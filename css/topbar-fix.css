@@ -1,0 +1,93 @@
+/* ===== CORREÇÃO V14 — barra superior responsiva =====
+   Mantém a busca centralizada na área realmente disponível e reserva o
+   espaço dos botões à direita, evitando sobreposição em diferentes larguras. */
+#topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+#topbar .brand,
+#topbar .sep,
+#topbar .sub{
+  flex:0 0 auto;
+}
+
+/* A busca deixa de ser posicionada por coordenada absoluta. Ela passa a
+   ocupar somente o espaço livre entre a identificação e os controles. */
+#topbar .global-search-box{
+  position:relative;
+  top:auto;
+  left:auto;
+  right:auto;
+  transform:none;
+  flex:1 1 520px;
+  width:auto;
+  min-width:220px;
+  max-width:520px;
+  margin:0 auto;
+  z-index:1600;
+}
+
+/* O spacer antigo não é mais necessário e não deve consumir espaço que
+   poderia ser usado pela busca. */
+#topbar .spacer{display:none;}
+
+/* Os controles permanecem agrupados naturalmente à direita. */
+#topbar .icon-btn-ibge,
+#topbar .icon-btn{
+  flex:0 0 auto;
+}
+
+@media (min-width:1101px){
+  #topbar .global-search-box{min-width:300px;}
+}
+
+@media (min-width:769px) and (max-width:1100px){
+  #topbar{gap:7px;padding-left:12px;padding-right:12px;}
+  #topbar .global-search-box{
+    flex:1 1 340px;
+    min-width:180px;
+    max-width:420px;
+  }
+  #topbar .icon-btn-ibge{
+    padding-left:9px;
+    padding-right:9px;
+    font-size:11px;
+    gap:5px;
+  }
+  #topbar .icon-btn-ibge svg{width:16px;height:16px;}
+  #topbar .icon-btn{width:34px;height:34px;}
+  #topbar .icon-btn-ibge + .icon-btn-ibge,
+  #topbar .icon-btn-ibge + .icon-btn,
+  #topbar .icon-btn + .icon-btn{margin-left:2px;}
+}
+
+@media (max-width:768px){
+  #topbar{
+    gap:5px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+  }
+  #topbar::-webkit-scrollbar{display:none;}
+  #topbar .global-search-box{
+    position:relative;
+    flex:0 1 clamp(150px,46vw,245px);
+    width:clamp(150px,46vw,245px);
+    min-width:150px;
+    max-width:245px;
+    margin:0 auto;
+  }
+}
+
+@media (max-width:480px){
+  #topbar .global-search-box{
+    flex:0 1 180px;
+    width:180px;
+    min-width:145px;
+    max-width:190px;
+  }
+}
