@@ -1,0 +1,381 @@
+/* ============================================================
+   PALETA V18 — Grafite + azul elétrico (aparência "GIS desktop", discreta)
+   Carregada por último. Altera só a aparência; nenhuma função muda.
+   Para ajustar um tom, edite as variáveis abaixo.
+   ============================================================ */
+:root{
+  --tema-barra:#151A21;
+  --tema-painel:#20252D;
+  --tema-painel-2:#262C34;
+  --tema-destaque:#3B9EFF;
+  --tema-destaque-claro:#7DBDFF;
+  --tema-destaque-escuro:#2A84E0;
+  --tema-hover:#303740;
+  --tema-texto:#FFFFFF;
+  --tema-texto-2:#AEB6C2;
+  --tema-borda:#3A424D;
+  --tema-fundo:#14181E;
+
+  --bar-blue:var(--tema-barra);
+  --bar-blue-dark:var(--tema-barra);
+  --panel-bg:var(--tema-painel);
+  --panel-bg-2:var(--tema-hover);
+  --panel-border:var(--tema-borda);
+  --panel-text:var(--tema-texto);
+  --muted-text:var(--tema-texto-2);
+  --accent-blue:var(--tema-destaque);
+  --accent-blue-glow:var(--tema-destaque-claro);
+  --toolbar-bg:#181C23;
+  --toolbar-btn-hover:var(--tema-hover);
+  --ui-bg:var(--tema-fundo);
+  --ui-surface:rgba(32,37,45,.98);
+  --ui-surface-2:rgba(38,44,52,.98);
+  --ui-border:rgba(255,255,255,.10);
+  --ui-border-strong:var(--tema-borda);
+  --ui-text:var(--tema-texto);
+  --ui-muted:var(--tema-texto-2);
+  --ui-accent:var(--tema-destaque);
+  --ui-accent-2:var(--tema-destaque-claro);
+  --ui-shadow:0 10px 28px rgba(0,0,0,.40);
+  /* Barra superior sólida, sem degradê chamativo */
+  --topbar-bg:var(--tema-barra);
+}
+
+html,body{background:var(--tema-fundo);}
+#topbar,
+body.light-theme #topbar{
+  background:var(--tema-barra);
+  border-bottom:1px solid var(--tema-borda);
+  box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+/* Cabeçalhos de painéis: mesma cor da barra superior, separados por filete discreto */
+.lp-header,.lay-header,.uso-head,.modal-head,#search-box-header,
+#bookmarks-box .bm-title,#sketch-box .sk-title,#measure-box .ms-title,
+#radius-box .rd-title,.tools-menu-title{
+  background:var(--tema-barra);
+  border-bottom:1px solid var(--tema-borda);
+}
+
+/* Hover discreto e foco visível em azul */
+.lay-row:hover,.lt-btn:hover,#left-toolbar .bb-btn:hover{background:var(--tema-hover);}
+:focus-visible{outline-color:var(--tema-destaque);}
+
+/* Itens ativos: azul com leve degradê para manter o texto branco legível */
+#left-toolbar .lt-btn.active,
+#left-toolbar .bb-btn.active,
+.lt-btn.active,
+.lt-tools-btn.active,
+.tools-menu-item.active,
+.global-search-tab.active{
+  background:linear-gradient(180deg,var(--tema-destaque),var(--tema-destaque-escuro));
+  border-color:var(--tema-destaque-claro);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(59,158,255,.28);
+}
+
+/* ---------- Tema claro: superfícies claras, barra grafite, destaque azul mais profundo ---------- */
+body.light-theme{
+  --accent-blue:#1F7AE0;
+  --accent-blue-glow:#3B9EFF;
+  --ui-accent:#1F7AE0;
+  --ui-accent-2:#3B9EFF;
+  --ui-surface:rgba(255,255,255,.98);
+  --ui-surface-2:#F3F5F8;
+  --ui-border:rgba(21,26,33,.12);
+  --ui-border-strong:rgba(21,26,33,.20);
+  --ui-text:#1F2630;
+  --ui-muted:#5E6978;
+  --ui-shadow:0 10px 26px rgba(21,26,33,.16);
+}
+body.light-theme #left-toolbar .lt-btn.active,
+body.light-theme #left-toolbar .bb-btn.active,
+body.light-theme .tools-menu-item.active,
+body.light-theme .global-search-tab.active{
+  background:linear-gradient(180deg,#2D8BF0,#1F7AE0);border-color:#3B9EFF;color:#fff;
+}
+body.light-theme #left-toolbar .lt-btn:hover,
+body.light-theme #left-toolbar .bb-btn:hover{background:rgba(31,122,224,.09);border-color:rgba(31,122,224,.28);color:#151A21;}
+body.light-theme .lp-tab.active{background:rgba(31,122,224,.10);color:#151A21;}
+body.light-theme :focus-visible{outline-color:#1F7AE0;}
+
+/* ============================================================
+   Janela Camadas — botão Ligar/Desligar (ON/OFF)
+   Substitui o ícone de olho. Mesma função (data-vis), novo visual.
+   ============================================================ */
+.lay-vis.lay-switch{
+  position:relative;flex:0 0 auto;
+  width:36px;height:18px;padding:0;border-radius:999px;
+  border:1px solid var(--tema-borda);
+  background:#181C23;color:var(--tema-texto-2);
+  display:inline-flex;align-items:center;justify-content:flex-end;
+  cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.lay-vis.lay-switch:hover:not(:disabled){background:var(--tema-hover);border-color:#566070;}
+.lay-vis.lay-switch .lay-switch-label{
+  position:absolute;top:0;bottom:0;display:flex;align-items:center;
+  font-size:8px;font-weight:800;letter-spacing:.4px;line-height:1;
+  right:6px;left:auto;color:#8E98A6;pointer-events:none;
+}
+.lay-vis.lay-switch .lay-switch-thumb{
+  position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;
+  background:#7B8594;box-shadow:0 1px 3px rgba(0,0,0,.45);
+  transition:transform .18s ease,background .18s ease;pointer-events:none;
+}
+/* LIGADO */
+.lay-vis.lay-switch[aria-checked="true"]{
+  background:var(--tema-destaque-escuro);border-color:var(--tema-destaque);
+  box-shadow:0 0 8px rgba(59,158,255,.30);
+}
+.lay-vis.lay-switch[aria-checked="true"]:hover:not(:disabled){background:var(--tema-destaque);}
+.lay-vis.lay-switch[aria-checked="true"] .lay-switch-label{left:6px;right:auto;color:#fff;}
+.lay-vis.lay-switch[aria-checked="true"] .lay-switch-thumb{transform:translateX(18px);background:#fff;}
+.lay-vis.lay-switch:focus-visible{outline:2px solid var(--tema-destaque-claro);outline-offset:2px;}
+.lay-vis.lay-switch:disabled{opacity:.35;cursor:not-allowed;}
+/* Camada desligada: nome mais discreto */
+.lay-row:has(.lay-switch[aria-checked="false"]) .lay-name{color:var(--tema-texto-2);}
+.lay-detail{margin-left:7px;}
+
+/* Tema claro */
+body.light-theme .lay-vis.lay-switch{background:#E4E8EE;border-color:#C9D0DA;}
+body.light-theme .lay-vis.lay-switch:hover:not(:disabled){background:#D9DFE7;}
+body.light-theme .lay-vis.lay-switch .lay-switch-label{color:#5E6978;}
+body.light-theme .lay-vis.lay-switch .lay-switch-thumb{background:#8A94A3;}
+body.light-theme .lay-vis.lay-switch[aria-checked="true"]{background:#1F7AE0;border-color:#3B9EFF;box-shadow:0 0 8px rgba(31,122,224,.25);}
+body.light-theme .lay-vis.lay-switch[aria-checked="true"] .lay-switch-label{color:#fff;}
+body.light-theme .lay-vis.lay-switch[aria-checked="true"] .lay-switch-thumb{background:#fff;}
+body.light-theme .lay-row:has(.lay-switch[aria-checked="false"]) .lay-name{color:#5E6978;}
+
+/* ============================================================
+   Legenda e janela Camadas — símbolos padronizados (estilo ArcGIS Pro)
+   Coluna de símbolo com largura fixa de 36px (2 × a altura de 18px):
+   polígonos = retângulo 36x18; linhas = mesma largura (espessura original);
+   pontos = ícone original centralizado. Cor, espessura, transparência e
+   contorno continuam os originais. Não afeta o mapa nem a legenda da exportação.
+   ============================================================ */
+.lp-sym-slot{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;flex:0 0 36px;min-height:18px;
+}
+.lp-sym-slot .lp-swatch.lp-swatch-poly{width:36px;height:18px;flex:0 0 36px;}
+.lp-sym-slot .lp-swatch.line,
+.lp-sym-slot .lp-swatch.dash{width:36px;flex:0 0 36px;}
+.lp-sym-slot .lp-swatch.lp-swatch-rail{width:36px;height:16px;flex:0 0 36px;}
+.lay-swatch-wrap .lp-sym-slot{width:36px;}
+
+/* Símbolo mais largo que a coluna (Forças de Segurança): sem sobreposição e com mais espaço até o nome.
+   Tamanho, cor e símbolo continuam os originais; as demais camadas não mudam. */
+.lp-sym-slot.lp-sym-slot-wide,
+.lay-swatch-wrap .lp-sym-slot.lp-sym-slot-wide{
+  width:auto;flex:0 0 auto;justify-content:flex-start;margin-right:9px;
+}
+
+/* Títulos dos grupos de geometria na Legenda (Pontos / Linhas / Polígonos) */
+.lp-geo-title{
+  font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
+  color:var(--muted-text);padding:0 0 5px;margin:2px 0 8px;
+  border-bottom:1px solid var(--tema-borda);
+}
+.lp-geo-title:not(:first-child){margin-top:12px;}
+#legend-panel .lp-clear-highlight{margin-left:45px;}
+
+/* ============================================================
+   Legenda (aba Interativo) — botão ON/OFF no lugar da caixa de seleção
+   Mesmo componente da janela Camadas.
+   ============================================================ */
+#legend-panel .lp-row .lay-vis.lay-switch{flex:0 0 36px;}
+
+/* ============================================================
+   Painel lateral — grupo "Dashboards" (Setores Censitários, Uso e Ocupação, Plano Diretor)
+   Botões movidos da barra superior; mesmos ids e comportamento.
+   ============================================================ */
+#left-toolbar #btn-dashboard-top:disabled,
+#left-toolbar #btn-uso-top:disabled,
+#left-toolbar #btn-plano-diretor-top:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;}
+
+/* ============================================================
+   TEMA CLARO — todos os textos em preto (#000)
+   - Variáveis de texto passam a preto; barra superior e cabeçalhos dos painéis
+     ficam claros para o texto preto continuar legível.
+   - Exceções (continuam como estavam): tela de abertura (fundo escuro) e rótulos
+     de bairros sobre o mapa (texto branco com contorno, legível sobre a imagem).
+   ============================================================ */
+body.light-theme{
+  --panel-text:#000;
+  --muted-text:#000;
+  --ui-text:#000;
+  --ui-muted:#000;
+  --tema-texto:#000;
+  --tema-texto-2:#000;
+  --topbar-bg:#E9EEF5;
+  --bar-blue:#DCE4EF;
+  --bar-blue-dark:#E9EEF5;
+  color:#000;
+}
+
+/* Barra superior e cabeçalhos de painéis: claros no tema claro */
+body.light-theme #topbar,
+body.light-theme .lp-header,
+body.light-theme .lay-header,
+body.light-theme .uso-head,
+body.light-theme .modal-head,
+body.light-theme #search-box-header,
+body.light-theme #bookmarks-box .bm-title,
+body.light-theme #sketch-box .sk-title,
+body.light-theme #measure-box .ms-title,
+body.light-theme #radius-box .rd-title,
+body.light-theme .tools-menu-title{
+  background:#E9EEF5;
+  border-bottom:1px solid #C9D0DA;
+}
+body.light-theme #topbar .icon-btn:hover,
+body.light-theme #topbar .icon-btn-ibge:hover{background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.18);}
+body.light-theme #topbar .icon-btn,
+body.light-theme #topbar .icon-btn-ibge{
+  border:1px solid rgba(21,26,33,.50);
+  background:rgba(255,255,255,.48);
+  box-shadow:0 1px 3px rgba(21,26,33,.12);
+}
+body.light-theme #topbar .icon-btn:hover,
+body.light-theme #topbar .icon-btn-ibge:hover{
+  background:rgba(255,255,255,.78);
+  border-color:rgba(21,26,33,.68);
+}
+body.light-theme #topbar .icon-btn:focus-visible,
+body.light-theme #topbar .icon-btn-ibge:focus-visible{
+  outline:2px solid #1F7AE0;
+  outline-offset:2px;
+}
+body.light-theme .lp-header .lp-close:hover,
+body.light-theme .lay-header-right .lay-icon-btn:hover:not(:disabled),
+body.light-theme .uso-icon-btn:hover,
+body.light-theme .modal-close:hover{background:rgba(0,0,0,.10);}
+
+/* Texto preto em todos os elementos que carregam texto (ícones em currentColor acompanham) */
+body.light-theme :is(div,span,p,a,b,strong,em,i,small,label,li,ul,ol,dl,dt,dd,td,th,tr,caption,
+  h1,h2,h3,h4,h5,h6,button,input,select,textarea,option,summary,legend,sup,sub,code,pre,figcaption):not(#opening-screen):not(#opening-screen *):not(.bairro-label):not(.bairro-label *):not(#about-box .about-sources a){
+  color:#000 !important;
+}
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder{color:rgba(0,0,0,.62) !important;opacity:1;}
+body.light-theme #uso-panel svg text,
+body.light-theme [id^="modal-"] svg text{fill:#000 !important;}
+
+/* Itens com fundo azul (ativos/destaque): texto preto, contraste ok sobre #1F7AE0 / #3B9EFF */
+body.light-theme .lt-btn.active svg,
+body.light-theme #left-toolbar .bb-btn.active svg,
+body.light-theme .tools-menu-item.active svg{stroke:currentColor;}
+/* Alça do compositor de mapa: fundo claro para o texto preto no tema claro */
+body.light-theme .map-export-grip{background:rgba(233,238,245,.95);border-color:#C9D0DA;}
+
+/* ============================================================
+   Hierarquia Geometria -> Categoria -> Camada (Legenda e janela Camadas)
+   ============================================================ */
+.lp-cat-title{
+  font-size:11px;font-weight:600;color:var(--muted-text);
+  margin:8px 0 4px 2px;padding-left:8px;border-left:2px solid var(--tema-borda);line-height:1.2;
+}
+.lp-geo-title + .lp-cat-title{margin-top:0;}
+/* Na janela Camadas o título da geometria separa os blocos de categorias */
+#layers-body .lay-geo-title{margin:10px 6px 6px;}
+#layers-body .lay-geo-title:first-child{margin-top:4px;}
+
+/* ============================================================
+   Painel lateral recolhível
+   Botão no topo do painel; recolhido, só o botão (seta) permanece visível.
+   ============================================================ */
+.window-collapse-header{
+  display:flex;
+  align-items:center;
+}
+.window-collapse-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  gap:3px;
+  min-width:0;
+  width:auto;
+  height:24px;
+  margin-left:auto;
+  padding:2px 4px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:6px;
+  background:rgba(255,255,255,.025);
+  color:var(--muted-text);
+  font-size:9.5px;
+  font-weight:600;
+  line-height:1;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.window-collapse-btn:hover{
+  background:var(--tema-hover);
+  border-color:var(--tema-borda);
+  color:var(--tema-texto);
+}
+.window-collapse-btn:focus-visible{
+  outline:2px solid var(--tema-destaque);
+  outline-offset:1px;
+}
+.window-collapse-native[hidden]{
+  display:none!important;
+}
+.window-collapse-btn svg{
+  width:12px;
+  height:12px;
+  flex:0 0 12px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:transform .18s ease;
+}
+.window-collapsible.window-collapsed{
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+}
+.window-collapsible.window-collapsed > :not(.window-collapse-header){
+  display:none!important;
+}
+.window-collapsed .window-collapse-btn svg,
+.lay-minimized .window-collapse-btn svg,
+.uso-minimized .window-collapse-btn svg{
+  transform:rotate(180deg);
+}
+
+#left-toolbar .lt-collapse{
+  position:absolute;
+  top:6px;
+  right:10px;
+  height:24px;
+  min-height:24px;
+  min-width:0;
+  width:auto;
+  flex:0 0 auto;
+  padding:2px 4px;
+  gap:3px;
+  white-space:nowrap;
+  border-radius:6px !important;
+  background:rgba(255,255,255,.025);
+  border-color:rgba(255,255,255,.06);
+  color:rgba(233,239,233,.72);
+  box-shadow:none;
+}
+#left-toolbar .lt-collapse svg{
+  width:12px;
+  height:12px;
+  flex:0 0 12px;
+  transition:transform .18s ease;
+}
+#left-toolbar .lt-collapse .lt-collapse-label{
+  display:inline-block;
+  font-size:9.5px;
+  line-height:1;
+  font-weight:600;
+}
+#left-toolbar.collapsed .lt-collapse svg{transform:rotate(180deg);}
+#left-toolbar.collapsed > *:not(#lt-collapse){display:none !important;}
+#left-toolbar.collapsed{gap:0;}

@@ -135,12 +135,14 @@ function closeCensoDashboard(){
 document.getElementById("btn-dashboard-top").addEventListener("click",()=>{
   if(document.getElementById("modal-ibge")?.classList.contains("open")) closeModal("modal-ibge");
   if(document.getElementById("uso-panel")?.classList.contains("open") && typeof usoClosePanel==="function") usoClosePanel();
+  if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel==="function") fbdsUsoClosePanel();
   if(document.getElementById("pd-panel")?.classList.contains("open") && typeof pdClosePanel==="function") pdClosePanel();
   openCensoDashboard();
 });
 document.getElementById("btn-ibge-top").addEventListener("click",()=>{
   if(document.getElementById("modal-dashboard-censo")?.classList.contains("open") && typeof closeCensoDashboard==="function") closeCensoDashboard();
   if(document.getElementById("uso-panel")?.classList.contains("open") && typeof usoClosePanel==="function") usoClosePanel();
+  if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel==="function") fbdsUsoClosePanel();
   openModal("modal-ibge");
   ibgeInit();
 });
@@ -148,6 +150,7 @@ document.getElementById("btn-uso-top").addEventListener("click",()=>{
   if(document.getElementById("modal-dashboard-censo")?.classList.contains("open") && typeof closeCensoDashboard==="function") closeCensoDashboard();
   if(document.getElementById("modal-ibge")?.classList.contains("open")) closeModal("modal-ibge");
   if(document.getElementById("pd-panel")?.classList.contains("open") && typeof pdClosePanel==="function") pdClosePanel();
+  if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel==="function") fbdsUsoClosePanel();
   if(typeof usoOpenPanel==="function") usoOpenPanel();
 });
 
@@ -155,6 +158,7 @@ document.getElementById("btn-plano-diretor-top").addEventListener("click",()=>{
   if(document.getElementById("modal-dashboard-censo")?.classList.contains("open") && typeof closeCensoDashboard==="function") closeCensoDashboard();
   if(document.getElementById("modal-ibge")?.classList.contains("open")) closeModal("modal-ibge");
   if(document.getElementById("uso-panel")?.classList.contains("open") && typeof usoClosePanel==="function") usoClosePanel();
+  if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel==="function") fbdsUsoClosePanel();
   if(typeof pdOpenPanel==="function") pdOpenPanel();
 });
 

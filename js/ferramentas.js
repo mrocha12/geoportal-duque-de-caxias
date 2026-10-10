@@ -436,7 +436,7 @@ document.querySelectorAll("#sketch-box .sk-item[data-mode]").forEach(item=>{
     const mode = item.getAttribute("data-mode");
     if(mode!=="off") stopEditingSketch();
     setSketchMode(mode==="off" ? "off" : mode);
-    closeAllPanels();
+    // V31: a janela Esboço permanece aberta (fecha só por X ou Esc)
   });
 });
 
@@ -633,7 +633,7 @@ function setMeasureMode(mode){
 document.querySelectorAll("#measure-box .ms-item[data-mode]").forEach(item=>{
   item.addEventListener("click",()=>{
     setMeasureMode(item.getAttribute("data-mode"));
-    closeAllPanels();
+    // V31: a janela Medir permanece aberta (fecha só por X ou Esc)
   });
 });
 document.querySelectorAll(".ms-unit-btn").forEach(btn=>{
@@ -704,6 +704,10 @@ const SEARCH_CATEGORIES = [
   {key:"secretarias",  label:"Secretarias"},
   {key:"terminais",    label:"Terminais"},
   {key:"assistencia_social", label:"Assistência Social"},
+  {key:"gasodutos",    label:"Gasodutos"},
+  {key:"terminais_combustiveis", label:"Term. Combustíveis"},
+  {key:"terminais_gnl", label:"Term. GNL"},
+  {key:"upgn",         label:"UPGN"},
   {key:"plano_diretor", label:"Plano Diretor"},
   {key:"vias",         label:"Vias"},
   {key:"ferrovia",     label:"Ferrovias"},
@@ -734,6 +738,10 @@ function buildSearchIndex(){
   DATA_SECRETARIAS.features.forEach(f=> push(f.properties.SECRETARIA, "Secretaria Municipal", "secretarias", f, "secretarias"));
   DATA_TERMINAIS.features.forEach(f=> push(f.properties.NOME, "Terminal"+(f.properties.TIPOEDIFRO?(" · "+f.properties.TIPOEDIFRO):""), "terminais", f, "terminais"));
   DATA_ASSISTENCIA_SOCIAL.features.forEach(f=> push(f.properties.NOME, "Assistência Social"+(f.properties.TIPO?(" · "+f.properties.TIPO):""), "assistencia_social", f, "assistencia_social"));
+  LAYERS.gasodutos.leaflet.toGeoJSON().features.forEach(f=> push(f.properties.DUTO, "Gasoduto"+(f.properties.TRECHO?(" · "+f.properties.TRECHO):""), "gasodutos", f, "gasodutos"));
+  LAYERS.terminais_combustiveis.leaflet.toGeoJSON().features.forEach(f=> push(f.properties.NOME, "Terminal de Combustíveis"+(f.properties.MUNICIPIO?(" · "+f.properties.MUNICIPIO+(f.properties.UF?"/"+f.properties.UF:"")):""), "terminais_combustiveis", f, "terminais_combustiveis"));
+  LAYERS.terminais_gnl.leaflet.toGeoJSON().features.forEach(f=> push(f.properties.NOME, "Terminal de GNL"+(f.properties.MUNICIPIO?(" · "+f.properties.MUNICIPIO+(f.properties.UF?"/"+f.properties.UF:"")):""), "terminais_gnl", f, "terminais_gnl"));
+  LAYERS.upgn.leaflet.toGeoJSON().features.forEach(f=> push(f.properties.NOME, "UPGN"+(f.properties.MUNICIPIO?(" · "+f.properties.MUNICIPIO+(f.properties.ESTADO?"/"+f.properties.ESTADO:"")):""), "upgn", f, "upgn"));
   DATA_PLANO_DIRETOR.features.forEach(f=> push(f.properties.Zona, "Plano Diretor"+(f.properties.Zona_2?(" · "+String(f.properties.Zona_2).trim()):""), "plano_diretor", f, "plano_diretor"));
   DATA_VIAS.features.forEach(f=> push(f.properties.NOME, "Via"+(f.properties.Classifica&&normalizeStr(f.properties.Classifica)?(" · "+f.properties.Classifica):""), "vias", f, "vias"));
   DATA_FERROVIA.features.forEach(f=> push(f.properties.NOME, "Ferrovia"+(f.properties.Ramal&&normalizeStr(f.properties.Ramal)?(" · "+f.properties.Ramal):""), "ferrovia", f, "ferrovia"));
@@ -842,9 +850,8 @@ document.addEventListener("keydown", e=>{
   if((e.ctrlKey || e.metaKey) && (e.key==="k" || e.key==="K")){
     e.preventDefault();
     openSearchBox();
-  } else if(e.key==="Escape" && searchBox.style.display==="block"){
-    closeSearchBox();
   }
+  // Esc: tratado por js/janelas.js (fecha somente a janela ativa)
 });
 
 /* destaque pulsante no mapa (~3s) + voo até a feição + popup */
@@ -909,18 +916,23 @@ function buildBookmarks(){
   });
   bookmarksList.innerHTML = "<div class='bm-item' data-home='1'>Extensão completa (município)</div>" +
     Object.keys(groups).map(d=>`<div class="bm-item" data-dist="${d}">${d}</div>`).join("");
-  bookmarksList.querySelector("[data-home]").addEventListener("click",()=>{ map.setView(HOME_VIEW.center, HOME_VIEW.zoom); bookmarksBox.style.display="none"; });
+  bookmarksList.querySelector("[data-home]").addEventListener("click",()=>{ map.setView(HOME_VIEW.center, HOME_VIEW.zoom); /* janela permanece aberta */ });
   bookmarksList.querySelectorAll("[data-dist]").forEach(el=>{
     el.addEventListener("click",()=>{
       const d = el.getAttribute("data-dist");
       const feats = groups[d];
       const temp = L.geoJSON({type:"FeatureCollection", features:feats});
       map.fitBounds(temp.getBounds(), {padding:[30,30]});
-      bookmarksBox.style.display="none";
+      // A janela de Marcadores permanece aberta; só fecha pelo X, pelo botão da barra lateral ou com Esc.
     });
   });
 }
 buildBookmarks();
+
+/* Fechar Marcadores: botão X (Esc tratado por js/janelas.js) */
+function closeBookmarksBox(){ bookmarksBox.style.display = "none"; }
+const bmCloseBtn = document.getElementById("bookmarks-close");
+if(bmCloseBtn) bmCloseBtn.addEventListener("click", closeBookmarksBox);
 
 /* ================= COMPASS / SCALE ================= */
 function formatScaleDistance(meters){
@@ -1082,20 +1094,9 @@ function showToast(msg){
   toastTimer = setTimeout(()=>t.classList.remove("show"), 2600);
 }
 
-/* ================= CLOSE FLYOUTS ON OUTSIDE CLICK ================= */
-/* "search-box" foi removido desta lista: a janela de busca só deve fechar
-   quando o usuário clicar explicitamente no botão de fechar (X), no botão
-   de alternância da lupa, ou pressionar Esc — nunca por clique fora ou
-   seleção de um item/local no mapa. */
-document.addEventListener("click",e=>{
-  const flyouts = ["bookmarks-box","sketch-box","measure-box","radius-box"];
-  flyouts.forEach(id=>{
-    const box = document.getElementById(id);
-    if(box.style.display==="block" && !box.contains(e.target) && !e.target.closest("#left-toolbar")){
-      box.style.display="none";
-    }
-  });
-});
+/* ================= JANELAS: SEM FECHAR POR CLIQUE FORA (V31) =================
+   Marcadores, Esboço, Medir, Consulta por Raio e Busca só fecham pelo botão X
+   ou pela tecla Esc (ver js/janelas.js). */
 
 /* ================= TABELA DE ATRIBUTOS ================= */
 function layerFeatureList(id){
@@ -1131,8 +1132,15 @@ const TOOLTIP_CONFIG = {
   secretarias:        NEW_LAYER_CFG.secretarias,
   terminais:          NEW_LAYER_CFG.terminais,
   assistencia_social: NEW_LAYER_CFG.assistencia_social,
+  gasodutos:          NEW_LAYER_CFG.gasodutos,
+  terminais_combustiveis: NEW_LAYER_CFG.terminais_combustiveis,
+  terminais_gnl:      NEW_LAYER_CFG.terminais_gnl,
+  upgn:               NEW_LAYER_CFG.upgn,
   plano_diretor:      NEW_LAYER_CFG.plano_diretor,
-  uso_ocupacao: { idField:"Classe", idFallback:"Uso e Ocupação do Solo", fields:[["Shape_Area","Área", v => typeof usoFormatArea === 'function' ? usoFormatArea(v||0) : v]] }
+  uso_ocupacao: { idField:"Classe", idFallback:"Uso e Ocupação do Solo", fields:[["Shape_Area","Área", v => typeof usoFormatArea === 'function' ? usoFormatArea(v||0) : v]] },
+  faces_logradouro: { idField:"NM_LOG", idFallback:"Logradouro", fields:[["NM_TIP_LOG","Tipo de logradouro"]] },
+  /* APP · FBDS: o valor de HIDRO ocupa o lugar do título em negrito (antes mostrava o número FID); demais campos mantidos */
+  fbds_app: { idField:"HIDRO", idFallback:"Área de Preservação Permanente", fields:[["GEOCODIGO","GEOCODIGO"],["MUNICIPIO","MUNICIPIO"],["UF","UF"],["CD_UF","CD_UF"]] }
 };
 const hoverTip = document.getElementById("hover-tooltip");
 let hoverActive = false;
@@ -1156,6 +1164,12 @@ function buildTooltipHTML(feature, id){
   let titleText = cfg.idField && !isBlank(props[cfg.idField])
     ? String(props[cfg.idField]).trim() : (cfg.idFallback || (layer ? layer.label : "Feição"));
   if(cfg.idPrefix) titleText = cfg.idPrefix + titleText;
+  if(id==="faces_logradouro") {
+    const tipo = !isBlank(props.NM_TIP_LOG) ? String(props.NM_TIP_LOG).trim() : "";
+    const nome = !isBlank(props.NM_LOG) ? String(props.NM_LOG).trim() : "";
+    titleText = [tipo, nome].filter(Boolean).join(" ") || "Logradouro sem nome";
+  }
+  if(id==="uso_ocupacao_fbds" && !isBlank(props.CLASSE_USO)) titleText = String(props.CLASSE_USO);
   let rows = (cfg.fields||[]).map(([k,label,formatter])=>{
     const v = props[k];
     if(isBlank(v)) return "";

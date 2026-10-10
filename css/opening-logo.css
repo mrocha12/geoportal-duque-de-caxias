@@ -1,0 +1,43 @@
+/* ===== V28 — Abertura com o logo MR ocupando toda a tela ===== */
+#opening-screen{background:#0a1626;}
+
+/* Fundo desfocado: preenche as sobras quando a tela não é quadrada */
+#opening-screen::before{
+  content:"";position:absolute;inset:-6%;z-index:-4;
+  background:url('../assets/images/logo-mr-abertura-fundo.jpg') center/cover no-repeat;
+  filter:blur(28px) brightness(.9);
+}
+
+/* Imagem inteira visível, sem cortes (contain) */
+#opening-screen .opening-bg{
+  background:url('../assets/images/logo-mr-abertura.gif') center/contain no-repeat,
+    url('../assets/images/logo-mr-abertura-fundo.jpg') center/contain no-repeat;
+  transform:none;animation:none;
+}
+
+/* Remove os elementos antigos: o próprio logo já traz o nome e o lema */
+#opening-screen .opening-vignette,
+#opening-screen .opening-scanline,
+#opening-screen .opening-network,
+#opening-screen .opening-corner,
+#opening-screen .opening-kicker,
+#opening-screen .opening-rule,
+#opening-screen #opening-subtitle{display:none;}
+
+/* Título mantido só para leitores de tela */
+#opening-screen #opening-title{
+  position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;animation:none;
+}
+
+/* Botão de entrada na parte de baixo */
+#opening-screen .opening-content{
+  position:absolute;left:50%;bottom:clamp(24px,7vh,72px);
+  transform:translateX(-50%);width:auto;padding:0;
+  animation:none;
+}
+#opening-screen .opening-enter{
+  background:rgba(8,22,38,.62);
+  border:1px solid rgba(120,200,255,.55);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}

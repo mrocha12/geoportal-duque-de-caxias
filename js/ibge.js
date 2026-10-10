@@ -176,10 +176,7 @@
 
     document.addEventListener("keydown", e=>{
       if(!overlay.classList.contains("open")) return;
-      if(e.key === "Escape"){
-        closeModal("modal-ibge");
-        return;
-      }
+      /* Esc: tratado por js/janelas.js (fecha somente a janela ativa) */
       if(e.key === "Tab"){
         const focusable = Array.from(box.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
           .filter(el => el.offsetParent !== null && !el.disabled);
@@ -369,14 +366,30 @@ function ibgeFmtNum(n, maxDec){
   if(n===null || n===undefined || isNaN(n)) return null;
   return n.toLocaleString("pt-BR", {maximumFractionDigits: maxDec!==undefined?maxDec:2});
 }
+/* Ícones dos indicadores (mesmo padrão visual dos cartões do Dashboard dos Setores Censitários) */
+const IBGE_KPI_ICONS = {
+  popEstimada:{bg:"rgba(59,130,246,.15)", fg:"#3b82f6", svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  popCenso:   {bg:"rgba(139,92,246,.15)", fg:"#8b5cf6", svg:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/>'},
+  area:       {bg:"rgba(20,184,166,.15)", fg:"#14b8a6", svg:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
+  densidade:  {bg:"rgba(6,182,212,.15)",  fg:"#06b6d4", svg:'<circle cx="6" cy="6" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="18" cy="6" r="1.6"/><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/><circle cx="6" cy="18" r="1.6"/><circle cx="12" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/>'},
+  pibTotal:   {bg:"rgba(34,197,94,.15)",  fg:"#22c55e", svg:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'},
+  pibPerCap:  {bg:"rgba(245,158,11,.15)", fg:"#f59e0b", svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}
+};
+function ibgeKpiHeadHTML(label, iconKey){
+  const ic = IBGE_KPI_ICONS[iconKey];
+  if(!ic) return `<div class="dsh-kpi-label">${label}</div>`;
+  return `<div class="dsh-kpi-head"><span class="dsh-kpi-icon" aria-hidden="true" style="background:${ic.bg};color:${ic.fg}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic.svg}</svg></span><div class="dsh-kpi-label">${label}</div></div>`;
+}
+
 function ibgeCardHTML(label, indic, opts){
   opts = opts||{};
+  const head = ibgeKpiHeadHTML(label, opts.icon);
   if(!indic || indic.value===null || indic.value===undefined){
-    return `<div class="dsh-kpi-card"><div class="dsh-kpi-label">${label}</div><div class="dsh-kpi-value ibge-na">Não disponível</div></div>`;
+    return `<div class="dsh-kpi-card">${head}<div class="dsh-kpi-value ibge-na">Não disponível</div></div>`;
   }
   const val = ibgeFmtNum(indic.value, opts.dec);
   return `<div class="dsh-kpi-card">
-    <div class="dsh-kpi-label">${label}</div>
+    ${head}
     <div class="dsh-kpi-value">${val}${opts.suffix||""}</div>
     <div class="dsh-kpi-sub">${(opts.unidade || indic.unidade || "")}${indic.periodo?(" · "+indic.periodo):""}</div>
   </div>`;
@@ -470,12 +483,12 @@ async function ibgeLoadIndicadores(codigo, linkCidades){
 
   wrap.innerHTML = `
     <div class="dsh-kpi-grid">
-      ${ibgeCardHTML("População estimada", data.popEstimada, {dec:0})}
-      ${ibgeCardHTML("População — Censo 2022", data.popCenso, {dec:0})}
-      ${ibgeCardHTML("Área territorial", data.area, {dec:1, suffix:" km²"})}
-      ${ibgeCardHTML("Densidade demográfica", data.densidade, {dec:2, suffix:" hab/km²"})}
-      ${ibgeCardHTML("PIB a preços correntes", data.pibTotal, {dec:0})}
-      ${ibgeCardHTML("PIB per capita", data.pibPerCap, {dec:2})}
+      ${ibgeCardHTML("População estimada", data.popEstimada, {icon:"popEstimada", dec:0})}
+      ${ibgeCardHTML("População — Censo 2022", data.popCenso, {icon:"popCenso", dec:0})}
+      ${ibgeCardHTML("Área territorial", data.area, {icon:"area", dec:1, suffix:" km²"})}
+      ${ibgeCardHTML("Densidade demográfica", data.densidade, {icon:"densidade", dec:2, suffix:" hab/km²"})}
+      ${ibgeCardHTML("PIB a preços correntes", data.pibTotal, {icon:"pibTotal", dec:0})}
+      ${ibgeCardHTML("PIB per capita", data.pibPerCap, {icon:"pibPerCap", dec:2})}
     </div>
     <div class="dsh-note">Fonte: IBGE — API de Localidades e API de Dados Agregados (SIDRA). O período de referência de cada indicador é o mais recente disponibilizado oficialmente pelo IBGE para aquele agregado; por isso pode variar de um indicador para outro.</div>
     <div class="ibge-unavail">

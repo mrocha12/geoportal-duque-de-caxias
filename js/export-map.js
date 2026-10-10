@@ -829,20 +829,12 @@
   trigger.addEventListener("click", openComposer);
 
   modal.addEventListener("click", event => {
-    if(event.target === modal){
-      closeModal("modal-map-export");
-      document.getElementById("bb-tools").focus();
-    }
+    /* V31: clicar fora da janela não fecha mais (só X ou Esc) */
     if(event.target.closest('[data-close="modal-map-export"]'))
       requestAnimationFrame(() => document.getElementById("bb-tools").focus());
   });
 
-  document.addEventListener("keydown", event => {
-    if(event.key === "Escape" && modal.classList.contains("open")){
-      closeModal("modal-map-export");
-      document.getElementById("bb-tools").focus();
-    }
-  }, true);
+  /* Esc: tratado por js/janelas.js (fecha somente a janela ativa) */
 
   document.getElementById("map-export-refresh").addEventListener("click", captureCurrentMap);
   document.getElementById("map-export-submit").addEventListener("click",  exportMap);

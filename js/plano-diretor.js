@@ -70,20 +70,20 @@ function pdRenderKPIs(all, scope){
   let biggest;
   if(pdSelectedClass){
     const z = pdGroup(scope, f=>pdVal(f,"Zona")).sort((a,b)=>b.area-a.area)[0];
-    biggest = {label:"Maior zona", value:z?z.key:"-", sub:z?usoFormatArea(z.area):""};
+    biggest = {icon:"top", label:"Maior zona", value:z?z.key:"-", sub:z?usoFormatArea(z.area):""};
   }else{
     const c = pdGroup(all, pdClassOf).sort((a,b)=>b.area-a.area)[0];
-    biggest = {label:"Maior classe", value:c?pdSigla(c.key):"-", sub:c?`${usoFormatArea(c.area)} · ${pdFmtPct(totalAll?c.area/totalAll*100:0)}`:""};
+    biggest = {icon:"top", label:"Maior classe", value:c?pdSigla(c.key):"-", sub:c?`${usoFormatArea(c.area)} · ${pdFmtPct(totalAll?c.area/totalAll*100:0)}`:""};
   }
   const cards = [
-    {label:"Feições (polígonos)", value:pdFmtInt(scope.length), sub:pdSelectedClass?`de ${pdFmtInt(all.length)} na base`:"na camada"},
-    {label:"Área total", value:usoFormatArea(totalScope), sub:pdSelectedClass?`${pdFmtPct(totalAll?totalScope/totalAll*100:0)} da área mapeada`:"soma de Shape_Area"},
-    {label:"Zonas", value:pdFmtInt(zonas.size), sub:"valores distintos de Zona"},
-    {label:"Classes de zoneamento", value:pdFmtInt(classes.size), sub:"valores distintos de Zona_2"},
-    {label:"Instrumentos legais", value:pdFmtInt(leis.size), sub:"valores distintos de Legislação"},
+    {icon:"features", label:"Feições (polígonos)", value:pdFmtInt(scope.length), sub:pdSelectedClass?`de ${pdFmtInt(all.length)} na base`:"na camada"},
+    {icon:"area", label:"Área total", value:usoFormatArea(totalScope), sub:pdSelectedClass?`${pdFmtPct(totalAll?totalScope/totalAll*100:0)} da área mapeada`:"soma de Shape_Area"},
+    {icon:"zones", label:"Zonas", value:pdFmtInt(zonas.size), sub:"valores distintos de Zona"},
+    {icon:"classes", label:"Classes de zoneamento", value:pdFmtInt(classes.size), sub:"valores distintos de Zona_2"},
+    {icon:"legal", label:"Instrumentos legais", value:pdFmtInt(leis.size), sub:"valores distintos de Legislação"},
     biggest
   ];
-  grid.innerHTML = cards.map(c=>`<div class="uso-kpi-card"><div class="uso-kpi-label">${escapeHtml(c.label)}</div><div class="uso-kpi-value" title="${pdAttr(c.value)}">${escapeHtml(c.value)}</div><div class="uso-kpi-sub">${escapeHtml(c.sub||"")}</div></div>`).join("");
+  grid.innerHTML = cards.map(c=>`<div class="uso-kpi-card"><div class="dsh-kpi-head">${dshKpiIconHTML(c.icon)}<div class="uso-kpi-label">${escapeHtml(c.label)}</div></div><div class="uso-kpi-value" title="${pdAttr(c.value)}">${escapeHtml(c.value)}</div><div class="uso-kpi-sub">${escapeHtml(c.sub||"")}</div></div>`).join("");
 }
 
 function pdRenderClasses(all){
@@ -91,11 +91,19 @@ function pdRenderClasses(all){
   const rows = pdGroup(all, pdClassOf).sort((a,b)=>b.area-a.area);
   const max = rows.length ? rows[0].area : 0;
   const stack = document.getElementById("pd-stack");
-  stack.innerHTML = rows.map(r=>{
+  const dR=70, dC=100, dW=32, dLen=2*Math.PI*dR;
+  let dOff=0;
+  let dHtml=`<svg viewBox="0 0 200 200" width="170" height="170" role="img" aria-label="Distribuição da área por classe de zoneamento"><circle cx="${dC}" cy="${dC}" r="${dR}" fill="none" stroke="rgba(130,130,130,.18)" stroke-width="${dW}"></circle>`;
+  rows.forEach(r=>{
     const pct = total ? r.area/total*100 : 0;
     const dim = pdSelectedClass && pdSelectedClass!==r.key;
-    return `<button type="button" class="pd-stack-seg${dim?" dim":""}" data-cls="${pdAttr(r.key)}" style="width:${pct}%;background:${pdColor(r.key)}" title="${pdAttr(r.key+" — "+usoFormatArea(r.area)+" ("+pdFmtPct(pct)+")")}" aria-label="${pdAttr(r.key)}"></button>`;
-  }).join("");
+    const active = pdSelectedClass===r.key;
+    const dash = Math.max(pct/100*dLen, pct>0 ? 0.6 : 0);
+    dHtml += `<circle class="pd-donut-seg fbds-donut-seg" data-cls="${pdAttr(r.key)}" role="button" tabindex="0" aria-label="${pdAttr(r.key)}" cx="${dC}" cy="${dC}" r="${dR}" fill="none" stroke="${pdColor(r.key)}" stroke-width="${active?dW+6:dW}" stroke-dasharray="${dash} ${dLen-dash}" stroke-dashoffset="${-dOff}" transform="rotate(-90 ${dC} ${dC})" opacity="${dim?0.25:1}"><title>${pdAttr(r.key+" — "+usoFormatArea(r.area)+" ("+pdFmtPct(pct)+")")}</title></circle>`;
+    dOff += dash;
+  });
+  dHtml += `<text x="${dC}" y="${dC-4}" text-anchor="middle" font-size="15" font-weight="700" fill="var(--panel-text)">${rows.length}</text><text x="${dC}" y="${dC+13}" text-anchor="middle" font-size="9" fill="var(--muted-text)">classes</text></svg>`;
+  stack.innerHTML = dHtml;
   document.getElementById("pd-class-bars").innerHTML = rows.map(r=>{
     const pct = total ? r.area/total*100 : 0;
     return pdBarRow({tag:"button", name:r.key, color:pdColor(r.key), active:pdSelectedClass===r.key,
@@ -104,6 +112,7 @@ function pdRenderClasses(all){
   }).join("");
   document.querySelectorAll("#pd-stack [data-cls],#pd-class-bars [data-cls]").forEach(el=>{
     el.addEventListener("click", ()=>pdSelectClass(el.getAttribute("data-cls")));
+    el.addEventListener("keydown", ev=>{ if(el.classList.contains("pd-donut-seg") && (ev.key==="Enter"||ev.key===" ")){ ev.preventDefault(); pdSelectClass(el.getAttribute("data-cls")); } });
   });
   const sel = document.getElementById("pd-filter-select");
   sel.innerHTML = `<option value="">Todas as classes</option>` + rows.map(r=>`<option value="${pdAttr(r.key)}"${r.key===pdSelectedClass?" selected":""}>${escapeHtml(r.key)}</option>`).join("");
@@ -253,6 +262,7 @@ function pdOpenPanel(cls){
   if(!panel.classList.contains("open")){
     if(document.getElementById("modal-dashboard-censo")?.classList.contains("open") && typeof closeCensoDashboard === "function") closeCensoDashboard();
     if(document.getElementById("uso-panel")?.classList.contains("open") && typeof usoClosePanel === "function") usoClosePanel();
+    if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel === "function") fbdsUsoClosePanel();
     pdVisibilitySnapshot = {};
     Object.keys(LAYERS).forEach(id=>{ pdVisibilitySnapshot[id] = map.hasLayer(LAYERS[id].leaflet); });
     Object.keys(LAYERS).forEach(id=>{

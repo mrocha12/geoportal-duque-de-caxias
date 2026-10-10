@@ -178,11 +178,7 @@
 
     document.addEventListener("keydown", e=>{
       if(!overlay.classList.contains("open")) return;
-      if(e.key === "Escape"){
-        if(typeof closeCensoDashboard==="function") closeCensoDashboard();
-        else closeModal("modal-dashboard-censo");
-        return;
-      }
+      /* Esc: tratado por js/janelas.js (fecha somente a janela ativa) */
       if(e.key === "Tab"){
         const focusable = Array.from(box.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
           .filter(el => el.offsetParent !== null && !el.disabled);

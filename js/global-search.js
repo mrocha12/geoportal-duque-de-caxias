@@ -85,6 +85,7 @@
     if(highlightTimer) clearTimeout(highlightTimer);
     highlightTimer=null;
   }
+  window.limparDestaqueBuscaGlobal = clearHighlight; // usado por js/janelas.js ao fechar janelas
   function highlightFeature(feature){
     clearHighlight();
     const geom=feature&&feature.geometry; if(!geom) return;

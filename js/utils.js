@@ -298,3 +298,47 @@ const ICON_ASSISTENCIA = makeSymbolIcon(`
   <path d="M5.4 27.6 C5.4 22.6 7.6 19.6 10.6 19.6 C13.6 19.6 15.8 22.6 15.8 27.6 Z" fill="#F57C00"/>
   <path d="M16.2 27.6 C16.2 22.6 18.4 19.6 21.4 19.6 C24.4 19.6 26.6 22.6 26.6 27.6 Z" fill="#F57C00"/>
 `, 28);
+
+// ---- Petróleo e Gás (V15) ----
+// Terminais de Combustíveis Líquidos: tanque de armazenamento, marrom #5D4037
+const ICON_TERMINAL_COMBUSTIVEL = makeSymbolIcon(`
+  <ellipse cx="16" cy="10" rx="9" ry="3.4" fill="#5D4037"/>
+  <path d="M7 10 V24 C7 26 11 27.6 16 27.6 C21 27.6 25 26 25 24 V10 C25 12 21 13.4 16 13.4 C11 13.4 7 12 7 10 Z" fill="#5D4037"/>
+  <path d="M7.8 17.2 C9.5 19 12.5 19.8 16 19.8 C19.5 19.8 22.5 19 24.2 17.2" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+`, 28);
+
+// Terminais de GNL: chama de gás natural, azul #0277BD
+const ICON_TERMINAL_GNL = makeSymbolIcon(`
+  <path d="M16 3 C17 8 22.5 10.5 22.5 17.5 C22.5 22.8 19.6 27.5 16 27.5 C12.4 27.5 9.5 22.8 9.5 17.5 C9.5 14.5 11 12.8 12.4 11.2 C12.6 13.4 13.6 14.4 14.6 14.8 C14 10.5 14.2 6.2 16 3 Z" fill="#0277BD"/>
+  <path d="M16 17 C17.6 19 19 20.4 19 22.6 C19 24.4 17.7 25.8 16 25.8 C14.3 25.8 13 24.4 13 22.6 C13 20.4 14.4 19 16 17 Z" fill="#ffffff"/>
+`, 28);
+
+// Unidades de Processamento de Gás Natural: planta industrial com chaminé, cinza-azulado #455A64
+const ICON_UPGN = makeSymbolIcon(`
+  <rect x="20.5" y="4.5" width="4" height="11" fill="#455A64"/>
+  <path d="M5 15 V9.5 L11 14.6 V9.5 L17 14.6 V15 Z" fill="#455A64"/>
+  <rect x="5" y="15" width="22" height="11" fill="#455A64"/>
+  <rect x="8" y="18.4" width="3" height="3.2" fill="#ffffff"/>
+  <rect x="14" y="18.4" width="3" height="3.2" fill="#ffffff"/>
+  <rect x="20" y="18.4" width="3" height="3.2" fill="#ffffff"/>
+  <rect x="4" y="26" width="24" height="2.2" fill="#455A64"/>
+`, 28);
+
+/* Ícones dos indicadores dos Dashboards — mesmo padrão visual do Dashboard Setores Censitários
+   (.dsh-kpi-icon: quadrado 26px, fundo translúcido, traço de 2px, ícone de 15px). */
+const DSH_KPI_ICONS = {
+  area:     {c:"59,130,246",  h:"#3b82f6", p:'<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'},
+  classes:  {c:"139,92,246",  h:"#8b5cf6", p:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'},
+  features: {c:"139,92,246",  h:"#8b5cf6", p:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'},
+  top:      {c:"245,158,11",  h:"#f59e0b", p:'<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>'},
+  percent:  {c:"6,182,212",   h:"#06b6d4", p:'<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>'},
+  built:    {c:"239,68,68",   h:"#ef4444", p:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>'},
+  veg:      {c:"34,197,94",   h:"#22c55e", p:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>'},
+  zones:    {c:"20,184,166",  h:"#14b8a6", p:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
+  legal:    {c:"99,102,241",  h:"#6366f1", p:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'}
+};
+function dshKpiIconHTML(key){
+  const i = DSH_KPI_ICONS[key];
+  if(!i) return "";
+  return `<span class="dsh-kpi-icon" aria-hidden="true" style="background:rgba(${i.c},.15);color:${i.h}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${i.p}</svg></span>`;
+}

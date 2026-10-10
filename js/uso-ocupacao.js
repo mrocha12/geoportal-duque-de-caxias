@@ -49,14 +49,14 @@ function usoRenderKPIs(stats){
   const grid = document.getElementById("uso-kpi-grid");
   if(!grid) return;
   const cards = [
-    {label:"Área total mapeada", value: usoFormatArea(stats.total), sub:""},
-    {label:"Número de classes", value: stats.n, sub:""},
-    {label:"Maior classe", value: stats.maxRow ? stats.maxRow.classe : "-", sub: stats.maxRow ? usoFormatArea(stats.maxRow.area) : ""},
-    {label:"% da maior classe", value: stats.maxRow ? usoFmtPct(stats.maxRow.pct) : "-", sub:""},
-    {label:"Área construída", value: usoFormatArea(stats.builtArea), sub: (stats.total? usoFmtPct(stats.builtArea/stats.total*100):"0,0%")+" do total"},
-    {label:"Área de vegetação", value: usoFormatArea(stats.vegArea), sub: (stats.total? usoFmtPct(stats.vegArea/stats.total*100):"0,0%")+" do total"}
+    {icon:"area", label:"Área total mapeada", value: usoFormatArea(stats.total), sub:""},
+    {icon:"classes", label:"Número de classes", value: stats.n, sub:""},
+    {icon:"top", label:"Maior classe", value: stats.maxRow ? stats.maxRow.classe : "-", sub: stats.maxRow ? usoFormatArea(stats.maxRow.area) : ""},
+    {icon:"percent", label:"% da maior classe", value: stats.maxRow ? usoFmtPct(stats.maxRow.pct) : "-", sub:""},
+    {icon:"built", label:"Área construída", value: usoFormatArea(stats.builtArea), sub: (stats.total? usoFmtPct(stats.builtArea/stats.total*100):"0,0%")+" do total"},
+    {icon:"veg", label:"Área de vegetação", value: usoFormatArea(stats.vegArea), sub: (stats.total? usoFmtPct(stats.vegArea/stats.total*100):"0,0%")+" do total"}
   ];
-  grid.innerHTML = cards.map(c=>`<div class="uso-kpi-card"><div class="uso-kpi-label">${usoEscapeHtml(c.label)}</div><div class="uso-kpi-value" title="${usoEscapeAttr(c.value)}">${usoEscapeHtml(String(c.value))}</div>${c.sub?`<div class="uso-kpi-sub">${usoEscapeHtml(c.sub)}</div>`:""}</div>`).join("");
+  grid.innerHTML = cards.map(c=>`<div class="uso-kpi-card"><div class="dsh-kpi-head">${dshKpiIconHTML(c.icon)}<div class="uso-kpi-label">${usoEscapeHtml(c.label)}</div></div><div class="uso-kpi-value" title="${usoEscapeAttr(c.value)}">${usoEscapeHtml(String(c.value))}</div>${c.sub?`<div class="uso-kpi-sub">${usoEscapeHtml(c.sub)}</div>`:""}</div>`).join("");
 }
 
 function usoBuildDonut(stats){
@@ -180,6 +180,7 @@ function usoOpenPanel(){
   // Captura o estado original apenas na primeira abertura, evitando
   // sobrescrever o estado que deverá ser restaurado ao fechar o painel.
   if(!panel.classList.contains("open")){
+    if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel==="function") fbdsUsoClosePanel();
     usoVisibilitySnapshot = {};
     Object.keys(LAYERS).forEach(id=>{
       usoVisibilitySnapshot[id] = map.hasLayer(LAYERS[id].leaflet);

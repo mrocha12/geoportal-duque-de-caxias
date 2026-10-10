@@ -11,6 +11,11 @@
   const STORAGE_KEY = 'geoportal_duque_de_caxias_opening_seen';
   let closing = false;
 
+  const showAbout = ()=>{
+    if(typeof openModal !== 'function') return;
+    openModal('modal-about');
+  };
+
   const finish = ()=>{
     if(closing) return;
     closing = true;
@@ -20,6 +25,7 @@
     window.setTimeout(()=>{
       screen.style.display='none';
       screen.setAttribute('hidden','');
+      showAbout();
     }, 650);
   };
 
@@ -29,13 +35,14 @@
     screen.style.display='none';
     screen.setAttribute('hidden','');
     screen.setAttribute('aria-hidden','true');
+    window.setTimeout(showAbout, 0);
     return;
   }
 
   enter.addEventListener('click', finish);
   close.addEventListener('click', finish);
   screen.addEventListener('click', (e)=>{
-    if(e.target === screen) finish();
+    if(e.target === screen || (e.target.classList && e.target.classList.contains('opening-bg'))) finish();
   });
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Escape' && !closing && screen.style.display !== 'none') finish();

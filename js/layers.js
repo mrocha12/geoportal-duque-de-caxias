@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    layers.js - Carregamento, configuração e controle das camadas
    Geoportal Duque de Caxias
    ============================================================ */
@@ -73,18 +73,41 @@ registerLayer("bairros", {
 });
 
 // 3. Ferrovia
+const FERROVIA_COR = "#2b2b2b";
+const FERROVIA_TRILHOS = [
+  L.geoJSON(DATA_FERROVIA, {pane:"paneOverlayLinhas", interactive:false, style:{color:FERROVIA_COR, weight:5, opacity:1, lineCap:"butt"}}),
+  L.geoJSON(DATA_FERROVIA, {pane:"paneOverlayLinhas", interactive:false, style:{color:"#ffffff", weight:2, opacity:1, lineCap:"butt"}})
+];
+const FERROVIA_DORMENTES = L.geoJSON(DATA_FERROVIA, {
+  pane:"paneOverlayLinhas",
+  style:{color:FERROVIA_COR, weight:12, opacity:1, dashArray:"2,4.5", lineCap:"butt"},
+  onEachFeature:(f,l)=>{
+    l.bindPopup(`<b>${escapeHtml(f.properties.NOME||"Ferrovia")}</b><br>Ramal: ${escapeHtml(f.properties.Ramal||"-")}`);
+    // Mantém o símbolo íntegro no hover (sem mudar a largura nem trazer os dormentes para frente) e sincroniza a opacidade
+    const setStyleOriginal = l.setStyle.bind(l);
+    l.setStyle = function(st){
+      const s = Object.assign({}, st || {}); s.weight = 12;
+      setStyleOriginal(s);
+      if(s.opacity !== undefined) FERROVIA_TRILHOS.forEach(g=>g.setStyle({opacity:s.opacity}));
+      return l;
+    };
+    l.bringToFront = function(){ return l; };
+  }
+});
+FERROVIA_DORMENTES.on("add", ()=> FERROVIA_TRILHOS.forEach(g=>g.addTo(map)));
+FERROVIA_DORMENTES.on("remove", ()=> FERROVIA_TRILHOS.forEach(g=>map.removeLayer(g)));
+
 registerLayer("ferrovia", {
   label:"Linhas Ferroviárias",
   category:"Infraestrutura",
   defaultVisible:true,
   count: DATA_FERROVIA.features.length,
   swatch:{type:"rail"},
-  leaflet: L.geoJSON(DATA_FERROVIA, {
-    pane:"paneOverlayLinhas",
-    style:{color:"#2b2b2b", weight:4, opacity:1, dashArray:"3,5", lineCap:"butt"},
-    onEachFeature:(f,l)=> l.bindPopup(`<b>${escapeHtml(f.properties.NOME||"Ferrovia")}</b><br>Ramal: ${escapeHtml(f.properties.Ramal||"-")}`)
-  })
+  leaflet: FERROVIA_DORMENTES
 });
+// Símbolo de trilho (dormentes + dois trilhos): a camada principal desenha os dormentes e duas
+// camadas auxiliares (não interativas) desenham a faixa dos trilhos e o vão entre eles. As auxiliares
+// entram e saem do mapa junto com a camada principal e acompanham a opacidade dela.
 
 // 4. Vias principais
 registerLayer("vias", {
@@ -92,10 +115,10 @@ registerLayer("vias", {
   category:"Infraestrutura",
   defaultVisible:true,
   count: DATA_VIAS.features.length,
-  swatch:{type:"line", color:"#FF0000"},
+  swatch:{type:"line", color:"#FF8C00"},
   leaflet: L.geoJSON(DATA_VIAS, {
     pane:"paneOverlayLinhas",
-    style:{color:"#FF0000", weight:2.5, opacity:0.95},
+    style:{color:"#FF8C00", weight:1.5, opacity:0.95},
     onEachFeature:(f,l)=> l.bindPopup(`<b>${escapeHtml(f.properties.NOME||"Via")}</b><br>${escapeHtml(f.properties.Classifica||"")}`)
   })
 });
@@ -277,6 +300,79 @@ function saudeImagemHTML(props, placement){
   const attribution=`${image.author} · ${image.license}`;
   return `<figure class="ct-photo ct-photo--${placement}"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" decoding="async"><figcaption>Fonte da imagem: <a href="${escapeHtml(image.source)}" target="_blank" rel="noopener noreferrer">${escapeHtml(attribution)}</a></figcaption></figure>`;
 }
+
+
+/* ================= FACES DE LOGRADOURO — dados otimizados =================
+   Os dados são carregados como JavaScript local para funcionar tanto em servidor
+   web quanto quando o Geoportal é aberto localmente, sem depender de fetch/CORS.
+*/
+let facesLogradouroLoadPromise = null;
+
+function loadFacesLogradouroLayer(){
+  const layer = LAYERS["faces_logradouro"];
+  if(!layer) return Promise.resolve(false);
+  if(layer._loaded) return Promise.resolve(true);
+  if(facesLogradouroLoadPromise) return facesLogradouroLoadPromise;
+
+  facesLogradouroLoadPromise = Promise.resolve().then(()=>{
+    if(typeof DATA_FACES_LOGRADOURO === "undefined") throw new Error("Dados de Faces de Logradouro não encontrados.");
+    layer.leaflet.addData(DATA_FACES_LOGRADOURO);
+    // Os eventos de hover precisam ser vinculados depois que as feições
+    // são efetivamente adicionadas ao GeoJSON (a vinculação global ocorre
+    // antes do carregamento desta camada).
+    if(typeof bindHoverToLayer === "function") {
+      layer.leaflet.eachLayer(l => bindHoverToLayer(l, "faces_logradouro"));
+    }
+    layer._loaded = true;
+    layer.count = DATA_FACES_LOGRADOURO.features ? DATA_FACES_LOGRADOURO.features.length : layer.count;
+    return true;
+  }).catch(err=>{
+    console.error("Não foi possível carregar Faces de Logradouro:", err);
+    layer._loaded = false;
+    facesLogradouroLoadPromise = null;
+    if(typeof showToast==="function") showToast("Não foi possível carregar a camada Faces de Logradouro.");
+    return false;
+  });
+
+  return facesLogradouroLoadPromise;
+}
+
+registerLayer("faces_logradouro", {
+  label:"Faces de Logradouro",
+  category:"Infraestrutura",
+  defaultVisible:false,
+  geometry:"linha",
+  zoomControlled:true,
+  minZoom:15,
+  lazyLoad:true,
+  autoShowOnZoom:true,
+  _loaded:false,
+  count:31509,
+  swatch:{type:"line", color:"#FF0000"},
+  leaflet: L.geoJSON(null, {
+    pane:"paneOverlayLinhas",
+    style:{color:"#FF0000", weight:0.8, opacity:0.9},
+    onEachFeature:(f,l)=>{
+      const p=f.properties||{};
+      const tipo=[p.NM_TIP_LOG,p.NM_TIT_LOG].filter(Boolean).join(" ");
+      const nome=p.NM_LOG||"Logradouro sem nome";
+      const setor=p.CD_SETOR||"-";
+      const quadra=p.CD_QUADRA||"-";
+      const face=p.CD_FACE||"-";
+      const totalRes=p.TOT_RES ?? "-";
+      const totalGeral=p.TOT_GERAL ?? "-";
+      l.bindPopup(
+        `<b>${escapeHtml(nome)}</b>`+
+        `<br>${escapeHtml(tipo||"Logradouro")}`+
+        `<br>Face: ${escapeHtml(face)}`+
+        `<br>Setor: ${escapeHtml(setor)}`+
+        `<br>Quadra: ${escapeHtml(quadra)}`+
+        `<br>Residências: ${escapeHtml(totalRes)}`+
+        `<br>Total: ${escapeHtml(totalGeral)}`
+      );
+    }
+  })
+});
 
 // 5. Estações ferroviárias
 registerLayer("estacoes", {
@@ -599,6 +695,150 @@ registerLayer("hidrografia", {
     }
   })
 });
+
+/* ================= CAMADAS AMBIENTAIS FBDS =================
+   Os GeoJSON mantêm os atributos originais; a proveniência e os links dos
+   metadados acompanham cada camada para consulta no catálogo e nos popups. */
+const FBDS_BASE_URL = "https://geo.fbds.org.br/RJ/DUQUE_DE_CAXIAS/";
+const FBDS_USO_URL = FBDS_BASE_URL + "USO/";
+const FBDS_HIDRO_URL = FBDS_BASE_URL + "HIDROGRAFIA/";
+const FBDS_APP_URL = FBDS_BASE_URL + "APP/";
+
+function fbdsPopupHTML(layer, properties, fields){
+  const rows = fields.map(([key,label])=>{
+    const value = properties[key];
+    if(value === undefined || value === null || value === "") return "";
+    const shown = typeof value === "number"
+      ? value.toLocaleString("pt-BR",{maximumFractionDigits:4})
+      : String(value);
+    return `<b>${escapeHtml(label)}:</b> ${escapeHtml(shown)}`;
+  }).filter(Boolean).join("<br>");
+  const source = layer.sourceUrl
+    ? `<br>Fonte: <a class="fbds-popup-source" href="${layer.sourceUrl}" target="_blank" rel="noopener noreferrer">FBDS · ${escapeHtml(layer.sourceDataset||"dados da camada")}</a>`
+    : "<br>Fonte: FBDS";
+  const metadata = layer.metadataUrl
+    ? `<br><a class="fbds-popup-source" href="${layer.metadataUrl}" target="_blank" rel="noopener noreferrer">Metadados técnicos (FBDS)</a>`
+    : "";
+  return `<b>${escapeHtml(layer.label)}</b>${rows?`<br>${rows}`:""}${source}${metadata}`;
+}
+
+function fbdsUsageColor(value){
+  const normalized = usoNormalize(value);
+  const colors = {
+    "formacao florestal":"#24733b",
+    "formacao nao florestal":"#78a84a",
+    "area antropizada":"#d6a43b",
+    "area edificada":"#c7463b",
+    "agua":"#277da1",
+    "silvicultura":"#8d6e45"
+  };
+  return colors[normalized] || "#777777";
+}
+
+let fbdsUsageSelectedClass = null;
+function fbdsUsageFeatureStyle(feature){
+  const properties = feature.properties || {};
+  const className = properties.CLASSE_USO || "Sem classe";
+  const color = fbdsUsageColor(className);
+  const selected = fbdsUsageSelectedClass;
+  const active = selected && className === selected;
+  const dimmed = selected && !active;
+  return {
+    color: active ? "#ffffff" : "#243129",
+    weight: active ? 2 : 0.6,
+    fillColor: color,
+    fillOpacity: dimmed ? 0.12 : 0.62,
+    opacity: dimmed ? 0.25 : 0.85
+  };
+}
+
+function fbdsRegisterGeoLayer(id, config){
+  const featureCollection = config.data;
+  const fields = config.fields;
+  const layerConfig = {
+    label:config.label,
+    category:"Meio Ambiente",
+    geometry:config.geometry,
+    defaultVisible:false,
+    hasDashboard:config.hasDashboard === true,
+    count:featureCollection.features.length,
+    swatch:config.swatch,
+    sourceName:"Fundação Brasileira para o Desenvolvimento Sustentável (FBDS)",
+    sourceUrl:config.sourceUrl,
+    sourceDataset:config.sourceDataset,
+    metadataUrl:config.metadataUrl
+  };
+  layerConfig.leaflet=L.geoJSON(featureCollection,{
+    pane:config.pane,
+    style:config.style,
+    pointToLayer:config.pointToLayer,
+    onEachFeature:(feature,leafletLayer)=>{
+      leafletLayer.bindPopup(fbdsPopupHTML(layerConfig,feature.properties || {},fields));
+      if(config.onFeatureClick) leafletLayer.on("click",()=>config.onFeatureClick(feature));
+    }
+  });
+  registerLayer(id,layerConfig);
+}
+
+fbdsRegisterGeoLayer("fbds_nascentes",{
+  label:"Nascentes (FBDS)", geometry:"ponto", data:DATA_FBDS_NASCENTES,
+  pane:"paneOverlayPontos", swatch:{type:"icon",color:"#087f8c",glyph:"●"},
+  sourceUrl:FBDS_HIDRO_URL, sourceDataset:"RJ_3301702_NASCENTES",
+  metadataUrl:FBDS_HIDRO_URL+"RJ_3301702_NASCENTES.shp.xml",
+  fields:[["GEOCODIGO","Código geográfico"],["HIDRO","Identificação hidrográfica"]],
+  pointToLayer:(feature,latlng)=>L.circleMarker(latlng,{radius:4,color:"#075b66",weight:1,fillColor:"#00a6b2",fillOpacity:.9})
+});
+fbdsRegisterGeoLayer("fbds_rios_simples",{
+  label:"Rios simples (FBDS)", geometry:"linha", data:DATA_FBDS_RIOS_SIMPLES,
+  pane:"paneOverlayLinhas", swatch:{type:"line",color:"#147bd1"},
+  sourceUrl:FBDS_HIDRO_URL, sourceDataset:"RJ_3301702_RIOS_SIMPLES",
+  metadataUrl:FBDS_HIDRO_URL+"RJ_3301702_RIOS_SIMPLES.shp.xml",
+  fields:[["GEOCODIGO","Código geográfico"],["HIDRO","Identificação hidrográfica"],["COMP_KM","Comprimento (km)"]],
+  style:{color:"#147bd1",weight:1.7,opacity:.88}
+});
+fbdsRegisterGeoLayer("fbds_massas_dagua",{
+  label:"Massas d'água (FBDS)", geometry:"poligono", data:DATA_FBDS_MASSAS_DAGUA,
+  pane:"paneOverlayPoligonos", swatch:{type:"fill",color:"#3287b8"},
+  sourceUrl:FBDS_HIDRO_URL, sourceDataset:"RJ_3301702_MASSAS_DAGUA",
+  metadataUrl:FBDS_HIDRO_URL+"RJ_3301702_MASSAS_DAGUA.shp.xml",
+  fields:[["HIDRO","Identificação hidrográfica"],["NATUREZA","Natureza"],["RIO","Rio"],["SETOR","Setor"],["AREA_HA","Área (ha)"]],
+  style:{color:"#155a7a",weight:1,fillColor:"#3287b8",fillOpacity:.55}
+});
+fbdsRegisterGeoLayer("fbds_rios_duplos",{
+  label:"Rios duplos (FBDS)", geometry:"poligono", data:DATA_FBDS_RIOS_DUPLOS,
+  pane:"paneOverlayPoligonos", swatch:{type:"fill",color:"#55a5c8"},
+  sourceUrl:FBDS_HIDRO_URL, sourceDataset:"RJ_3301702_RIOS_DUPLOS",
+  metadataUrl:FBDS_HIDRO_URL+"RJ_3301702_RIOS_DUPLOS.shp.xml",
+  fields:[["HIDRO","Identificação hidrográfica"],["AREA_HA","Área (ha)"]],
+  style:{color:"#155a7a",weight:1,fillColor:"#55a5c8",fillOpacity:.52}
+});
+fbdsRegisterGeoLayer("fbds_app",{
+  label:"Áreas de Preservação Permanente (APP · FBDS)", geometry:"poligono", data:DATA_FBDS_APP,
+  pane:"paneOverlayPoligonos", swatch:{type:"fill",color:"#238b57"},
+  sourceUrl:FBDS_APP_URL, sourceDataset:"RJ_3301702_APP",
+  metadataUrl:FBDS_APP_URL+"RJ_3301702_APP.shp.xml",
+  fields:[["GEOCODIGO","Código geográfico"],["HIDRO","Identificação hidrográfica"],["APP_M","APP (m)"],["AREA_HA","Área (ha)"]],
+  style:{color:"#155b38",weight:1,fillColor:"#238b57",fillOpacity:.42}
+});
+fbdsRegisterGeoLayer("fbds_app_uso",{
+  label:"Uso do solo em APP (FBDS)", geometry:"poligono", data:DATA_FBDS_APP_USO,
+  pane:"paneOverlayPoligonos", swatch:{type:"multi",color:"#d6a43b"},
+  sourceUrl:FBDS_APP_URL, sourceDataset:"RJ_3301702_APP_USO",
+  metadataUrl:FBDS_APP_URL+"RJ_3301702_APP_USO.shp.xml",
+  fields:[["CLASSE_USO","Classe de uso"],["AREA_HA","Área (ha)"],["GEOCODIGO","Código geográfico"]],
+  style:feature=>({color:"#4a473b",weight:.55,fillColor:fbdsUsageColor(feature.properties && feature.properties.CLASSE_USO),fillOpacity:.62})
+});
+fbdsRegisterGeoLayer("uso_ocupacao_fbds",{
+  label:"Uso e ocupação do solo (FBDS)", geometry:"poligono", data:DATA_FBDS_USO_OCUPACAO,
+  pane:"paneOverlayPoligonos", swatch:{type:"multi",color:"#24733b"}, hasDashboard:true,
+  sourceUrl:FBDS_USO_URL, sourceDataset:"RJ_3301702_USO",
+  metadataUrl:FBDS_USO_URL+"RJ_3301702_USO.shp.xml",
+  fields:[["CLASSE_USO","Classe de uso"],["AREA_HA","Área (ha)"],["GEOCODIGO","Código geográfico"]],
+  style:fbdsUsageFeatureStyle,
+  onFeatureClick:feature=>{
+    if(typeof fbdsUsoSelectClass==="function") fbdsUsoSelectClass((feature.properties||{}).CLASSE_USO || "Sem classe");
+  }
+});
 /* ================= NOVAS CAMADAS (V11) =================
    Cultura e Turismo, Forças de Segurança, Secretarias Municipais, Terminais
    Rodoviários, Unidades de Assistência Social e Plano Diretor 2022.
@@ -649,6 +889,29 @@ function culturaTurismoImagemHTML(props, placement){
   if(!image) return "";
   return `<figure class="ct-photo ct-photo--${placement}"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" decoding="async"><figcaption>Fonte: <a href="${escapeHtml(image.source)}" target="_blank" rel="noopener noreferrer">${escapeHtml(image.credit)}</a></figcaption></figure>`;
 }
+/* ---- Petróleo e Gás (V15): formatadores de exibição (os dados originais permanecem intactos) ----
+   Nas bases de origem a acentuação foi corrompida (ex.: "OPERAÇÃO" aparece como "OPERAORO",
+   "Gás" como "Grs"). Para o campo de situação e o de fluido o significado é inequívoco,
+   então a exibição (popup, tooltip, resultados de raio) é normalizada; a Tabela de Atributos
+   e as exportações continuam com o valor original. */
+function fmtSituacaoOperacao(v){
+  const s = String(v).trim();
+  if(/^autorizada\s+opera/i.test(s)) return "Autorizada operação";
+  if(/^opera/i.test(s)) return "Operação";
+  return s;
+}
+function fmtFluidoGas(v){
+  const s = String(v).trim();
+  return s.replace(/^Gr?s\b/i, "Gás");
+}
+function fmtExtensaoKm(v){
+  const n = Number(String(v).replace(",","."));
+  return Number.isFinite(n) ? n.toLocaleString("pt-BR",{maximumFractionDigits:3})+" km" : String(v);
+}
+function fmtDiametroPol(v){
+  const s = String(v).trim();
+  return /^[\d.,]+$/.test(s) ? s+" pol" : s;
+}
 const NEW_LAYER_CFG = {
   cultura_turismo: { idField:"NOME", idFallback:"Equipamento de Cultura e Turismo",
     fields:[["TIPO","Tipo"],["SECRETARIA","Secretaria"],["ENDERECO","Endereço"],["BAIRRO","Bairro"],["DISTRITO","Distrito"],["FONTE","Fonte"],["FonteData","Data da fonte",fmtFonteData]] },
@@ -660,6 +923,14 @@ const NEW_LAYER_CFG = {
     fields:[["TIPOEDIFRO","Tipo"],["Bairro","Bairro"],["Distrito","Distrito"],["Caxias","Caxias"],["Ano","Ano"],["Fonte","Fonte"],["Elaboraç","Elaboração"],["Contato","Contato"]] },
   assistencia_social: { idField:"NOME", idFallback:"Unidade de Assistência Social",
     fields:[["TIPO","Tipo"],["SECRETARIA","Secretaria"],["ENDERECO","Endereço"],["BAIRRO","Bairro"],["DISTRITO","Distrito"],["FONTE","Fonte"],["FonteData","Data da fonte",fmtFonteData]] },
+  gasodutos: { idField:"DUTO", idFallback:"Gasoduto de Transporte",
+    fields:[["TRECHO","Trecho"],["DIAM_POL","Diâmetro",fmtDiametroPol],["EXTENS_KM","Extensão",fmtExtensaoKm],["INST_ORIGE","Origem"],["INST_DEST","Destino"],["MUN_ORIG","Município de origem"],["MUN_DEST","Município de destino"],["PROPRIET","Proprietário"],["OPERADOR","Operador"],["TIPO","Tipo"],["FLUIDO","Fluido",fmtFluidoGas]] },
+  terminais_combustiveis: { idField:"NOME", idFallback:"Terminal de Combustíveis Líquidos",
+    fields:[["RAZAO_SOCI","Razão social"],["AUTORIZACA","Autorização"],["SITUACAO_A","Situação",fmtSituacaoOperacao],["MUNICIPIO","Município"],["UF","UF"],["SIMP","SIMP"]] },
+  terminais_gnl: { idField:"NOME", idFallback:"Terminal de GNL",
+    fields:[["RAZAO_SOCI","Razão social"],["AUTORIZACA","Autorização"],["SITUACAO_A","Situação",fmtSituacaoOperacao],["CAPACIDADE","Capacidade"],["MUNICIPIO","Município"],["UF","UF"]] },
+  upgn: { idField:"NOME", idFallback:"Unidade de Processamento de Gás Natural",
+    fields:[["TIPO","Tipo"],["TITULARIDA","Titularidade"],["MUNICIPIO","Município"],["ESTADO","UF"],["FONTE","Fonte"]] },
   plano_diretor: { idField:"Zona", idFallback:"Plano Diretor",
     fields:[["Zona_2","Classe de zoneamento"],["Legislacao","Legislação"],["AnoLei","Ano da lei"],["OBJ_Estrat","Objetivo estratégico"],["Shape_Area","Área",v=> typeof usoFormatArea==="function" ? usoFormatArea(Number(v)||0) : v]] }
 };
@@ -680,10 +951,12 @@ function newLayerPopupHTML(id, p, extraHtml){
   return `<b>${escapeHtml(title)}</b>${image}${rows?"<br>"+rows:""}${summaryRow}${extraHtml||""}`;
 }
 function registerPointLayer(id, cfg){
-  const data = cfg.data, icon = cfg.icon;
+  const data = cfg.bufferMunicipal17km ? petroGasFilterByMunicipalBuffer(cfg.data) : cfg.data;
+  const icon = cfg.icon;
   registerLayer(id, {
     label:cfg.label, category:cfg.category, defaultVisible:false,
-    zoomControlled:true, minZoom:14,
+    zoomControlled:cfg.zoomControlled!==false, minZoom:14,
+    zoomBounds:cfg.zoomBounds,
     count:data.features.length,
     swatch:cfg.swatch || {type:"icon", glyph:cfg.glyph, color:cfg.color},
     tableColumns:cfg.tableColumns,
@@ -795,7 +1068,133 @@ registerLayer("plano_diretor", {
   })
 });
 
-const DRAW_ORDER = ["uso_ocupacao","censo","bairros","plano_diretor","municipio","ucs_estadual","ucs_federal","ucs_municipal","hidrografia","vias","ferrovia","estacoes","terminais","saude","escolas","assistencia_social","secretarias","seguranca","cultura_turismo","cemiterios","religiao","reservatorio"];
+/* ================= PETRÓLEO E GÁS (V15) =================
+   Bases nacionais (Brasil inteiro): Gasodutos de Transporte, Terminais de Combustíveis
+   Líquidos, Terminais de GNL e Unidades de Processamento de Gás Natural (UPGN).
+   Apenas feições que intersectam o buffer externo de 17 km do limite municipal são
+   exibidas. O botão "Zoom na camada"
+   leva à região de Caxias/Baía de Guanabara, e não ao centro do país. */
+const PETROGAS_ZOOM_BOUNDS = [[-23.10,-43.60],[-22.30,-42.90]];
+const PETROGAS_CATEGORY = "Petróleo e Gás";
+const PETROGAS_GAS_COLOR = "#F9A825";
+const PETROGAS_BUFFER_METERS = 17000;
+const PETROGAS_BOUNDS_PADDING = 0.2;
+function petroGasFilterByMunicipalBuffer(data){
+  const municipality = DATA_MUNICIPIO.features[0].geometry;
+  const polygonCoords = municipality.type === "Polygon" ? [municipality.coordinates] : municipality.coordinates;
+  const allCoords = polygonCoords.flat(2);
+  const bounds = allCoords.reduce((b,c)=>({
+    minLon:Math.min(b.minLon,c[0]), maxLon:Math.max(b.maxLon,c[0]),
+    minLat:Math.min(b.minLat,c[1]), maxLat:Math.max(b.maxLat,c[1])
+  }), {minLon:Infinity,maxLon:-Infinity,minLat:Infinity,maxLat:-Infinity});
+  const centerLon=(bounds.minLon+bounds.maxLon)/2, centerLat=(bounds.minLat+bounds.maxLat)/2;
+  const project=coord=>{
+    const rad=Math.PI/180, lat=coord[1]*rad, lon=coord[0]*rad;
+    const lat0=centerLat*rad, dLon=lon-centerLon*rad;
+    const cosC=Math.max(-1,Math.min(1,Math.sin(lat0)*Math.sin(lat)+Math.cos(lat0)*Math.cos(lat)*Math.cos(dLon)));
+    const c=Math.acos(cosC), k=c<1e-10 ? 1 : c/Math.sin(c);
+    return [6371008.8*k*Math.cos(lat)*Math.sin(dLon),
+      6371008.8*k*(Math.cos(lat0)*Math.sin(lat)-Math.sin(lat0)*Math.cos(lat)*Math.cos(dLon))];
+  };
+  const polygons=polygonCoords.map(poly=>poly.map(ring=>ring.map(project)));
+  const boundaries=polygons.flatMap(poly=>poly.flatMap(ring=>ring.slice(1).map((point,i)=>[ring[i],point])));
+  const nearBounds=coord=>coord[0]>=bounds.minLon-PETROGAS_BOUNDS_PADDING && coord[0]<=bounds.maxLon+PETROGAS_BOUNDS_PADDING &&
+    coord[1]>=bounds.minLat-PETROGAS_BOUNDS_PADDING && coord[1]<=bounds.maxLat+PETROGAS_BOUNDS_PADDING;
+  const pointInRing=(point,ring)=>{
+    let inside=false;
+    for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+      const a=ring[i], b=ring[j];
+      if((a[1]>point[1])!==(b[1]>point[1]) && point[0]<(b[0]-a[0])*(point[1]-a[1])/(b[1]-a[1])+a[0]) inside=!inside;
+    }
+    return inside;
+  };
+  const inMunicipality=point=>polygons.some(poly=>pointInRing(point,poly[0]) && !poly.slice(1).some(hole=>pointInRing(point,hole)));
+  const pointSegmentDistance=(p,a,b)=>{
+    const dx=b[0]-a[0], dy=b[1]-a[1];
+    const t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy||1)));
+    return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy);
+  };
+  const segmentsIntersect=(a,b,c,d)=>{
+    const cross=(p,q,r)=>(q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]);
+    const onSegment=(p,q,r)=>q[0]>=Math.min(p[0],r[0]) && q[0]<=Math.max(p[0],r[0]) &&
+      q[1]>=Math.min(p[1],r[1]) && q[1]<=Math.max(p[1],r[1]);
+    const abC=cross(a,b,c), abD=cross(a,b,d), cdA=cross(c,d,a), cdB=cross(c,d,b);
+    return (abC*abD<0 && cdA*cdB<0) || (abC===0 && onSegment(a,c,b)) || (abD===0 && onSegment(a,d,b)) ||
+      (cdA===0 && onSegment(c,a,d)) || (cdB===0 && onSegment(c,b,d));
+  };
+  const pointInBuffer=coord=>{
+    if(!nearBounds(coord)) return false;
+    const point=project(coord);
+    return inMunicipality(point) || boundaries.some(([a,b])=>pointSegmentDistance(point,a,b)<=PETROGAS_BUFFER_METERS);
+  };
+  const segmentInBuffer=(start,end)=>{
+    if(Math.max(start[0],end[0])<bounds.minLon-PETROGAS_BOUNDS_PADDING || Math.min(start[0],end[0])>bounds.maxLon+PETROGAS_BOUNDS_PADDING ||
+       Math.max(start[1],end[1])<bounds.minLat-PETROGAS_BOUNDS_PADDING || Math.min(start[1],end[1])>bounds.maxLat+PETROGAS_BOUNDS_PADDING) return false;
+    const a=project(start), b=project(end);
+    return boundaries.some(([c,d])=>segmentsIntersect(a,b,c,d) ||
+      Math.min(pointSegmentDistance(a,c,d),pointSegmentDistance(b,c,d),pointSegmentDistance(c,a,b),pointSegmentDistance(d,a,b))<=PETROGAS_BUFFER_METERS);
+  };
+  const geometryInBuffer=geometry=>{
+    if(!geometry) return false;
+    if(geometry.type==="Point") return pointInBuffer(geometry.coordinates);
+    if(geometry.type==="MultiPoint") return geometry.coordinates.some(pointInBuffer);
+    if(geometry.type==="LineString") return geometry.coordinates.some(pointInBuffer) ||
+      geometry.coordinates.some((point,i)=>i>0 && segmentInBuffer(geometry.coordinates[i-1],point));
+    if(geometry.type==="MultiLineString") return geometry.coordinates.some(line=>geometryInBuffer({type:"LineString",coordinates:line}));
+    if(geometry.type==="GeometryCollection") return geometry.geometries.some(geometryInBuffer);
+    return false;
+  };
+  return Object.assign({},data,{features:data.features.filter(feature=>geometryInBuffer(feature.geometry))});
+}
+const DATA_GASODUTOS_BUFFERED = petroGasFilterByMunicipalBuffer(DATA_GASODUTOS);
+/* Símbolo: linha amarela com entorno preto. A camada principal desenha o contorno preto (mais largo) e uma
+   camada auxiliar não interativa desenha a linha amarela por cima; ela entra/sai do mapa junto com a principal
+   e acompanha a opacidade. */
+const GASODUTOS_LINHA_BRANCA = L.geoJSON(DATA_GASODUTOS_BUFFERED, {
+  pane:"paneOverlayLinhas", interactive:false, style:{color:"#FFD600", weight:3, opacity:0.95}
+});
+registerLayer("gasodutos", {
+  label:"Gasodutos de Transporte", category:PETROGAS_CATEGORY, defaultVisible:false,
+  count: DATA_GASODUTOS_BUFFERED.features.length,
+  swatch:{type:"line", color:"#FFD600", outlineColor:"#000000"},
+  zoomBounds: PETROGAS_ZOOM_BOUNDS,
+  tableColumns:["DUTO","TRECHO","DIAM_POL","EXTENS_KM","INST_ORIGE","INST_DEST","MUN_ORIG","MUN_DEST","PROPRIET","OPERADOR","TIPO","FLUIDO"],
+  leaflet: L.geoJSON(DATA_GASODUTOS_BUFFERED, {
+    pane:"paneOverlayLinhas",
+    style:{color:"#000000", weight:6, opacity:0.95},
+    onEachFeature:(f,l)=>{
+      l.bindPopup(newLayerPopupHTML("gasodutos", f.properties), {maxWidth:320});
+      // Mantém o símbolo íntegro no hover (largura fixa, sem trazer o contorno para frente) e sincroniza a opacidade
+      const setStyleOriginal = l.setStyle.bind(l);
+      l.setStyle = function(st){
+        const s = Object.assign({}, st || {}); s.weight = 6;
+        setStyleOriginal(s);
+        if(s.opacity !== undefined) GASODUTOS_LINHA_BRANCA.setStyle({opacity:s.opacity});
+        return l;
+      };
+      l.bringToFront = function(){ return l; };
+    }
+  })
+});
+LAYERS.gasodutos.leaflet.on("add", ()=> GASODUTOS_LINHA_BRANCA.addTo(map));
+LAYERS.gasodutos.leaflet.on("remove", ()=> map.removeLayer(GASODUTOS_LINHA_BRANCA));
+registerPointLayer("terminais_combustiveis", {
+  label:"Terminais de Combustíveis Líquidos", category:PETROGAS_CATEGORY, data:DATA_TERMINAIS_COMBUSTIVEIS, icon:ICON_TERMINAL_COMBUSTIVEL,
+  glyph:"&#9981;", color:"#5D4037", zoomControlled:false, zoomBounds:PETROGAS_ZOOM_BOUNDS, bufferMunicipal17km:true,
+  tableColumns:["NOME","RAZAO_SOCI","AUTORIZACA","SITUACAO_A","MUNICIPIO","UF","SIMP"]
+});
+registerPointLayer("terminais_gnl", {
+  label:"Terminais de GNL", category:PETROGAS_CATEGORY, data:DATA_TERMINAIS_GNL, icon:ICON_TERMINAL_GNL,
+  glyph:"&#128293;", color:"#0277BD", zoomControlled:false, zoomBounds:PETROGAS_ZOOM_BOUNDS, bufferMunicipal17km:true,
+  tableColumns:["NOME","RAZAO_SOCI","AUTORIZACA","SITUACAO_A","CAPACIDADE","MUNICIPIO","UF"]
+});
+registerPointLayer("upgn", {
+  label:"Unidades de Processamento de Gás Natural", category:PETROGAS_CATEGORY, data:DATA_UPGN, icon:ICON_UPGN,
+  glyph:"&#127981;", color:"#455A64", zoomControlled:false, zoomBounds:PETROGAS_ZOOM_BOUNDS, bufferMunicipal17km:true,
+  tableColumns:["NOME","TIPO","TITULARIDA","MUNICIPIO","ESTADO","FONTE"]
+});
+
+const DRAW_ORDER = ["uso_ocupacao","censo","bairros","plano_diretor","municipio","ucs_estadual","ucs_federal","ucs_municipal","hidrografia","fbds_rios_simples","fbds_massas_dagua","fbds_rios_duplos","fbds_app","fbds_app_uso","uso_ocupacao_fbds","fbds_nascentes","vias","ferrovia","gasodutos","estacoes","terminais","terminais_combustiveis","terminais_gnl","upgn","saude","escolas","assistencia_social","secretarias","seguranca","cultura_turismo","cemiterios","religiao","reservatorio"];
 DRAW_ORDER.forEach(id=>{ if(LAYERS[id].defaultVisible) LAYERS[id].leaflet.addTo(map); });
 
 let extraLayerCount = 0; // user-added layers via file

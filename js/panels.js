@@ -3,6 +3,87 @@
    Geoportal Duque de Caxias
    ============================================================ */
 
+/* ================= RECOLHER JANELAS FLUTUANTES ================= */
+(function initWindowCollapseButtons(){
+  const windows = [
+    {panel:"search-box", header:"#search-box-header"},
+    {panel:"bookmarks-box", header:".bm-title"},
+    {panel:"sketch-box", header:".sk-title"},
+    {panel:"measure-box", header:".ms-title"},
+    {panel:"radius-box", header:".rd-title"},
+    {panel:"legend-panel", header:".lp-header"},
+    {panel:"layers-panel", header:".lay-header", minimize:"#lay-minimize-btn", minimizedClass:"lay-minimized"},
+    {panel:"panel-basemap", header:".lp-header"},
+    {panel:"panel-addlayer", header:".lp-header"},
+    {panel:"panel-export", header:".lp-header"},
+    {panel:"uso-panel", header:".uso-head", minimize:"#uso-minimize-btn", minimizedClass:"uso-minimized"},
+    {panel:"pd-panel", header:".uso-head", minimize:"#pd-minimize-btn", minimizedClass:"uso-minimized"},
+    {panel:"fbds-uso-panel", header:".uso-head", minimize:"#fbds-uso-minimize-btn", minimizedClass:"uso-minimized"},
+    /* Janelas modais (V31): o recolhimento age sobre a caixa da janela */
+    {panel:"attr-table-box", header:".modal-head"},
+    {panel:"radius-results-box", header:".modal-head"},
+    {panel:"dsh-modal-box", header:".modal-head"},
+    {panel:"ibge-modal-box", header:".modal-head"},
+    {panel:"help-box", header:".modal-head"},
+    {panel:"about-box", header:".modal-head"},
+    {panel:"map-export-box", header:".modal-head"}
+  ];
+
+  windows.forEach(({panel:panelId,header:headerSelector,minimize:minimizeSelector,minimizedClass})=>{
+    const panel = document.getElementById(panelId);
+    const header = panel && panel.querySelector(headerSelector);
+    if(!panel || !header) return;
+
+    const nativeMinimize = minimizeSelector && panel.querySelector(minimizeSelector);
+    if(nativeMinimize){
+      nativeMinimize.classList.add("window-collapse-native");
+      nativeMinimize.hidden = true;
+    }
+    else panel.classList.add("window-collapsible");
+
+    header.classList.add("window-collapse-header");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "window-collapse-btn";
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"></path></svg><span>Recolher</span>';
+
+    const existingControl = nativeMinimize || header.querySelector(".lp-close,.search-close,.win-x,.modal-close");
+    if(existingControl) existingControl.parentNode.insertBefore(button,existingControl);
+    else header.appendChild(button);
+
+    const updateButton = ()=>{
+      const collapsed = minimizedClass
+        ? panel.classList.contains(minimizedClass)
+        : panel.classList.contains("window-collapsed");
+      const action = collapsed ? "Expandir janela" : "Recolher janela";
+      button.setAttribute("aria-label",action);
+      button.setAttribute("title",action);
+      button.setAttribute("aria-expanded",String(!collapsed));
+    };
+
+    button.addEventListener("click",()=>{
+      if(nativeMinimize) nativeMinimize.click();
+      else panel.classList.toggle("window-collapsed");
+      updateButton();
+    });
+    if(nativeMinimize){
+      new MutationObserver(updateButton).observe(panel,{attributes:true,attributeFilter:["class"]});
+    }
+    updateButton();
+
+    /* Ao fechar a janela, ela volta expandida na próxima abertura */
+    if(!nativeMinimize){
+      const host = panel.closest(".modal-overlay") || panel;
+      new MutationObserver(()=>{
+        if(getComputedStyle(host).display === "none" && panel.classList.contains("window-collapsed")){
+          panel.classList.remove("window-collapsed");
+          updateButton();
+        }
+      }).observe(host,{attributes:true,attributeFilter:["class","style"]});
+    }
+  });
+})();
+
 /* ================= LEGEND PANEL ================= */
 const legendBody = document.getElementById("legend-body");
 const legendPanel = document.getElementById("legend-panel");
@@ -19,17 +100,17 @@ function districtEntries(){
 
 function swatchHTML(sw){
   if(!sw) return `<div class="lp-swatch"></div>`;
-  if(sw.type==="fill") return `<div class="lp-swatch" style="background:${sw.color};"></div>`;
-  if(sw.type==="line") return `<div class="lp-swatch line" style="background:${sw.color};"></div>`;
-  if(sw.type==="polygon-outline") return `<div class="lp-swatch" style="background:none;border:2px solid ${sw.color};border-radius:2px;"></div>`;
+  if(sw.type==="fill") return `<div class="lp-swatch lp-swatch-poly" style="background:${sw.color};"></div>`;
+  if(sw.type==="line") return `<div class="lp-swatch line" style="background:${sw.color};${sw.outlineColor?`box-shadow:0 0 0 1.5px ${sw.outlineColor};`:""}"></div>`;
+  if(sw.type==="polygon-outline") return `<div class="lp-swatch lp-swatch-poly" style="background:none;border:2px solid ${sw.color};border-radius:2px;"></div>`;
   if(sw.type==="dash") return `<div class="lp-swatch dash"></div>`;
   if(sw.type==="rail") return `<div class="lp-swatch" style="background:none;display:flex;align-items:center;justify-content:center;">
-      <svg width="20" height="16" viewBox="0 0 20 16"><line x1="1" y1="8" x2="19" y2="8" stroke="#4A4A4A" stroke-width="2"/><line x1="9" y1="4" x2="9" y2="12" stroke="#4A4A4A" stroke-width="2"/></svg>
+      <svg width="20" height="16" viewBox="0 0 20 16"><g stroke="#4A4A4A" stroke-width="1.6"><line x1="3" y1="2.5" x2="3" y2="13.5"/><line x1="7" y1="2.5" x2="7" y2="13.5"/><line x1="11" y1="2.5" x2="11" y2="13.5"/><line x1="15" y1="2.5" x2="15" y2="13.5"/><line x1="19" y1="2.5" x2="19" y2="13.5"/></g><rect x="0" y="5.4" width="20" height="5.2" fill="#4A4A4A"/><rect x="0" y="7" width="20" height="2" fill="#fff"/></svg>
     </div>`;
   if(sw.type==="icon") return `<div class="lp-swatch" style="background:#fff;border:1px solid #a7a9ac;color:${sw.color};border-radius:50%;">${sw.glyph}</div>`;
   if(sw.type==="security") return `<div style="display:flex;gap:2px;flex:0 0 auto;">${SECURITY_FORCE_SYMBOLS.map(force=>securitySymbolSwatchHTML(force,14)).join("")}</div>`;
-  if(sw.type==="gradient") return `<div class="lp-swatch" style="background:linear-gradient(135deg,#ffffcc,#800026);"></div>`;
-  if(sw.type==="multi") return `<div class="lp-swatch" style="background:linear-gradient(135deg,#F2C14E 0 25%,#C8553D 25% 50%,#7B5EA7 50% 75%,#4C9F70 75% 100%);"></div>`;
+  if(sw.type==="gradient") return `<div class="lp-swatch lp-swatch-poly" style="background:linear-gradient(135deg,#ffffcc,#800026);"></div>`;
+  if(sw.type==="multi") return `<div class="lp-swatch lp-swatch-poly" style="background:linear-gradient(135deg,#F2C14E 0 25%,#C8553D 25% 50%,#7B5EA7 50% 75%,#4C9F70 75% 100%);"></div>`;
   return `<div class="lp-swatch"></div>`;
 }
 
@@ -38,39 +119,102 @@ function securitySymbolSwatchHTML(force,size=18){
   return `<div class="lp-swatch" style="width:${size}px;height:${size}px;flex:0 0 ${size}px;background:#fff;border:1px solid #a7a9ac;color:${force.color};border-radius:50%;"><svg width="${glyphSize}px" height="${glyphSize}px" viewBox="0 0 32 32" aria-hidden="true">${force.svg}</svg></div>`;
 }
 
+/* ===== Organização por tipo de geometria + símbolo padronizado (estilo ArcGIS Pro) =====
+   Ordem dos grupos: Pontos -> Linhas -> Polígonos. A ordem das camadas dentro de cada
+   grupo é a ordem que cada janela já usava. Não altera DRAW_ORDER nem o mapa. */
+const GEOMETRY_GROUPS = [
+  {key:"ponto",    label:"Pontos"},
+  {key:"linha",    label:"Linhas"},
+  {key:"poligono", label:"Polígonos"}
+];
+function layerGeometryType(id){
+  const layer = LAYERS[id];
+  if(!layer) return "poligono";
+  if(layer.geometry) return layer.geometry;
+  const t = layer.swatch && layer.swatch.type;
+  if(t==="icon" || t==="security") return "ponto";
+  if(t==="line" || t==="rail" || t==="dash") return "linha";
+  return "poligono";
+}
+function layerGeometryGroups(ids){
+  return GEOMETRY_GROUPS
+    .map(g=>({key:g.key, label:g.label, ids:ids.filter(id=>layerGeometryType(id)===g.key)}))
+    .filter(g=>g.ids.length);
+}
+/* Hierarquia única para Legenda e janela Camadas: Geometria (Pontos > Linhas > Polígonos)
+   -> Categoria -> camadas. Categorias na ordem em que aparecem no cadastro de camadas e
+   camadas na ordem de cadastro dentro de cada categoria. Só muda a apresentação. */
+function layerHierarchy(ids){
+  const order = Object.keys(LAYERS);
+  const catOf = id => LAYERS[id].category || "Outras";
+  const catOrder = [];
+  order.forEach(id=>{ const c = catOf(id); if(!catOrder.includes(c)) catOrder.push(c); });
+  return GEOMETRY_GROUPS.map(g=>{
+    const gids = ids.filter(id=>LAYERS[id] && layerGeometryType(id)===g.key);
+    const cats = catOrder.map(c=>({
+      cat:c,
+      ids:gids.filter(id=>catOf(id)===c).sort((a,b)=>order.indexOf(a)-order.indexOf(b))
+    })).filter(x=>x.ids.length);
+    return {key:g.key, label:g.label, cats};
+  }).filter(g=>g.cats.length);
+}
+/* Símbolo da Legenda e da janela Camadas: coluna de largura fixa (36px).
+   Polígonos e linhas ocupam a largura toda; pontos ficam centralizados. */
+function legendSymbolHTML(sw){
+  let inner;
+  if(sw && sw.type==="rail"){
+    inner = `<div class="lp-swatch lp-swatch-rail" style="background:none;display:flex;align-items:center;justify-content:center;"><svg width="36" height="16" viewBox="0 0 36 16"><g stroke="#4A4A4A" stroke-width="1.6"><line x1="3" y1="2.5" x2="3" y2="13.5"/><line x1="8" y1="2.5" x2="8" y2="13.5"/><line x1="13" y1="2.5" x2="13" y2="13.5"/><line x1="18" y1="2.5" x2="18" y2="13.5"/><line x1="23" y1="2.5" x2="23" y2="13.5"/><line x1="28" y1="2.5" x2="28" y2="13.5"/><line x1="33" y1="2.5" x2="33" y2="13.5"/></g><rect x="0" y="5.4" width="36" height="5.2" fill="#4A4A4A"/><rect x="0" y="7" width="36" height="2" fill="#fff"/></svg></div>`;
+  } else {
+    inner = swatchHTML(sw);
+  }
+  /* Forças de Segurança: 4 círculos lado a lado (62px) não cabem na coluna de 36px;
+     a coluna dessa camada acompanha a largura do símbolo e ganha folga até o nome. */
+  const slotClass = (sw && sw.type==="security") ? "lp-sym-slot lp-sym-slot-wide" : "lp-sym-slot";
+  return `<span class="${slotClass}">${inner}</span>`;
+}
+
 function renderLegend(){
   let html = "";
+  /* Na aba Interativo cada linha tem o botão ON/OFF (36px + espaçamento): recua as sub-listas na mesma medida */
+  const subIndent = legendTab==="interativo" ? 45 : 0;
   const ids = DRAW_ORDER.filter(id=>LAYERS[id]);
-  ids.forEach(id=>{
+  /* Faces de Logradouro não faz parte de DRAW_ORDER (exportação e Consulta por Raio) mas deve constar na Legenda */
+  if(LAYERS.faces_logradouro && !ids.includes("faces_logradouro")) ids.push("faces_logradouro");
+  layerHierarchy(ids).forEach(grp=>{
+  grp.cats.forEach(catGrp=>{
+  const grpIds = catGrp.ids.filter(id=> legendTab!=="legenda" || map.hasLayer(LAYERS[id].leaflet));
+  if(!grpIds.length) return;
+  html += `<div class="lp-cat-title">${escapeHtml(catGrp.cat)}</div>`;
+  grpIds.forEach(id=>{
     const layer = LAYERS[id];
     const visible = map.hasLayer(layer.leaflet);
     if(legendTab==="legenda" && !visible) return;
     html += `<div class="lp-section">`;
     if(legendTab==="interativo"){
-      html += `<div class="lp-row"><input type="checkbox" data-layer="${id}" ${visible?"checked":""}> ${swatchHTML(layer.swatch)} <span>${layer.label}</span></div>`;
+      html += `<div class="lp-row"><button type="button" class="lay-vis lay-switch" data-legend-vis="${id}" role="switch" aria-checked="${visible}" aria-label="${escapeHtml(layer.label)}: ${visible?"ligada":"desligada"}" title="${visible?"Desligar camada":"Ligar camada"}"><span class="lay-switch-label" aria-hidden="true">${visible?"ON":"OFF"}</span><span class="lay-switch-thumb" aria-hidden="true"></span></button> ${legendSymbolHTML(layer.swatch)} <span>${layer.label}</span></div>`;
     } else {
-      html += `<div class="lp-row">${swatchHTML(layer.swatch)} <span>${layer.label}</span></div>`;
+      html += `<div class="lp-row">${legendSymbolHTML(layer.swatch)} <span>${layer.label}</span></div>`;
     }
     if(id==="bairros" && (legendTab==="legenda"?visible:true)){
-      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:27px;">`;
+      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:${45+subIndent}px;">`;
       districtEntries().forEach(d=>{
         const isActive = highlightedDistrict===d;
-        html += `<div class="lp-row lp-dist-item ${isActive?"active-highlight":""}" data-highlight="${d}" style="padding:2px 4px;"><div class="lp-swatch" style="width:14px;height:14px;flex:0 0 14px;background:${distColor(d)};"></div><span style="font-size:11px;">${d}</span></div>`;
+        html += `<div class="lp-row lp-dist-item ${isActive?"active-highlight":""}" data-highlight="${d}" style="padding:2px 4px;"><div class="lp-swatch lp-swatch-poly" style="width:28px;height:14px;flex:0 0 28px;background:${distColor(d)};"></div><span style="font-size:11px;">${d}</span></div>`;
       });
       html += `</div>`;
-      if(highlightedDistrict) html += `<span class="lp-clear-highlight" id="clear-dist-highlight">limpar destaque</span>`;
+      if(highlightedDistrict) html += `<span class="lp-clear-highlight" style="margin-left:${45+subIndent}px;" id="clear-dist-highlight">limpar destaque</span>`;
     }
     if(id==="censo" && (legendTab==="legenda"?visible:true)){
-      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:27px;">`;
+      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:${45+subIndent}px;">`;
       CENSO_COLORS.forEach((color,i)=>{
         const isActive = highlightedCensoRange===i;
-        html += `<div class="lp-row lp-dist-item ${isActive?"active-highlight":""}" data-censo-range="${i}" style="padding:2px 4px;cursor:pointer;"><div class="lp-swatch" style="width:14px;height:14px;flex:0 0 14px;background:${color};"></div><span style="font-size:11px;">${censoRangeLabel(i)}</span></div>`;
+        html += `<div class="lp-row lp-dist-item ${isActive?"active-highlight":""}" data-censo-range="${i}" style="padding:2px 4px;cursor:pointer;"><div class="lp-swatch lp-swatch-poly" style="width:28px;height:14px;flex:0 0 28px;background:${color};"></div><span style="font-size:11px;">${censoRangeLabel(i)}</span></div>`;
       });
       html += `</div>`;
-      if(highlightedCensoRange!==null) html += `<span class="lp-clear-highlight" id="clear-censo-highlight">limpar filtro</span>`;
+      if(highlightedCensoRange!==null) html += `<span class="lp-clear-highlight" style="margin-left:${45+subIndent}px;" id="clear-censo-highlight">limpar filtro</span>`;
     }
     if(id==="seguranca" && (legendTab==="legenda"?visible:true)){
-      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:27px;">`;
+      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:${45+subIndent}px;">`;
       SECURITY_FORCE_SYMBOLS.forEach(force=>{
         html += `<div class="lp-row" style="padding:2px 4px;">${securitySymbolSwatchHTML(force,18)}<span style="font-size:11px;">${escapeHtml(force.agency)}</span></div>`;
       });
@@ -80,28 +224,32 @@ function renderLegend(){
       const ucData = id==="ucs_estadual" ? DATA_UCS_ESTADUAL : (id==="ucs_federal" ? DATA_UCS_FEDERAL : DATA_UCS_MUNICIPAL);
       const cats = ucCategoriesPresent(ucData);
       if(cats.length){
-        html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:27px;">`;
+        html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:${45+subIndent}px;">`;
         cats.forEach(c=>{
-          html += `<div class="lp-row" style="padding:2px 4px;"><div class="lp-swatch" style="width:14px;height:14px;flex:0 0 14px;background:${ucColor(c)};"></div><span style="font-size:11px;">${c}</span></div>`;
+          html += `<div class="lp-row" style="padding:2px 4px;"><div class="lp-swatch lp-swatch-poly" style="width:28px;height:14px;flex:0 0 28px;background:${ucColor(c)};"></div><span style="font-size:11px;">${c}</span></div>`;
         });
         html += `</div>`;
       }
     }
     if(id==="plano_diretor" && (legendTab==="legenda"?visible:true) && typeof pdClassesPresent==="function"){
-      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:27px;">`;
+      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:${45+subIndent}px;">`;
       pdClassesPresent().forEach(c=>{
-        html += `<div class="lp-row" style="padding:2px 4px;"><div class="lp-swatch" style="width:14px;height:14px;flex:0 0 14px;background:${pdColor(c)};"></div><span style="font-size:11px;">${escapeHtml(c)}</span></div>`;
+        html += `<div class="lp-row" style="padding:2px 4px;"><div class="lp-swatch lp-swatch-poly" style="width:28px;height:14px;flex:0 0 28px;background:${pdColor(c)};"></div><span style="font-size:11px;">${escapeHtml(c)}</span></div>`;
       });
       html += `</div>`;
     }
     html += `</div>`;
   });
+  });
+  });
   if(!html) html = `<div style="color:var(--muted-text);font-size:12px;">Nenhuma camada visível. Use a aba "Interativo" para ativar camadas.</div>`;
   legendBody.innerHTML = html;
   if(legendTab==="interativo"){
-    legendBody.querySelectorAll("input[data-layer]").forEach(cb=>{
-      cb.addEventListener("change",e=>{
-        toggleLayer(e.target.getAttribute("data-layer"), e.target.checked);
+    legendBody.querySelectorAll("[data-legend-vis]").forEach(btn=>{
+      btn.addEventListener("click",e=>{
+        e.stopPropagation();
+        const id = btn.getAttribute("data-legend-vis");
+        toggleLayer(id, !map.hasLayer(LAYERS[id].leaflet));
       });
     });
   }
@@ -151,13 +299,12 @@ function layNormalize(s){
 }
 
 function layGroupedIds(){
-  const cats = {};
-  Object.keys(LAYERS).forEach(id=>{
-    const c = LAYERS[id].category;
-    cats[c] = cats[c] || [];
-    cats[c].push(id);
+  /* Mesma hierarquia da Legenda: geometria -> categoria. Chave = "geometria|categoria". */
+  const out = {};
+  layerHierarchy(Object.keys(LAYERS)).forEach(g=>{
+    g.cats.forEach(c=>{ out[g.key+"|"+c.cat] = c.ids; });
   });
-  return cats;
+  return out;
 }
 
 function renderLayersPanel(){
@@ -172,6 +319,7 @@ function renderLayersPanel(){
   let totalVisible = 0, totalCount = 0, anyMatch = false;
 
   catNames.forEach(cat=>{
+    const catLabel = cat.slice(cat.indexOf("|")+1);
     const ids = cats[cat].filter(id=> !query || layNormalize(LAYERS[id].label).includes(query));
     if(query && ids.length===0) return;
     anyMatch = true;
@@ -183,7 +331,7 @@ function renderLayersPanel(){
     html += `<div class="lay-group">
       <button class="lay-group-head" data-group-toggle="${escapeHtml(cat)}" aria-expanded="${!collapsed}">
         <svg class="lay-chev ${collapsed?"":"open"}" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9l5 5 5-5"/></svg>
-        <span class="lay-group-name">${escapeHtml(cat)}</span>
+        <span class="lay-group-name">${escapeHtml(catLabel)}</span>
         <span class="lay-group-count">${groupVisible}/${ids.length}</span>
       </button>
       <div class="lay-group-body"${collapsed?" hidden":""}>`;
@@ -198,12 +346,11 @@ function renderLayersPanel(){
       const isDimmedByIsolate = layersIsolatedId && !isIsolated;
 
       html += `<div class="lay-row${isExpanded?" expanded":""}${isIsolated?" isolated":""}${isDimmedByIsolate?" dimmed":""}" data-censo-disabled="${locked?"true":"false"}" data-row="${id}">
-        <button class="lay-vis" data-vis="${id}" aria-pressed="${visible}" title="${visible?"Ocultar camada":"Mostrar camada"}"${disabledAttr}>
-          ${visible
-            ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 5.5 12 5.5 22.5 12 22.5 12 18.5 18.5 12 18.5 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>`
-            : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.7A9.7 9.7 0 0 1 12 5.5c6.5 0 10.5 6.5 10.5 6.5a16.3 16.3 0 0 1-3.2 3.9M6.7 7.2A16.4 16.4 0 0 0 1.5 12S5.5 18.5 12 18.5a9.5 9.5 0 0 0 3.9-.8"/><path d="M9.5 9.8A3 3 0 0 0 12 15a3 3 0 0 0 2.2-.97"/></svg>`}
+        <button class="lay-vis lay-switch" data-vis="${id}" role="switch" aria-checked="${visible}" aria-label="${escapeHtml(layer.label)}: ${visible?"ligada":"desligada"}" title="${visible?"Desligar camada":"Ligar camada"}"${disabledAttr}>
+          <span class="lay-switch-label" aria-hidden="true">${visible?"ON":"OFF"}</span>
+          <span class="lay-switch-thumb" aria-hidden="true"></span>
         </button>
-        <span class="lay-swatch-wrap">${swatchHTML(layer.swatch)}</span>
+        <span class="lay-swatch-wrap">${legendSymbolHTML(layer.swatch)}</span>
         <button class="lay-name" data-select="${id}" title="${escapeHtml(layer.label)}"${disabledAttr}>${escapeHtml(layer.label)}</button>
         ${isIsolated ? `<span class="lay-iso-tag" title="Camada isolada">isolada</span>` : ""}
         <span class="lay-featcount">${layer.count}</span>
@@ -233,6 +380,7 @@ function renderLayersPanel(){
             <span class="opacity-val">${pct}%</span>
           </div>
           <div class="lay-detail-meta">${layer.count} feições · ${escapeHtml(layer.category)}</div>
+          ${layer.sourceName?`<div class="lay-detail-source">Fonte: <a href="${layer.sourceUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(layer.sourceName)}</a>${layer.metadataUrl?` · <a href="${layer.metadataUrl}" target="_blank" rel="noopener noreferrer">Metadados</a>`:""}<br>Base: ${escapeHtml(layer.sourceDataset||"")}</div>`:""}
         </div>`;
       }
     });
@@ -283,12 +431,13 @@ function renderLayersPanel(){
       const layer = LAYERS[id];
       if(act==="zoom"){
         if(!map.hasLayer(layer.leaflet)) toggleLayer(id,true);
-        try{ map.fitBounds(layer.leaflet.getBounds(), {padding:[30,30]}); }catch(err){ showToast("Não foi possível calcular a extensão desta camada."); }
+        try{ map.fitBounds(layer.zoomBounds || layer.leaflet.getBounds(), {padding:[30,30]}); }catch(err){ showToast("Não foi possível calcular a extensão desta camada."); }
       } else if(act==="table"){
         openAttributeTable(id);
       } else if(act==="dashboard"){
         if(id==="censo"){ openCensoDashboard(); }
         if(id==="uso_ocupacao" && typeof usoOpenPanel==="function"){ usoOpenPanel(); }
+        if(id==="uso_ocupacao_fbds" && typeof fbdsUsoOpenPanel==="function"){ fbdsUsoOpenPanel(); }
         if(id==="plano_diretor" && typeof pdOpenPanel==="function"){ pdOpenPanel(); }
       } else if(act==="isolate"){
         toggleIsolateLayer(id);
@@ -313,11 +462,12 @@ function renderLayersPanel(){
 
 /* ---- Isolar camada: mostra somente a camada escolhida, preservando o
    estado anterior de cada camada para restaurar depois. Não interfere
-   com os modos exclusivos dos dashboards (Censo / Uso e Ocupação),
-   que já controlam a visibilidade por conta própria. ---- */
+   com os modos exclusivos dos dashboards, que controlam a visibilidade. ---- */
 function toggleIsolateLayer(id){
-  const censoOnlyMode = !!document.getElementById("modal-dashboard-censo")?.classList.contains("open");
-  if(censoOnlyMode) return;
+  const dashboardOpen = [
+    "modal-dashboard-censo","uso-panel","pd-panel","fbds-uso-panel"
+  ].some(panelId=>document.getElementById(panelId)?.classList.contains("open"));
+  if(dashboardOpen) return;
   if(layersIsolatedId === id){
     restoreFromIsolate();
     return;
@@ -604,7 +754,43 @@ function updateZoomControlledLayers(){
     if(!layer.zoomControlled) return;
     const shouldShow = map.getZoom() >= (layer.minZoom || 14);
     const isVisible = map.hasLayer(layer.leaflet);
-    if(shouldShow && !isVisible){
+    if(layer.lazyLoad){
+      // Camadas lazy com autoShowOnZoom carregam somente ao atingir o zoom
+      // mínimo e passam a acompanhar automaticamente a visibilidade por zoom.
+      // As demais camadas lazy continuam dependendo da ativação manual.
+      if(layer.autoShowOnZoom){
+        if(shouldShow){
+          layer._enabled = true;
+          if(!layer._loaded){
+            loadFacesLogradouroLayer().then(ok=>{
+              if(ok && layer._enabled && map.getZoom() >= (layer.minZoom || 14) && !map.hasLayer(layer.leaflet)){
+                layer.leaflet.addTo(map);
+              }
+              renderLegend();
+              renderLayersPanel();
+            });
+          } else if(!isVisible){
+            layer.leaflet.addTo(map);
+            changed = true;
+          }
+        } else {
+          layer._enabled = false;
+          if(isVisible){ map.removeLayer(layer.leaflet); changed = true; }
+        }
+      } else {
+        if(!layer._enabled){
+          if(isVisible){ map.removeLayer(layer.leaflet); changed = true; }
+          return;
+        }
+        if(shouldShow && !isVisible && layer._loaded){
+          layer.leaflet.addTo(map);
+          changed = true;
+        } else if(!shouldShow && isVisible){
+          map.removeLayer(layer.leaflet);
+          changed = true;
+        }
+      }
+    } else if(shouldShow && !isVisible){
       layer.leaflet.addTo(map);
       changed = true;
     } else if(!shouldShow && isVisible){
@@ -629,8 +815,26 @@ function toggleLayer(id, visible){
   if(censoDashboardOpen && id !== "censo") return;
   if(pdDashboardOpen && id !== "plano_diretor") return;
   if(layer.zoomControlled && visible && map.getZoom() < (layer.minZoom || 14)) visible = false;
-  if(visible && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
-  if(!visible && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
+  if(layer.lazyLoad && visible){
+    layer._enabled = true;
+    if(!layer._loaded){
+      loadFacesLogradouroLayer().then(ok=>{
+        if(ok && layer._enabled && map.getZoom() >= (layer.minZoom || 14) && !map.hasLayer(layer.leaflet)){
+          layer.leaflet.addTo(map);
+        }
+        renderLegend();
+        renderLayersPanel();
+      });
+    } else if(!map.hasLayer(layer.leaflet)){
+      layer.leaflet.addTo(map);
+    }
+  } else if(layer.lazyLoad && !visible){
+    layer._enabled = false;
+    if(map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
+  } else {
+    if(visible && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
+    if(!visible && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
+  }
   // Se a Tabela de Atributos estiver filtrando esta camada, reaplica apenas
   // a visibilidade das feições após ligar/desligar a camada.
   if(id === atLayerId && typeof atApplyMapVisibility === "function"){
@@ -659,8 +863,25 @@ function setAllLayers(visible){
     const layer = LAYERS[id];
     let v = visible;
     if(layer.zoomControlled && v && map.getZoom() < (layer.minZoom || 14)) v = false;
-    if(v && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
-    if(!v && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
+    if(layer.lazyLoad){
+      layer._enabled = !!v;
+      if(v && !layer._loaded){
+        loadFacesLogradouroLayer().then(ok=>{
+          if(ok && layer._enabled && map.getZoom() >= (layer.minZoom || 14) && !map.hasLayer(layer.leaflet)){
+            layer.leaflet.addTo(map);
+          }
+          renderLegend();
+          renderLayersPanel();
+        });
+      } else if(v && !map.hasLayer(layer.leaflet) && layer._loaded){
+        layer.leaflet.addTo(map);
+      } else if(!v && map.hasLayer(layer.leaflet)){
+        map.removeLayer(layer.leaflet);
+      }
+    } else {
+      if(v && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
+      if(!v && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
+    }
   });
   if(atLayerId && typeof atApplyMapVisibility === "function"){
     atApplyMapVisibility(atFilteredIndices);
@@ -720,7 +941,7 @@ function renderBasemapGrid(){
     card.addEventListener("click",()=>{
       const id = card.getAttribute("data-basemap");
       setBasemap(id);
-      closeAllPanels();
+      // V31: o painel Mapas Base permanece aberto após a escolha (fecha só por X ou Esc)
     });
   });
 }
@@ -772,12 +993,21 @@ function loadExternalGeoJSON(file, cb){
           l.bindPopup(rows || "Feição sem atributos");
         }
       }).addTo(map);
+      /* Geometria predominante do arquivo (polígono > linha > ponto) */
+      const gTypes = (gj.features||[]).map(f=>f && f.geometry && f.geometry.type || "");
+      const userGeometry = gTypes.some(t=>/Polygon/.test(t)) ? "poligono"
+                         : gTypes.some(t=>/LineString/.test(t)) ? "linha"
+                         : gTypes.some(t=>/Point/.test(t)) ? "ponto" : "poligono";
+      const userSwatch = userGeometry==="linha" ? {type:"line", color}
+                       : userGeometry==="ponto" ? {type:"icon", glyph:"&#9679;", color}
+                       : {type:"fill", color};
       registerLayer(id, {
         label: file.name.replace(/\.(json|geojson)$/i,""),
         category:"Camadas do usuário",
         defaultVisible:true,
         count: (gj.features||[]).length,
-        swatch:{type:"fill", color},
+        swatch:userSwatch,
+        geometry:userGeometry,
         leaflet
       });
       DRAW_ORDER.push(id);
@@ -812,13 +1042,8 @@ document.querySelectorAll(".modal-close").forEach(btn=>{
     else closeModal(id);
   });
 });
-document.querySelectorAll(".modal-overlay").forEach(ov=>{
-  ov.addEventListener("click",e=>{
-    if(e.target!==ov) return;
-    if(ov.id==="modal-dashboard-censo") return;
-    ov.classList.remove("open");
-  });
-});
+/* V31: clicar no fundo (fora da janela) NÃO fecha mais os modais.
+   Fechamento somente pelo botão X ou pela tecla Esc (js/janelas.js). */
 
 /* ================= SINGLE-WINDOW PANEL SYSTEM ================= */
 // All IDs of panels that compete for the top-right slot
@@ -886,9 +1111,12 @@ function openPanel(panelId, onOpen){
 document.addEventListener("keydown", e=>{
   if(e.key !== "Escape") return;
   if(typeof cancelActiveTools === "function") cancelActiveTools();
-  closeAllPanels();
-  if(typeof closeToolsMenu === "function") closeToolsMenu();
-  document.querySelectorAll(".modal-overlay.open").forEach(overlay=>closeModal(overlay.id));
+  // V31: Esc fecha apenas a janela ativa (js/janelas.js), não mais todas de uma vez.
+  const menu = document.getElementById("tools-menu");
+  if(menu && !menu.hidden && typeof closeToolsMenu === "function"){
+    closeToolsMenu();
+    e.__geoEscConsumido = true; // fechou só o menu; mantém as janelas
+  }
 });
 
 /* ================= BOTTOM TOOLBAR ================= */
@@ -922,3 +1150,28 @@ document.getElementById("bb-radius").addEventListener("click",()=>{
   openPanel("radius-box", ()=>{ if(typeof radiusOnPanelOpen==="function") radiusOnPanelOpen(); });
 });
 let censoVisibilitySnapshot = null;
+
+/* ================= PAINEL LATERAL RECOLHÍVEL ================= */
+(function initToolbarCollapse(){
+  const bar = document.getElementById("left-toolbar");
+  const btn = document.getElementById("lt-collapse");
+  if(!bar || !btn) return;
+  const KEY = "geoportal.painelLateralRecolhido";
+  function apply(collapsed){
+    bar.classList.toggle("collapsed", collapsed);
+    btn.setAttribute("aria-expanded", String(!collapsed));
+    // O texto visual permanece sempre "Recolher".
+    // Tooltip e acessibilidade continuam indicando a ação do estado atual.
+    const actionLabel = collapsed ? "Expandir painel lateral" : "Recolher painel lateral";
+    btn.setAttribute("aria-label", actionLabel);
+    btn.setAttribute("title", actionLabel);
+  }
+  let saved = false;
+  try{ saved = localStorage.getItem(KEY)==="1"; }catch(e){}
+  apply(saved);
+  btn.addEventListener("click", ()=>{
+    const next = !bar.classList.contains("collapsed");
+    apply(next);
+    try{ localStorage.setItem(KEY, next ? "1" : "0"); }catch(e){}
+  });
+})();

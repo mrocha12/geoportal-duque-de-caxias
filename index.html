@@ -5,8 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Geoportal | Duque de Caxias</title>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css?v=20261001-culture-tourism-photos-v12">
-  <link rel="stylesheet" href="css/topbar-fix.css">
+    <link rel="stylesheet" href="css/style.css?v=v19-fbds-v3">
+  <link rel="stylesheet" href="css/topbar-fix.css?v=20261010-v1">
+  <link rel="stylesheet" href="css/tema-grafite-azul.css?v=v28">
+  <link rel="stylesheet" href="css/opening-logo.css?v=gif2">
+  <link rel="stylesheet" href="css/painel-efeito.css?v=20261010-v1">
+  <link rel="stylesheet" href="css/janelas.css?v=20261010-v1">
+  <link rel="stylesheet" href="css/transparencia.css?v=v36">
 </head>
 <body>
 
@@ -45,9 +50,9 @@
 <div id="app">
 
   <div id="topbar">
-    <span class="brand">Geoportal</span>
+    <a class="brand-logo-link" href="https://marcio-gis-portf.lovable.app" target="_blank" rel="noopener noreferrer" title="Abrir portfólio MR – Tecnologia que mapeia." aria-label="Abrir o portfólio MR – Tecnologia que mapeia. em uma nova aba"><img class="brand-logo" src="assets/images/logo-mr-completo.png?v=2" alt="MR – Geoprocessamento" width="113" height="67"></a><span class="brand-title"><span class="brand">Geoportal</span>
     <span class="sep">|</span>
-    <span class="sub">Duque de Caxias</span>
+    <span class="sub">Duque de Caxias</span></span>
     <div id="global-search-box" class="global-search-box" aria-label="Pesquisar endereços e informações das camadas">
       <div class="global-search-input-wrap">
         <span class="global-search-input-icon" aria-hidden="true">⌕</span>
@@ -60,18 +65,6 @@
     <button class="icon-btn-ibge" id="btn-ibge-top" title="Consultar dados oficiais do IBGE por município" aria-label="Dados do IBGE">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
       <span>Dados do IBGE</span>
-    </button>
-    <button class="icon-btn-ibge" id="btn-uso-top" title="Consultar Uso e Ocupação do Solo" aria-label="Uso e Ocupação">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-      <span>Uso e Ocupação</span>
-    </button>
-    <button class="icon-btn-ibge icon-btn-dashboard" id="btn-dashboard-top" title="Abrir Dashboard dos Setores Censitários" aria-label="Dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-      <span>Dashboard</span>
-    </button>
-    <button class="icon-btn-ibge icon-btn-dashboard" id="btn-plano-diretor-top" title="Abrir Dashboard do Plano Diretor" aria-label="Dashboard do Plano Diretor">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M8 16v-5"></path><path d="M12 16V8"></path><path d="M16 16v-3"></path><path d="M20 16V6"></path></svg>
-      <span>Plano Diretor</span>
     </button>
     <button class="icon-btn" id="btn-share" title="Copiar link desta vista do mapa" aria-label="Copiar link desta vista do mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg></button>
     <button class="icon-btn" id="btn-theme" title="Tema claro/escuro" aria-label="Alternar tema">☾</button>
@@ -86,6 +79,10 @@
 
     <!-- LEFT TOOLBAR -->
     <div id="left-toolbar">
+      <button class="lt-btn lt-collapse" id="lt-collapse" type="button" title="Recolher painel lateral" aria-label="Recolher painel lateral" aria-expanded="true" aria-controls="left-toolbar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"></path></svg>
+        <span class="lt-collapse-label">Recolher</span>
+      </button>
       <button class="lt-btn" id="lt-search" title="Buscar por categoria" aria-label="Buscar por categoria">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"></circle><path d="M15.5 15.5L21 21"></path></svg>
       </button>
@@ -171,6 +168,32 @@
       </span>
       <span class="bb-label">Legenda</span>
     </button>
+      <div class="lt-gap lt-group-separator"></div>
+      <div class="lt-group-label" aria-hidden="true">Dashboards</div>
+      <button class="lt-btn bb-btn" id="btn-dashboard-top" title="Abrir Dashboard dos Setores Censitários" aria-label="Dashboard dos Setores Censitários">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+      </span>
+      <span class="bb-label">Dashboard dos Setores Censitários</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-uso-top" title="Consultar Uso e Ocupação do Solo" aria-label="Uso e Ocupação do Solo">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+      </span>
+      <span class="bb-label">Uso e Ocupação do Solo</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-fbds-uso-top" title="Abrir Dashboard de Uso e Ocupação do Solo da FBDS" aria-label="Dashboard de Uso e Ocupação do Solo da FBDS">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M7 15l4-5 3 3 5-7"></path></svg>
+      </span>
+      <span class="bb-label">Uso e Ocupação do Solo (FBDS)</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-plano-diretor-top" title="Abrir Dashboard do Plano Diretor" aria-label="Dashboard do Plano Diretor">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M8 16v-5"></path><path d="M12 16V8"></path><path d="M16 16v-3"></path><path d="M20 16V6"></path></svg>
+      </span>
+      <span class="bb-label">Dashboard do Plano Diretor</span>
+    </button>
 
 
       <div class="lt-gap"></div>
@@ -190,12 +213,12 @@
     </div>
 
     <div id="bookmarks-box">
-      <div class="bm-title">Marcadores</div>
+      <div class="bm-title"><span>Marcadores</span><button class="search-close" id="bookmarks-close" type="button" title="Fechar marcadores (Esc)" aria-label="Fechar marcadores">&#10005;</button></div>
       <div id="bookmarks-list"></div>
     </div>
 
     <div id="sketch-box">
-      <div class="sk-title">Esboço <span class="sk-title-actions"><span id="sketch-export">exportar</span><span id="sketch-clear">limpar</span></span></div>
+      <div class="sk-title"><span class="win-title">Esboço</span> <span class="sk-title-actions"><span id="sketch-export">exportar</span><span id="sketch-clear">limpar</span></span><button class="win-x" type="button" data-close-panel title="Fechar (Esc)" aria-label="Fechar Esboço">&#10005;</button></div>
       <div class="sk-item" data-mode="marker">&#128204; Ponto</div>
       <div class="sk-item" data-mode="polyline">&#9585; Linha</div>
       <div class="sk-item" data-mode="polygon">&#9723; Polígono</div>
@@ -218,7 +241,7 @@
     </div>
 
     <div id="measure-box">
-      <div class="ms-title">Medir</div>
+      <div class="ms-title"><span class="win-title">Medir</span><button class="win-x" type="button" data-close-panel title="Fechar (Esc)" aria-label="Fechar Medir">&#10005;</button></div>
       <div class="ms-item" data-mode="distance">&#128207; Distância</div>
       <div class="ms-units" id="ms-units-distance">
         <button type="button" class="ms-unit-btn active" data-unit-type="distance" data-unit="m">m</button>
@@ -236,7 +259,7 @@
 
     <!-- RADIUS QUERY PANEL (Consulta por Raio) -->
     <div id="radius-box">
-      <div class="rd-title">Consulta por Raio <span class="rd-title-actions"><span id="radius-clear-title">limpar</span></span></div>
+      <div class="rd-title"><span class="win-title">Consulta por Raio</span> <span class="rd-title-actions"><span id="radius-clear-title">limpar</span></span><button class="win-x" type="button" data-close-panel title="Fechar (Esc)" aria-label="Fechar Consulta por Raio">&#10005;</button></div>
       <div class="rd-item" id="rd-define-point">&#128205; Definir ponto no mapa</div>
       <div class="rd-item" id="rd-use-location">&#128758; Usar minha localização</div>
       <div class="rd-row">
@@ -435,6 +458,65 @@
       </div>
     </div>
 
+    <!-- DASHBOARD FBDS — Uso e Ocupação do Solo -->
+    <div id="fbds-uso-panel" class="uso-panel fbds-uso-panel" role="dialog" aria-label="Dashboard de Uso e Ocupação do Solo da FBDS">
+      <div class="uso-rz uso-rz-n" data-rz="n"></div>
+      <div class="uso-rz uso-rz-s" data-rz="s"></div>
+      <div class="uso-rz uso-rz-e" data-rz="e"></div>
+      <div class="uso-rz uso-rz-w" data-rz="w"></div>
+      <div class="uso-rz uso-rz-ne" data-rz="ne"></div>
+      <div class="uso-rz uso-rz-nw" data-rz="nw"></div>
+      <div class="uso-rz uso-rz-se" data-rz="se"></div>
+      <div class="uso-rz uso-rz-sw" data-rz="sw"></div>
+      <div class="uso-head" id="fbds-uso-head">
+        <div class="uso-head-left">
+          <span class="uso-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg></span>
+          <h3>Uso e Ocupação do Solo <span>· FBDS</span></h3>
+        </div>
+        <div class="uso-head-right">
+          <button class="uso-icon-btn" id="fbds-uso-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+          <button class="uso-icon-btn" id="fbds-uso-minimize-btn" title="Minimizar/Restaurar" aria-label="Minimizar ou restaurar painel">&#8722;</button>
+          <button class="uso-icon-btn" id="fbds-uso-close-btn" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+        </div>
+      </div>
+      <div class="uso-body" id="fbds-uso-body">
+        <div class="fbds-uso-source">Base temática de uso e ocupação do solo da Fundação Brasileira para o Desenvolvimento Sustentável.</div>
+        <div class="uso-kpi-grid" id="fbds-uso-kpi-grid"></div>
+        <div class="uso-selection-banner" id="fbds-uso-selection-banner" style="display:none;"></div>
+        <div class="uso-section">
+          <div class="uso-section-title">Distribuição da área por classe <span class="pd-hint">selecione uma classe para realçar no mapa</span></div>
+          <div class="fbds-uso-donut" id="fbds-uso-stack" role="group" aria-label="Distribuição da área por classe de uso e ocupação"></div>
+          <div class="fbds-uso-legend" id="fbds-uso-legend"></div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-filter-row">
+            <label for="fbds-uso-filter">Classe</label>
+            <select id="fbds-uso-filter"><option value="">Todas as classes</option></select>
+            <button class="uso-mini-btn" id="fbds-uso-clear-filter" type="button">Limpar filtro</button>
+          </div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-section-title">Área por classe</div>
+          <div class="uso-table-wrap">
+            <table class="uso-table">
+              <thead><tr><th>Classe</th><th style="text-align:right;">Área</th><th style="text-align:right;">%</th></tr></thead>
+              <tbody id="fbds-uso-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="uso-section fbds-uso-metadata">
+          <div class="uso-section-title">Fonte e metadados</div>
+          <div>Base publicada para Duque de Caxias, RJ. Os valores de área são os do atributo original <b>AREA_HA</b>; as classes vêm de <b>CLASSE_USO</b>.</div>
+          <a href="https://geo.fbds.org.br/RJ/DUQUE_DE_CAXIAS/USO/" target="_blank" rel="noopener noreferrer">Consultar os arquivos da camada no repositório da FBDS</a><br>
+          <a href="https://geo.fbds.org.br/RJ/DUQUE_DE_CAXIAS/USO/RJ_3301702_USO.shp.xml" target="_blank" rel="noopener noreferrer">Consultar metadados técnicos da camada na FBDS</a>
+        </div>
+        <div class="uso-footer">
+          <button class="uso-mini-btn" id="fbds-uso-open-table" type="button">Tabela de atributos</button>
+          <button class="uso-mini-btn" id="fbds-uso-export-csv" type="button">Exportar resumo CSV</button>
+        </div>
+      </div>
+    </div>
+
     <!-- PLANO DIRETOR — DASHBOARD (flutuante, arrastável, redimensionável, minimizável) -->
     <div id="pd-panel" class="uso-panel pd-panel" role="dialog" aria-label="Dashboard do Plano Diretor 2022">
       <div class="uso-rz uso-rz-n" data-rz="n"></div>
@@ -462,7 +544,7 @@
         <div class="uso-selection-banner" id="pd-selection-banner" style="display:none;"></div>
         <div class="uso-section">
           <div class="uso-section-title">Área por classe de zoneamento <span class="pd-hint">clique para filtrar</span></div>
-          <div class="pd-stack" id="pd-stack" role="img" aria-label="Distribuição da área por classe de zoneamento"></div>
+          <div class="fbds-uso-donut" id="pd-stack" role="group" aria-label="Distribuição da área por classe de zoneamento"></div>
           <div class="pd-bars" id="pd-class-bars"></div>
         </div>
         <div class="uso-section">
@@ -662,54 +744,65 @@
 
     <!-- HELP MODAL -->
     <div class="modal-overlay" id="modal-help">
-      <div class="modal-box" style="width:min(720px,94vw);max-height:88vh;">
+      <div class="modal-box" id="help-box" style="width:min(720px,94vw);max-height:88vh;">
         <div class="modal-head"><h3>Ajuda — Como usar o Geoportal</h3><button class="modal-close" data-close="modal-help" title="Fechar" aria-label="Fechar ajuda">&#10005;</button></div>
         <div class="modal-body help-body">
           <p class="help-intro">Este guia reúne as funções disponíveis atualmente no Geoportal. Use os botões e painéis para navegar, consultar camadas, analisar dados e exportar informações.</p>
 
           <div class="help-section">
             <div class="help-section-title">Menu superior</div>
-            <div class="help-row"><span class="help-icn">IBGE</span><div><b>Dados do IBGE</b> — abre o painel de dados municipais do IBGE. Permite pesquisar municípios, consultar indicadores disponíveis e visualizar o limite oficial do município quando essa opção estiver disponível.</div></div>
-            <div class="help-row"><span class="help-icn">▦</span><div><b>Uso e Ocupação</b> — abre o painel de análise da camada de uso e ocupação do solo, com indicadores, gráfico de distribuição por classe, legenda, filtro por classe, tabela e exportação em CSV ou JSON. O painel pode ser movido, redimensionado, minimizado e restaurado.</div></div>
-            <div class="help-row"><span class="help-icn">▥</span><div><b>Dashboard</b> — abre o Dashboard dos Setores Censitários com dados do Censo 2022. Enquanto o Dashboard está aberto, somente a camada de setores censitários permanece ativa e selecionável no mapa.</div></div>
-            <div class="help-row"><span class="help-icn">☾</span><div><b>Tema claro/escuro</b> — alterna a aparência do Geoportal entre os temas disponíveis.</div></div>
-            <div class="help-row"><span class="help-icn">?</span><div><b>Ajuda</b> — abre este guia.</div></div>
-            <div class="help-row"><span class="help-icn">i</span><div><b>Sobre o Geoportal</b> — apresenta informações gerais sobre o sistema, fontes de dados, mapas base e o município.</div></div>
+            <div class="help-row"><span class="help-icn">MR</span><div><b>Logotipo</b> — abre o portfólio externo de MR – Geoprocessamento em uma nova aba.</div></div>
+            <div class="help-row"><span class="help-icn">⌕</span><div><b>Pesquisa global</b> — pesquisa endereços e valores presentes nos atributos das camadas. Digite pelo menos três caracteres e escolha um resultado para centralizar o mapa; resultados de feições também são destacados e podem abrir seus detalhes. A busca de endereços depende de um serviço externo e pode ficar indisponível temporariamente.</div></div>
+            <div class="help-row"><span class="help-icn">IBGE</span><div><b>Dados do IBGE</b> — abre o painel de consulta por município. Pesquise e selecione uma cidade para ver indicadores disponíveis, como população estimada, população do Censo 2022, área territorial, densidade demográfica e PIB. Também é possível solicitar a exibição do limite municipal oficial do IBGE no mapa. Os dados dependem dos serviços do IBGE e da conexão com a internet.</div></div>
+            <div class="help-row"><span class="help-icn">↗</span><div><b>Copiar link desta vista</b> — copia um endereço que guarda o centro e o zoom atuais do mapa, o mapa base selecionado e as camadas visíveis. Ao abrir o link, o Geoportal tenta reconstruir essa vista. Se a área de transferência não estiver disponível, o endereço pode ser copiado pela caixa de diálogo do navegador.</div></div>
+            <div class="help-row"><span class="help-icn">☾</span><div><b>Tema claro/escuro</b> — alterna entre os temas. A escolha fica salva neste navegador para as próximas visitas.</div></div>
+            <div class="help-row"><span class="help-icn">?</span><div><b>Ajuda</b> — abre este guia de uso.</div></div>
+            <div class="help-row"><span class="help-icn">i</span><div><b>Sobre o Geoportal</b> — apresenta a finalidade do sistema, um resumo do município e links para fontes oficiais.</div></div>
           </div>
 
           <div class="help-section">
-            <div class="help-section-title">Navegação no mapa</div>
-            <div class="help-row"><span class="help-icn">⌕</span><div><b>Buscar</b> — pesquisa feições pelo nome, incluindo bairros, escolas e unidades de saúde. Selecione um resultado para centralizar o mapa e destacar a feição.</div></div>
-            <div class="help-row"><span class="help-icn">⌂</span><div><b>Extensão inicial</b> — retorna o mapa ao enquadramento inicial do município.</div></div>
-            <div class="help-row"><span class="help-icn">+</span><div><b>Zoom + / −</b> — aumenta ou reduz a aproximação do mapa. A roda do mouse também pode ser usada para navegar no zoom.</div></div>
-            <div class="help-row"><span class="help-icn">★</span><div><b>Marcadores de extensão</b> — permite salvar e recuperar rapidamente extensões do mapa.</div></div>
-            <div class="help-row"><span class="help-icn">◎</span><div><b>Minha localização</b> — tenta centralizar o mapa na posição atual usando a geolocalização do navegador. É necessário autorizar o acesso à localização.</div></div>
+            <div class="help-section-title">Barra lateral esquerda</div>
+            <div class="help-row"><span class="help-icn">☰</span><div><b>Recolher painel lateral</b> — oculta ou reabre a barra para ampliar a área visível do mapa. Em telas menores, o botão de menu abre ou fecha essa barra.</div></div>
+            <div class="help-row"><span class="help-icn">⌕</span><div><b>Buscar por categoria</b> — abre uma busca temática própria para localizar itens por categoria. Ela é diferente da pesquisa global do menu superior.</div></div>
+            <div class="help-row"><span class="help-icn">⌂</span><div><b>Extensão inicial</b> — retorna ao enquadramento inicial do município.</div></div>
+            <div class="help-row"><span class="help-icn">+</span><div><b>Aumentar/diminuir zoom</b> — aproxima ou afasta o mapa. Também é possível navegar com os gestos ou controles de zoom do mapa.</div></div>
+            <div class="help-row"><span class="help-icn">★</span><div><b>Marcadores de extensão</b> — leva rapidamente à extensão completa do município ou à extensão de cada distrito.</div></div>
+            <div class="help-row"><span class="help-icn">◎</span><div><b>Minha localização</b> — solicita a localização ao navegador e, se autorizada e disponível, centraliza o mapa nessa posição.</div></div>
+            <div class="help-row"><span class="help-icn">▣</span><div><b>Tela cheia</b> — fica no final da barra lateral e alterna a tela cheia quando o navegador oferece suporte.</div></div>
           </div>
 
           <div class="help-section">
-            <div class="help-section-title">Camadas, legenda e dados</div>
-            <div class="help-row"><span class="help-icn">▦</span><div><b>Mapas Base</b> — permite trocar o mapa de fundo entre as opções disponíveis, como imagem, ruas, topográfico, terreno e fundos claros/escuros.</div></div>
-            <div class="help-row"><span class="help-icn">▱</span><div><b>Camadas de mapa</b> — liga ou desliga as camadas disponíveis. Os botões <b>Ligar todas</b> e <b>Desligar todas</b> controlam as camadas quando essa ação estiver disponível. O indicador numérico mostra quantas camadas estão ativas.</div></div>
-            <div class="help-row"><span class="help-icn">⊕</span><div><b>Adicionar camada</b> — disponibiliza camadas adicionais e permite carregar um arquivo local nos formatos <b>GeoJSON/JSON</b>.</div></div>
-            <div class="help-row"><span class="help-icn">☷</span><div><b>Legenda</b> — mostra a simbologia das camadas. A aba <b>Interativo</b> permite destacar um distrito específico pela legenda.</div></div>
-            <div class="help-row"><span class="help-icn">▤</span><div><b>Tabela de atributos</b> — pode ser acessada a partir das camadas e apresenta os atributos das feições. Uma feição selecionada na tabela pode ser localizada no mapa.</div></div>
-            <div class="help-row"><span class="help-icn">i</span><div><b>Informações das feições</b> — passe o mouse sobre uma feição para consultar um resumo quando disponível e clique para abrir os detalhes da feição.</div></div>
+            <div class="help-section-title">Interação com o mapa</div>
+            <div class="help-row"><span class="help-icn">↔</span><div><b>Navegar</b> — arraste o mapa para deslocar a vista e use os controles disponíveis para mudar o zoom.</div></div>
+            <div class="help-row"><span class="help-icn">i</span><div><b>Consultar feições</b> — quando uma camada oferece detalhes, passe o cursor sobre a feição para ver um resumo e clique para abrir seu popup com os atributos disponíveis. O conteúdo varia conforme a camada.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Dados, camadas e painéis da barra lateral</div>
+            <div class="help-row"><span class="help-icn">▦</span><div><b>Mapas Base</b> — escolhe o mapa de fundo, por exemplo imagem de satélite, ruas, topográfico, terreno ou mapas em tons de cinza, entre as opções disponíveis.</div></div>
+            <div class="help-row"><span class="help-icn">▱</span><div><b>Camadas de mapa</b> — mostra as camadas disponíveis e permite ligar ou desligar cada uma. O painel também oferece pesquisa de camadas, controles para ligar/desligar todas, expandir/recolher grupos e, quando disponível, ajustar a opacidade ou isolar uma camada. O número junto ao botão indica quantas camadas estão ativas.</div></div>
+            <div class="help-row"><span class="help-icn">⊕</span><div><b>Adicionar camada</b> — apresenta camadas adicionais disponíveis e permite carregar um arquivo local <b>GeoJSON/JSON</b> válido.</div></div>
+            <div class="help-row"><span class="help-icn">☷</span><div><b>Legenda</b> — explica os símbolos das camadas. Na aba <b>Interativo</b>, os itens compatíveis permitem realçar distritos no mapa.</div></div>
+            <div class="help-row"><span class="help-icn">▥</span><div><b>Dashboard dos Setores Censitários</b> — abre a análise dos dados de população do Censo 2022. Enquanto aberto, o painel mantém temporariamente ativa a camada de setores censitários; ao fechá-lo, restaura a visibilidade anterior das camadas.</div></div>
+            <div class="help-row"><span class="help-icn">▦</span><div><b>Uso e Ocupação do Solo</b> — abre o painel com indicadores, distribuição por classe, seleção no mapa e exportação dos dados em CSV ou JSON.</div></div>
+            <div class="help-row"><span class="help-icn">▤</span><div><b>Uso e Ocupação do Solo (FBDS)</b> — abre um dashboard separado com a área por classe da base da Fundação Brasileira para o Desenvolvimento Sustentável. As camadas ambientais FBDS ficam no grupo <b>Meio Ambiente</b> e incluem nascentes, rios, massas d'água, APP, uso do solo em APP e uso e ocupação; os popups e detalhes das camadas indicam a fonte e dão acesso aos metadados publicados.</div></div>
+            <div class="help-row"><span class="help-icn">▤</span><div><b>Dashboard do Plano Diretor</b> — abre a análise temática do Plano Diretor, com consulta e seleção de classes/zonas, informações associadas e opções de exportação disponíveis no painel.</div></div>
           </div>
 
           <div class="help-section">
             <div class="help-section-title">Escala e coordenadas</div>
-            <div class="help-row"><span class="help-icn">1:</span><div><b>Escala</b> — a escala atual é exibida no mapa junto com a barra gráfica. Para definir uma escala manualmente, abra o controle da escala e informe apenas o denominador, por exemplo <b>200000</b>. O sistema interpreta como <b>1:200.000</b> e ajusta o zoom do mapa.</div></div>
-            <div class="help-row"><span class="help-icn">XY</span><div><b>Coordenadas</b> — mostra a latitude/longitude do cursor e, na linha seguinte, as coordenadas <b>SIRGAS 2000 / UTM 23S (EPSG:31983)</b>. O mapa continua utilizando sua referência/projeção atual; a UTM é apresentada como conversão para consulta.</div></div>
-            <div class="help-row"><span class="help-icn">⧉</span><div><b>Copiar coordenadas</b> — copia para a área de transferência as coordenadas exibidas no quadro.</div></div>
+            <div class="help-row"><span class="help-icn">1:</span><div><b>Escala do mapa</b> — o painel de status cartográfico mostra a escala numérica e a barra gráfica. Para definir uma escala, use o botão ao lado do valor numérico, digite somente o denominador (por exemplo, <b>200000</b>) e aplique.</div></div>
+            <div class="help-row"><span class="help-icn">XY</span><div><b>Coordenadas do cursor</b> — ao mover o cursor sobre o mapa, são exibidas latitude/longitude e coordenadas <b>SIRGAS 2000 / UTM 23S (EPSG:31983)</b>. A UTM é uma conversão para consulta; não altera a referência de visualização do mapa.</div></div>
+            <div class="help-row"><span class="help-icn">⧉</span><div><b>Copiar coordenadas</b> — copia as coordenadas mostradas. Se ainda não houver coordenada, posicione o cursor sobre o mapa primeiro.</div></div>
           </div>
 
           <div class="help-section">
             <div class="help-section-title">Dashboard — Setores Censitários</div>
-            <div class="help-row"><span class="help-icn">▥</span><div><b>Indicadores</b> — apresenta população total, quantidade de setores, média, mediana, maior e menor população e setores com população zero, calculados a partir da camada carregada e do campo <b>V0001</b>.</div></div>
-            <div class="help-row"><span class="help-icn">▤</span><div><b>Faixas de população</b> — clique em uma faixa para destacar no mapa os setores pertencentes à classe selecionada.</div></div>
-            <div class="help-row"><span class="help-icn">✓</span><div><b>Seleção de setores</b> — com o Dashboard aberto, clique diretamente nos setores no mapa para selecionar um ou mais. O painel informa a quantidade selecionada e a população somada. A seleção pode ser limpa pelo próprio Dashboard.</div></div>
-            <div class="help-row"><span class="help-icn">↗</span><div><b>Top 5 setores</b> — clique em uma linha para localizar o setor correspondente no mapa e abrir seus detalhes.</div></div>
-            <div class="help-row"><span class="help-icn">↻</span><div><b>Restaurar tamanho e posição</b> — retorna o Dashboard à configuração padrão de tamanho e posição.</div></div>
+            <div class="help-row"><span class="help-icn">▥</span><div><b>Indicadores</b> — resume população total, quantidade de setores, média e mediana por setor, maiores e menores valores e setores com população zero. Os cálculos são feitos com os setores carregados e o campo <b>V0001</b> (população residente do Censo 2022).</div></div>
+            <div class="help-row"><span class="help-icn">▤</span><div><b>Faixas de população</b> — selecione uma faixa para destacar no mapa os setores correspondentes.</div></div>
+            <div class="help-row"><span class="help-icn">✓</span><div><b>Selecionar setores</b> — com o Dashboard aberto, clique nos setores para marcar ou desmarcar a seleção. O painel mostra a quantidade selecionada e a soma da população; use <b>limpar seleção</b> para remover o destaque.</div></div>
+            <div class="help-row"><span class="help-icn">↗</span><div><b>Top 5 setores por população</b> — selecione uma linha para localizar o setor no mapa e consultar seus detalhes.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Restaurar tamanho e posição</b> — retorna o Dashboard à configuração padrão.</div></div>
           </div>
 
           <div class="help-section">
@@ -722,25 +815,35 @@
           </div>
 
           <div class="help-section">
+            <div class="help-section-title">Dashboard de Uso e Ocupação do Solo (FBDS)</div>
+            <div class="help-row"><span class="help-icn">◔</span><div><b>Indicadores e classes</b> — resume a área total, a quantidade de feições e as áreas/percentuais por classe, usando os campos originais <b>AREA_HA</b> e <b>CLASSE_USO</b>.</div></div>
+            <div class="help-row"><span class="help-icn">▤</span><div><b>Selecionar classe</b> — use o gráfico, a legenda, a tabela ou o filtro para destacar no mapa a classe escolhida; limpar a seleção volta a mostrar todas as classes.</div></div>
+            <div class="help-row"><span class="help-icn">↗</span><div><b>Fonte e metadados</b> — consulta os metadados técnicos publicados pela FBDS. A tabela de atributos abre os registros da camada, e o botão de exportação baixa o resumo por classe em CSV.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Janela</b> — pode ser movida, redimensionada, minimizada e restaurada ao tamanho e à posição padrão. Ao fechar o dashboard, a visibilidade anterior das camadas é recuperada.</div></div>
+          </div>
+
+          <div class="help-section">
             <div class="help-section-title">Ferramentas da barra lateral esquerda</div>
-            <div class="help-row"><span class="help-icn">⌖</span><div><b>Medir</b> — mede distâncias e áreas diretamente no mapa. Clique para definir os vértices e finalize a medição conforme indicado pela ferramenta.</div></div>
-            <div class="help-row"><span class="help-icn">✎</span><div><b>Esboço</b> — cria pontos, linhas e polígonos de anotação sobre o mapa, com recursos para editar, estilizar e remover os esboços.</div></div>
-            <div class="help-row"><span class="help-icn">◎</span><div><b>Consulta por Raio</b> — defina um ponto no mapa e um raio de busca para localizar as feições das camadas que estejam dentro ou intersectem essa área. As feições encontradas são destacadas no mapa e apresentadas em um painel de resultados organizado por camada. É possível limpar a consulta a qualquer momento.</div></div>
+            <div class="help-row"><span class="help-icn">⌖</span><div><b>Medir</b> — escolha distância ou área e desenhe a medição no mapa. Os resultados e unidades são exibidos na ferramenta; as medições podem ser removidas pela própria janela.</div></div>
+            <div class="help-row"><span class="help-icn">✎</span><div><b>Esboço</b> — desenhe pontos, linhas ou polígonos, ajuste cor e espessura, edite vértices, exporte ou limpe os esboços.</div></div>
+            <div class="help-row"><span class="help-icn">◎</span><div><b>Consulta por Raio</b> — defina um ponto no mapa (ou tente usar sua localização), informe o raio e escolha as camadas a consultar. Os resultados são destacados no mapa e listados por camada; podem ser pesquisados, ordenados e exportados em CSV ou GeoJSON.</div></div>
             <div class="help-row"><span class="help-icn">▦</span><div><b>Tabela de Atributos</b> — escolha uma camada para ver seus registros em tabela: pesquise, filtre por campo, ordene colunas, selecione um ou vários registros (refletido no mapa com destaque), dê zoom, abra o popup completo ou exporte os resultados filtrados/selecionados em CSV ou GeoJSON.</div></div>
-            <div class="help-row"><span class="help-icn">⇩</span><div><b>Exportar / Salvar Camadas</b> — selecione uma camada e o formato disponível para gerar o arquivo. A ferramenta oferece GeoJSON, Shapefile, KML/KMZ e CSV para camadas de pontos, conforme o tipo de geometria e as opções disponíveis. <b>GeoPackage não está disponível nesta versão.</b></div></div>
-            <div class="help-row"><span class="help-icn">☰</span><div><b>Ferramentas</b> — reúne os comandos secundários disponíveis na interface para economizar espaço.</div></div>
+            <div class="help-row"><span class="help-icn">⇩</span><div><b>Exportar / Salvar Camadas</b> — selecione a camada e um dos formatos oferecidos para ela. Os formatos disponíveis podem incluir GeoJSON, Shapefile, KML/KMZ e CSV, conforme a geometria e os atributos; GeoPackage não está disponível.</div></div>
+            <div class="help-row"><span class="help-icn">▧</span><div><b>Exportar Mapa</b> — prepara uma composição cartográfica com mapa, título, legenda, escala, norte, coordenadas, fonte e identidade visual. É possível ajustar a página e os elementos do layout e exportar em <b>PDF, PNG ou JPG</b>.</div></div>
           </div>
 
           <div class="help-section">
             <div class="help-section-title">Comportamento dos painéis</div>
-            <div class="help-row"><span class="help-icn">↔</span><div><b>Painéis móveis e redimensionáveis</b> — o Dashboard e o painel de Uso e Ocupação podem ser arrastados e redimensionados. Os botões de restauração retornam à posição e ao tamanho padrão.</div></div>
-            <div class="help-row"><span class="help-icn">×</span><div><b>Fechar</b> — use o botão <b>×</b> do painel. Os modais de ajuda e informações também podem ser fechados clicando fora da janela.</div></div>
-            <div class="help-row"><span class="help-icn">▣</span><div><b>Tela cheia</b> — o botão no canto inferior direito alterna a visualização em tela cheia quando suportado pelo navegador.</div></div>
+            <div class="help-row"><span class="help-icn">↔</span><div><b>Mover e redimensionar</b> — as janelas podem ser arrastadas pelo cabeçalho e redimensionadas pelas bordas ou pelos cantos. Em telas menores, mantenha o cabeçalho e os controles dentro da área visível.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Restaurar tamanho e posição padrão</b> — use o botão de seta circular no cabeçalho para devolver a janela ao tamanho e à posição originais. A opção está disponível em todas as janelas, inclusive painéis, ferramentas e modais.</div></div>
+            <div class="help-row"><span class="help-icn">▧</span><div><b>Transparência</b> — os corpos, cabeçalhos e áreas internas das janelas são semitransparentes para deixar o mapa aparecer ao fundo. O efeito acompanha os temas claro e escuro.</div></div>
+            <div class="help-row"><span class="help-icn">×</span><div><b>Fechar</b> — use o botão <b>×</b> do cabeçalho ou pressione <b>Esc</b> para fechar a janela ativa. Clicar fora de uma janela não a fecha.</div></div>
+            <div class="help-row"><span class="help-icn">▣</span><div><b>Tela cheia</b> — use o botão no final da barra lateral esquerda para alternar a tela cheia, quando suportada pelo navegador.</div></div>
           </div>
 
           <div class="help-section">
             <div class="help-section-title">Dica geral</div>
-            <div class="help-row" style="grid-template-columns:1fr;"><div>As ferramentas podem controlar a visibilidade e o estado das camadas. Quando um painel de análise exige uma camada específica, o Geoportal ajusta temporariamente as camadas ativas para permitir a interação e restaura o estado anterior quando o painel é fechado.</div></div>
+            <div class="help-row" style="grid-template-columns:1fr;"><div>Os painéis de análise que precisam controlar camadas (como o Dashboard dos Setores Censitários) podem alterar temporariamente quais camadas estão visíveis. Ao fechar o painel, o Geoportal restaura o estado anterior. A pesquisa global e a busca por categoria são ferramentas diferentes e podem ser usadas de forma independente.</div></div>
           </div>
         </div>
       </div>
@@ -748,25 +851,25 @@
 
     <!-- ABOUT MODAL -->
     <div class="modal-overlay" id="modal-about">
-      <div class="modal-box" style="width:420px;">
+      <div class="modal-box" id="about-box" style="width:420px;">
         <div class="modal-head"><h3>Sobre o Geoportal</h3><button class="modal-close" data-close="modal-about" title="Fechar" aria-label="Fechar painel">&#10005;</button></div>
         <div class="modal-body" style="font-size:13px;line-height:1.6;">
-          <p><b>Geoportal | Duque de Caxias</b> reúne camadas cartográficas municipais para consulta e análise territorial: limites administrativos, distritos, rede viária, rede ferroviária, equipamentos de saúde e educação e setores censitários (Censo 2022).</p>
-          <p style="color:var(--muted-text);">Sistema de referência: SIRGAS 2000. Fontes: IBGE, GPU/SEMUH, Prefeitura Municipal de Duque de Caxias.</p>
-          <p style="color:var(--muted-text);">Mapas base: Esri (World Imagery, World Street Map, World Topo Map, World Dark/Light Gray, World Terrain).</p>
-          <p style="color:var(--muted-text);">Ferramentas: busca, marcadores de extensão, medição de distância/área, esboço, tabela de atributos e destaque interativo de distritos na legenda.</p>
+          <p><b>Geoportal | Duque de Caxias</b> é uma ferramenta de consulta e análise territorial que organiza informações geográficas em um mapa interativo. É possível explorar camadas, comparar temas, localizar áreas e consultar atributos das feições.</p>
+          <p>O mapa reúne informações sobre limites municipais e distritais, bairros, vias, ferrovias, equipamentos públicos e setores censitários do Censo 2022. As ferramentas incluem busca, mapas base, medição, esboços, consulta por raio, tabela de atributos e exportação de dados.</p>
+          <p>Duque de Caxias está situado na Baixada Fluminense e integra a Região Metropolitana do Rio de Janeiro, no estado do Rio de Janeiro, Região Sudeste do Brasil. O município recebeu o nome em homenagem a Luís Alves de Lima e Silva, o Duque de Caxias, nascido na região em 1803.</p>
+          <p><b>Referência cartográfica:</b> SIRGAS 2000. <b>Mapas base:</b> serviços da Esri, incluindo imagens, ruas, relevo e mapas em tons de cinza.</p>
+          <p class="about-sources"><b>Fontes e informações oficiais:</b><br>
+            <a href="https://portal.duquedecaxias.rj.gov.br/pagina/conheca-duque-de-caxias" target="_blank" rel="noopener noreferrer">Prefeitura de Duque de Caxias — Conheça Duque de Caxias</a><br>
+            <a href="https://servicodados.ibge.gov.br/api/v1/localidades/municipios/3301702" target="_blank" rel="noopener noreferrer">IBGE — Localização e divisão territorial do município</a><br>
+            <a href="https://www.ibge.gov.br/cidades-e-estados/rj/duque-de-caxias.html" target="_blank" rel="noopener noreferrer">IBGE — Cidades e Estados: Duque de Caxias</a>
+          </p>
           <hr style="border:none;border-top:1px solid var(--muted-text,#ccc);margin:12px 0;">
-          <p><b>Sobre Duque de Caxias</b></p>
-          <p>Duque de Caxias é uma cidade localizada no estado do Rio de Janeiro, na região Sudeste do Brasil. Ela faz parte da Baixada Fluminense e fica bem próxima da capital, Rio de Janeiro.</p>
-          <p>A cidade tem uma população grande e é conhecida por sua importância industrial. Muitas fábricas e empresas estão instaladas lá, o que ajuda bastante na economia local. Também é um ponto importante de transporte, com rodovias e linhas de trem que ligam Duque de Caxias a outras regiões.</p>
-          <p>O nome da cidade é uma homenagem a Luís Alves de Lima e Silva, o Duque de Caxias, que foi um importante militar e figura histórica do Brasil.</p>
-          <p>Além da indústria, a cidade também tem áreas verdes, bairros residenciais e centros comerciais. Como em outras cidades grandes, Duque de Caxias enfrenta desafios como trânsito, segurança e infraestrutura, mas também é um lugar com muita força de trabalho e cultura popular.</p>
         </div>
       </div>
     </div>
 
     <div class="modal-overlay map-export-overlay" id="modal-map-export">
-      <section class="modal-box map-export-dialog" role="dialog" aria-modal="true" aria-labelledby="map-export-heading" tabindex="-1">
+      <section class="modal-box map-export-dialog" id="map-export-box" role="dialog" aria-modal="true" aria-labelledby="map-export-heading" tabindex="-1">
         <div class="modal-head map-export-head">
           <h3 id="map-export-heading">Exportar Mapa</h3>
           <button class="modal-close" data-close="modal-map-export" title="Fechar" aria-label="Fechar Exportar Mapa">&#10005;</button>
@@ -965,25 +1068,30 @@
 <script src="vendor/tokml.js"></script>
 <script src="vendor/html2canvas.min.js?v=1.4.1"></script>
 <!-- Dados -->
-    <script src="data/data.js"></script>
+    <script src="data/data.js?v=20261002-petroleo-gas-v1"></script>
+<script src="data/meio-ambiente-fbds.js?v=20261007-fbds-v1"></script>
     <!-- Modulos JS -->
     <script src="js/map.js"></script>
-    <script src="js/utils.js?v=20261001-security-vehicle-icons-v3"></script>
-    <script src="js/layers.js?v=20261002-estacoes-photos-v2"></script>
-    <script src="js/panels.js?v=20261001-security-agency-icons-v2"></script>
+    <script src="js/utils.js?v=20261002-petroleo-gas-v2"></script>
+    <script src="data/faces-logradouros.js?v=20261007-faces-v4"></script>
+    <script src="js/layers.js?v=20261010-gasodutos-v2"></script>
+    <script src="js/panels.js?v=20261010-v3"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/setores-censitarios.js"></script>
-    <script src="js/ibge.js"></script>
+    <script src="js/setores-censitarios.js?v=fbds-dashboard-v1"></script>
+    <script src="js/ibge.js?v=20261010-icones-v1"></script>
     <script src="js/global-search.js"></script>
-    <script src="js/ferramentas.js?v=20261002-estacoes-photos-v1"></script>
+    <script src="js/ferramentas.js?v=20261010-app-hidro-v2"></script>
     <script src="js/radius.js"></script>
     <script src="js/attribute-table.js"></script>
-    <script src="js/uso-ocupacao.js"></script>
-    <script src="js/plano-diretor.js"></script>
+    <script src="js/uso-ocupacao.js?v=fbds-dashboard-v2"></script>
+    <script src="js/plano-diretor.js?v=fbds-dashboard-v2"></script>
+    <script src="js/fbds-uso.js?v=20261007-fbds-v4"></script>
     <script src="js/controls.js?v=20261001-map-composer"></script>
     <script src="js/export-map.js?v=20261001-export-map-v8"></script>
+    <script src="js/janelas.js?v=esc-fbds"></script>
+    <script src="js/janelas-mover.js?v=v34"></script>
     <script src="js/app.js"></script>
 <script src="js/permalink.js"></script>
-<script src="js/opening.js"></script>
+<script src="js/opening.js?v=v3"></script>
 </body>
 </html>

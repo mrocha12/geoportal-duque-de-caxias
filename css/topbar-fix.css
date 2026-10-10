@@ -91,3 +91,42 @@
     max-width:190px;
   }
 }
+
+/* ===== LOGO MR completo na barra superior (V27) ===== */
+#topbar{height:76px;flex-basis:76px;}
+#topbar .brand-logo{
+  flex:0 0 auto;height:68px;width:auto;display:block;
+  margin-right:4px;border-radius:6px;object-fit:contain;
+  box-shadow:none;
+}
+body.light-theme #topbar .brand-logo{box-shadow:none;filter:drop-shadow(0 0 .6px rgba(20,32,48,.9)) drop-shadow(0 1px 1.5px rgba(20,32,48,.45));}
+@media (max-width:760px){
+  #topbar{height:60px;flex-basis:60px;}
+  #topbar .brand-logo{height:52px;}
+}
+
+/* Painéis flutuantes acompanham a barra mais alta (+10px) */
+@media (min-width:761px){
+  #layers-panel{top:76px;}
+}
+
+/* Logo clicável (abre o portfólio em nova aba) */
+#topbar .brand-logo-link{
+  flex:0 0 auto;display:flex;align-items:center;border-radius:6px;
+  cursor:pointer;text-decoration:none;
+  transition:transform .15s ease,filter .15s ease;
+}
+#topbar .brand-logo-link:hover{transform:scale(1.04);filter:brightness(1.12);}
+#topbar .brand-logo-link:focus-visible{outline:2px solid #3B9EFF;outline-offset:3px;}
+
+/* Título em duas linhas: "Geoportal" acima, "Duque de Caxias" abaixo (tamanhos originais) */
+#topbar .brand-title{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;
+  justify-content:center;gap:5px;
+}
+#topbar .brand-title .brand{line-height:1.05;}
+#topbar .brand-title .sep{display:none;}
+#topbar .brand-title .sub{line-height:1.15;}
+@media (max-width:430px){#topbar .brand-title{display:none;}}
+/* Mantém a barra de pesquisa na mesma posição de antes em telas largas */
+@media (min-width:1100px){#topbar .brand-title{min-width:289px;}}
