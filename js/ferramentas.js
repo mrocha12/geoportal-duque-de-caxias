@@ -709,7 +709,7 @@ const SEARCH_CATEGORIES = [
   {key:"terminais_gnl", label:"Term. GNL"},
   {key:"upgn",         label:"UPGN"},
   {key:"plano_diretor", label:"Plano Diretor"},
-  {key:"vias",         label:"Vias"},
+  {key:"arruamento_osm", label:"Arruamento_OSM"},
   {key:"ferrovia",     label:"Ferrovias"},
   {key:"ucs",          label:"UCs"},
   {key:"hidrografia",  label:"Hidrografia"}
@@ -743,7 +743,15 @@ function buildSearchIndex(){
   LAYERS.terminais_gnl.leaflet.toGeoJSON().features.forEach(f=> push(f.properties.NOME, "Terminal de GNL"+(f.properties.MUNICIPIO?(" · "+f.properties.MUNICIPIO+(f.properties.UF?"/"+f.properties.UF:"")):""), "terminais_gnl", f, "terminais_gnl"));
   LAYERS.upgn.leaflet.toGeoJSON().features.forEach(f=> push(f.properties.NOME, "UPGN"+(f.properties.MUNICIPIO?(" · "+f.properties.MUNICIPIO+(f.properties.ESTADO?"/"+f.properties.ESTADO:"")):""), "upgn", f, "upgn"));
   DATA_PLANO_DIRETOR.features.forEach(f=> push(f.properties.Zona, "Plano Diretor"+(f.properties.Zona_2?(" · "+String(f.properties.Zona_2).trim()):""), "plano_diretor", f, "plano_diretor"));
-  DATA_VIAS.features.forEach(f=> push(f.properties.NOME, "Via"+(f.properties.Classifica&&normalizeStr(f.properties.Classifica)?(" · "+f.properties.Classifica):""), "vias", f, "vias"));
+  /* Arruamento_OSM: um resultado por nome de via (a base tem vários trechos com o mesmo nome) */
+  { const _arrNomes = new Set();
+    DATA_ARRUAMENTO_OSM.features.forEach(f=>{
+      const nm = f.properties.name;
+      if(!nm || !normalizeStr(nm) || _arrNomes.has(normalizeStr(nm))) return;
+      _arrNomes.add(normalizeStr(nm));
+      push(nm, "Via"+(f.properties.fclass&&normalizeStr(f.properties.fclass)?(" · "+f.properties.fclass):""), "arruamento_osm", f, "arruamento_osm");
+    }); }
+  DATA_AGLOMERADOS_SUBORMAIS.features.forEach(f=> push(f.properties.NM_AGSN, "Aglomerado Subormal"+(f.properties.NM_MUNICIP?(" · "+f.properties.NM_MUNICIP):""), "aglomerados_subormais", f, "aglomerados_subormais"));
   DATA_FERROVIA.features.forEach(f=> push(f.properties.NOME, "Ferrovia"+(f.properties.Ramal&&normalizeStr(f.properties.Ramal)?(" · "+f.properties.Ramal):""), "ferrovia", f, "ferrovia"));
   if(DATA_UCS_ESTADUAL.features) DATA_UCS_ESTADUAL.features.forEach(f=> push(f.properties.nome_uc, "UC Estadual", "ucs_estadual", f, "ucs"));
   if(DATA_UCS_FEDERAL.features) DATA_UCS_FEDERAL.features.forEach(f=> push(f.properties.nome_uc, "UC Federal", "ucs_federal", f, "ucs"));
@@ -873,6 +881,7 @@ function openSearchFeaturePopup(m){
   if(!map.hasLayer(layerObj.leaflet)) toggleLayer(m.layerId, true);
   layerObj.leaflet.eachLayer(l=>{ if(l.feature===m.feature && l.openPopup) l.openPopup(); });
 }
+const SEARCH_FLY_DURATION = 3;
 function flyToSearchResult(m){
   const layerObj = LAYERS[m.layerId];
   if(!layerObj) return;
@@ -881,17 +890,17 @@ function flyToSearchResult(m){
   let after;
   if(geom.type==="Point"){
     const latlng = [geom.coordinates[1], geom.coordinates[0]];
-    map.flyTo(latlng, 17, {duration:0.8});
+    map.flyTo(latlng, 17, {duration:SEARCH_FLY_DURATION});
     after = ()=>{ addSearchPulse(latlng, false); openSearchFeaturePopup(m); };
   } else {
     const temp = L.geoJSON(m.feature);
     const bounds = temp.getBounds();
-    map.flyToBounds(bounds, {padding:[50,50], duration:0.8});
+    map.flyToBounds(bounds, {padding:[50,50], duration:SEARCH_FLY_DURATION});
     after = ()=>{ addSearchPulse(bounds, true); openSearchFeaturePopup(m); };
   }
   let done = false;
   map.once("moveend", ()=>{ if(done) return; done=true; after(); });
-  setTimeout(()=>{ if(done) return; done=true; after(); }, 900);
+  setTimeout(()=>{ if(done) return; done=true; after(); }, SEARCH_FLY_DURATION*1000+250);
 }
 function selectSearchResult(m){
   flyToSearchResult(m);
@@ -1054,8 +1063,9 @@ scaleManualInput.addEventListener("keydown", e=>{
 scaleManualInput.addEventListener("input", ()=>setScaleManualError(""));
 
 map.on("zoomend moveend", updateScale);
-map.on("zoomend", updateZoomControlledLayers);
+map.on("zoomend moveend resize", updateZoomControlledLayers);
 map.on("zoomend", updateBairroLabels);
+map.on("zoomend", updateArruamentoOsmLabels);
 updateScale();
 
 /* ================= ALINHAMENTO DOS ELEMENTOS INFERIORES ================= */
@@ -1115,7 +1125,8 @@ const TOOLTIP_CONFIG = {
   municipio:    { idField:"NOME", idFallback:"Limite Municipal de Duque de Caxias", fields:[] },
   bairros:      { idField:"Name", fields:[["Distrito","Distrito"],["PopCenso22","População (2022)"],["Area","Área (km²)"]] },
   ferrovia:     { idField:"NOME", idFallback:"Linha Ferroviária", fields:[["Ramal","Ramal"]] },
-  vias:         { idField:"NOME", idFallback:"Via", fields:[["Classifica","Classificação"]] },
+  arruamento_osm: { idField:"name", idFallback:"Via sem nome", fields:[["fclass","Classe"],["ref","Ref."]] },
+  aglomerados_subormais: { idField:"NM_AGSN", idFallback:"Aglomerado Subormal", fields:[["CodAGSN","Código"],["NM_MUNICIP","Município"]] },
   estacoes:     { idField:"Name", fields:[["Ramal","Ramal"]] },
   saude:        { idField:"NOME", fields:[["TIPO","Tipo"],["BAIRRO","Bairro"],["ENDERECO","Endereço"]] },
   escolas:      { idField:"NOME", fields:[["TIPO","Tipo"],["BAIRRO","Bairro"],["ENDERECO","Endereço"]] },
@@ -1138,7 +1149,6 @@ const TOOLTIP_CONFIG = {
   upgn:               NEW_LAYER_CFG.upgn,
   plano_diretor:      NEW_LAYER_CFG.plano_diretor,
   uso_ocupacao: { idField:"Classe", idFallback:"Uso e Ocupação do Solo", fields:[["Shape_Area","Área", v => typeof usoFormatArea === 'function' ? usoFormatArea(v||0) : v]] },
-  faces_logradouro: { idField:"NM_LOG", idFallback:"Logradouro", fields:[["NM_TIP_LOG","Tipo de logradouro"]] },
   /* APP · FBDS: o valor de HIDRO ocupa o lugar do título em negrito (antes mostrava o número FID); demais campos mantidos */
   fbds_app: { idField:"HIDRO", idFallback:"Área de Preservação Permanente", fields:[["GEOCODIGO","GEOCODIGO"],["MUNICIPIO","MUNICIPIO"],["UF","UF"],["CD_UF","CD_UF"]] }
 };
@@ -1164,11 +1174,6 @@ function buildTooltipHTML(feature, id){
   let titleText = cfg.idField && !isBlank(props[cfg.idField])
     ? String(props[cfg.idField]).trim() : (cfg.idFallback || (layer ? layer.label : "Feição"));
   if(cfg.idPrefix) titleText = cfg.idPrefix + titleText;
-  if(id==="faces_logradouro") {
-    const tipo = !isBlank(props.NM_TIP_LOG) ? String(props.NM_TIP_LOG).trim() : "";
-    const nome = !isBlank(props.NM_LOG) ? String(props.NM_LOG).trim() : "";
-    titleText = [tipo, nome].filter(Boolean).join(" ") || "Logradouro sem nome";
-  }
   if(id==="uso_ocupacao_fbds" && !isBlank(props.CLASSE_USO)) titleText = String(props.CLASSE_USO);
   let rows = (cfg.fields||[]).map(([k,label,formatter])=>{
     const v = props[k];

@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    panels.js - Janelas, painéis e comportamento da interface
    Geoportal Duque de Caxias
    ============================================================ */
@@ -102,7 +102,7 @@ function swatchHTML(sw){
   if(!sw) return `<div class="lp-swatch"></div>`;
   if(sw.type==="fill") return `<div class="lp-swatch lp-swatch-poly" style="background:${sw.color};"></div>`;
   if(sw.type==="line") return `<div class="lp-swatch line" style="background:${sw.color};${sw.outlineColor?`box-shadow:0 0 0 1.5px ${sw.outlineColor};`:""}"></div>`;
-  if(sw.type==="polygon-outline") return `<div class="lp-swatch lp-swatch-poly" style="background:none;border:2px solid ${sw.color};border-radius:2px;"></div>`;
+  if(sw.type==="polygon-outline") return `<div class="lp-swatch lp-swatch-poly" style="background:none;border:2px ${sw.dashed?"dashed":"solid"} ${sw.color};border-radius:2px;"></div>`;
   if(sw.type==="dash") return `<div class="lp-swatch dash"></div>`;
   if(sw.type==="rail") return `<div class="lp-swatch" style="background:none;display:flex;align-items:center;justify-content:center;">
       <svg width="20" height="16" viewBox="0 0 20 16"><g stroke="#4A4A4A" stroke-width="1.6"><line x1="3" y1="2.5" x2="3" y2="13.5"/><line x1="7" y1="2.5" x2="7" y2="13.5"/><line x1="11" y1="2.5" x2="11" y2="13.5"/><line x1="15" y1="2.5" x2="15" y2="13.5"/><line x1="19" y1="2.5" x2="19" y2="13.5"/></g><rect x="0" y="5.4" width="20" height="5.2" fill="#4A4A4A"/><rect x="0" y="7" width="20" height="2" fill="#fff"/></svg>
@@ -178,8 +178,6 @@ function renderLegend(){
   /* Na aba Interativo cada linha tem o botão ON/OFF (36px + espaçamento): recua as sub-listas na mesma medida */
   const subIndent = legendTab==="interativo" ? 45 : 0;
   const ids = DRAW_ORDER.filter(id=>LAYERS[id]);
-  /* Faces de Logradouro não faz parte de DRAW_ORDER (exportação e Consulta por Raio) mas deve constar na Legenda */
-  if(LAYERS.faces_logradouro && !ids.includes("faces_logradouro")) ids.push("faces_logradouro");
   layerHierarchy(ids).forEach(grp=>{
   grp.cats.forEach(catGrp=>{
   const grpIds = catGrp.ids.filter(id=> legendTab!=="legenda" || map.hasLayer(LAYERS[id].leaflet));
@@ -734,6 +732,17 @@ function updateToolbarStates(){
 
 }
 
+function getMapScaleDenominator(){
+  const scaleY = map.getSize().y / 2;
+  const scaleStart = map.containerPointToLatLng([0, scaleY]);
+  const scaleEnd = map.containerPointToLatLng([148, scaleY]);
+  return scaleStart.distanceTo(scaleEnd) / (148 * 0.0254 / 96);
+}
+
+function isLayerWithinDisplayScale(layer){
+  return !layer.maxScale || getMapScaleDenominator() <= layer.maxScale;
+}
+
 function updateZoomControlledLayers(){
   const censoDashboardOpen = !!document.getElementById("modal-dashboard-censo")?.classList.contains("open");
   const pdDashboardOpen = !!document.getElementById("pd-panel")?.classList.contains("open");
@@ -752,45 +761,9 @@ function updateZoomControlledLayers(){
   Object.keys(LAYERS).forEach(id=>{
     const layer = LAYERS[id];
     if(!layer.zoomControlled) return;
-    const shouldShow = map.getZoom() >= (layer.minZoom || 14);
+    const shouldShow = map.getZoom() >= (layer.minZoom || 14) && isLayerWithinDisplayScale(layer);
     const isVisible = map.hasLayer(layer.leaflet);
-    if(layer.lazyLoad){
-      // Camadas lazy com autoShowOnZoom carregam somente ao atingir o zoom
-      // mínimo e passam a acompanhar automaticamente a visibilidade por zoom.
-      // As demais camadas lazy continuam dependendo da ativação manual.
-      if(layer.autoShowOnZoom){
-        if(shouldShow){
-          layer._enabled = true;
-          if(!layer._loaded){
-            loadFacesLogradouroLayer().then(ok=>{
-              if(ok && layer._enabled && map.getZoom() >= (layer.minZoom || 14) && !map.hasLayer(layer.leaflet)){
-                layer.leaflet.addTo(map);
-              }
-              renderLegend();
-              renderLayersPanel();
-            });
-          } else if(!isVisible){
-            layer.leaflet.addTo(map);
-            changed = true;
-          }
-        } else {
-          layer._enabled = false;
-          if(isVisible){ map.removeLayer(layer.leaflet); changed = true; }
-        }
-      } else {
-        if(!layer._enabled){
-          if(isVisible){ map.removeLayer(layer.leaflet); changed = true; }
-          return;
-        }
-        if(shouldShow && !isVisible && layer._loaded){
-          layer.leaflet.addTo(map);
-          changed = true;
-        } else if(!shouldShow && isVisible){
-          map.removeLayer(layer.leaflet);
-          changed = true;
-        }
-      }
-    } else if(shouldShow && !isVisible){
+    if(shouldShow && !isVisible && !(layer.respectUserToggle && layer._userOff)){
       layer.leaflet.addTo(map);
       changed = true;
     } else if(!shouldShow && isVisible){
@@ -814,27 +787,11 @@ function toggleLayer(id, visible){
   const pdDashboardOpen = !!document.getElementById("pd-panel")?.classList.contains("open");
   if(censoDashboardOpen && id !== "censo") return;
   if(pdDashboardOpen && id !== "plano_diretor") return;
-  if(layer.zoomControlled && visible && map.getZoom() < (layer.minZoom || 14)) visible = false;
-  if(layer.lazyLoad && visible){
-    layer._enabled = true;
-    if(!layer._loaded){
-      loadFacesLogradouroLayer().then(ok=>{
-        if(ok && layer._enabled && map.getZoom() >= (layer.minZoom || 14) && !map.hasLayer(layer.leaflet)){
-          layer.leaflet.addTo(map);
-        }
-        renderLegend();
-        renderLayersPanel();
-      });
-    } else if(!map.hasLayer(layer.leaflet)){
-      layer.leaflet.addTo(map);
-    }
-  } else if(layer.lazyLoad && !visible){
-    layer._enabled = false;
-    if(map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
-  } else {
-    if(visible && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
-    if(!visible && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
-  }
+  if(layer.respectUserToggle) layer._userOff = !visible; // intenção do usuário, antes do ajuste por zoom
+  if(layer.zoomControlled && visible &&
+    (map.getZoom() < (layer.minZoom || 14) || !isLayerWithinDisplayScale(layer))) visible = false;
+  if(visible && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
+  if(!visible && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
   // Se a Tabela de Atributos estiver filtrando esta camada, reaplica apenas
   // a visibilidade das feições após ligar/desligar a camada.
   if(id === atLayerId && typeof atApplyMapVisibility === "function"){
@@ -862,26 +819,11 @@ function setAllLayers(visible){
   Object.keys(LAYERS).forEach(id=>{
     const layer = LAYERS[id];
     let v = visible;
-    if(layer.zoomControlled && v && map.getZoom() < (layer.minZoom || 14)) v = false;
-    if(layer.lazyLoad){
-      layer._enabled = !!v;
-      if(v && !layer._loaded){
-        loadFacesLogradouroLayer().then(ok=>{
-          if(ok && layer._enabled && map.getZoom() >= (layer.minZoom || 14) && !map.hasLayer(layer.leaflet)){
-            layer.leaflet.addTo(map);
-          }
-          renderLegend();
-          renderLayersPanel();
-        });
-      } else if(v && !map.hasLayer(layer.leaflet) && layer._loaded){
-        layer.leaflet.addTo(map);
-      } else if(!v && map.hasLayer(layer.leaflet)){
-        map.removeLayer(layer.leaflet);
-      }
-    } else {
-      if(v && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
-      if(!v && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
-    }
+    if(layer.respectUserToggle) layer._userOff = !visible;
+    if(layer.zoomControlled && v &&
+      (map.getZoom() < (layer.minZoom || 14) || !isLayerWithinDisplayScale(layer))) v = false;
+    if(v && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
+    if(!v && map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
   });
   if(atLayerId && typeof atApplyMapVisibility === "function"){
     atApplyMapVisibility(atFilteredIndices);
@@ -925,6 +867,7 @@ function setLayerOpacity(id, val){
 
 updateZoomControlledLayers();
 updateBairroLabels();
+updateArruamentoOsmLabels();
 
 /* ================= BASEMAP GALLERY ================= */
 const basemapGrid = document.getElementById("basemap-grid");

@@ -1340,6 +1340,18 @@ body.light-theme .ct-photo a{color:var(--bar-blue-dark);}
 }
 .bairro-label::before{display:none;}
 
+/* Container transparente dos labels de nome de via da camada Arruamento_OSM;
+   o texto reutiliza o estilo bairro-label. */
+.via-nome-label{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  padding:0 !important;
+  overflow:visible !important;   /* span pode sair dos limites do container 0×0 */
+  pointer-events:none;
+}
+.via-nome-label .bairro-label{color:#fff;}
+
 /* labels de sigla da camada "Principais Vias" (ex.: BR-040, RJ-106) */
 .via-sigla-icon{
   background:transparent;

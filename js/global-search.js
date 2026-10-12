@@ -17,6 +17,7 @@
   let addressTimer = null;
   let highlightLayer = null;
   let highlightTimer = null;
+  const SEARCH_FLY_DURATION = 3;
 
   const norm = s => (s == null ? "" : String(s)).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
@@ -93,18 +94,31 @@
     else highlightLayer=L.geoJSON(feature,{style:{color:"#1e9fe0",weight:4,fill:false,opacity:.95,interactive:false},pane:"paneHighlight"}).addTo(map);
     highlightTimer=setTimeout(clearHighlight,5000);
   }
+  function afterSearchFlight(callback){
+    let done=false;
+    let fallback;
+    const finish=()=>{
+      if(done) return;
+      done=true;
+      clearTimeout(fallback);
+      map.off("moveend",finish);
+      callback();
+    };
+    map.on("moveend",finish);
+    fallback=setTimeout(finish,SEARCH_FLY_DURATION*1000+250);
+  }
   function selectLayerResult(item){
     const layerObj=LAYERS[item.layerId]; if(!layerObj) return;
     if(typeof toggleLayer==="function" && !map.hasLayer(layerObj.leaflet)) toggleLayer(item.layerId,true);
     const geom=item.feature.geometry;
     if(geom&&geom.type==="Point"){
-      map.flyTo([geom.coordinates[1],geom.coordinates[0]],17,{duration:.8});
-      setTimeout(()=>{highlightFeature(item.feature);openLayerPopup(item);},850);
+      afterSearchFlight(()=>{highlightFeature(item.feature);openLayerPopup(item);});
+      map.flyTo([geom.coordinates[1],geom.coordinates[0]],17,{duration:SEARCH_FLY_DURATION});
     }else{
       const b=geometryBounds(item.feature);
       if(b&&b.isValid()){
-        map.flyToBounds(b,{padding:[60,60],duration:.8});
-        setTimeout(()=>{highlightFeature(item.feature);openLayerPopup(item);},850);
+        afterSearchFlight(()=>{highlightFeature(item.feature);openLayerPopup(item);});
+        map.flyToBounds(b,{padding:[60,60],duration:SEARCH_FLY_DURATION});
       }
     }
   }
@@ -115,12 +129,14 @@
   }
   function selectAddress(feature){
     const [lon,lat]=feature.geometry.coordinates;
-    map.flyTo([lat,lon],18,{duration:.9});
+    afterSearchFlight(()=>{
+      const p=feature.properties||{};
+      const label=[p.name,p.street,p.housenumber,p.locality||p.district,p.city,p.state].filter(Boolean).join(", ");
+      L.popup({maxWidth:340}).setLatLng([lat,lon]).setContent(`<b>${esc(label||"Endereço")}</b><br><span style="color:var(--muted-text)">Localização encontrada por geocodificação.</span>`).openOn(map);
+    });
+    map.flyTo([lat,lon],18,{duration:SEARCH_FLY_DURATION});
     clearHighlight();
     highlightLayer=L.circleMarker([lat,lon],{radius:10,color:"#1e9fe0",weight:4,fillColor:"#fff",fillOpacity:.9,interactive:false,pane:"paneHighlight"}).addTo(map);
-    const p=feature.properties||{};
-    const label=[p.name,p.street,p.housenumber,p.locality||p.district,p.city,p.state].filter(Boolean).join(", ");
-    setTimeout(()=>L.popup({maxWidth:340}).setLatLng([lat,lon]).setContent(`<b>${esc(label||"Endereço")}</b><br><span style="color:var(--muted-text)">Localização encontrada por geocodificação.</span>`).openOn(map),950);
     highlightTimer=setTimeout(clearHighlight,5000);
   }
 

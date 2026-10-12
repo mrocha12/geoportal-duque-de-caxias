@@ -44,10 +44,10 @@ registerLayer("municipio", {
   category:"Limites",
   defaultVisible:true,
   count: DATA_MUNICIPIO.features.length,
-  swatch:{type:"polygon-outline", color:"#000000"},
+  swatch:{type:"polygon-outline", color:"#FF0000", dashed:true},
   leaflet: L.geoJSON(DATA_MUNICIPIO, {
     pane:"paneOverlayPoligonos",
-    style:{color:"#000000", weight:2.5, fill:false, opacity:0.95},
+    style:{color:"#FF0000", weight:2.5, fill:false, opacity:0.95, dashArray:"8,6"},
     onEachFeature:(f,l)=> l.bindPopup(`<b>${escapeHtml(f.properties.NOME||"Município")}</b><br>Limite Municipal de Duque de Caxias (polígono)`)
   })
 });
@@ -56,7 +56,7 @@ registerLayer("municipio", {
 registerLayer("bairros", {
   label:"Bairros / Distritos - DCX",
   category:"Limites",
-  defaultVisible:true,
+  defaultVisible:false,
   count: DATA_BAIRROS.features.length,
   swatch:{type:"fill", color:"#2fb3a6"},
   isDistrict:true,
@@ -100,7 +100,7 @@ FERROVIA_DORMENTES.on("remove", ()=> FERROVIA_TRILHOS.forEach(g=>map.removeLayer
 registerLayer("ferrovia", {
   label:"Linhas Ferroviárias",
   category:"Infraestrutura",
-  defaultVisible:true,
+  defaultVisible:false,
   count: DATA_FERROVIA.features.length,
   swatch:{type:"rail"},
   leaflet: FERROVIA_DORMENTES
@@ -109,119 +109,225 @@ registerLayer("ferrovia", {
 // camadas auxiliares (não interativas) desenham a faixa dos trilhos e o vão entre eles. As auxiliares
 // entram e saem do mapa junto com a camada principal e acompanham a opacidade dela.
 
-// 4. Vias principais
-registerLayer("vias", {
-  label:"Principais Vias",
+// 4. Arruamento_OSM (substitui a antiga camada "Principais Vias")
+/* Exibição restrita a níveis de zoom e escala (tratada por
+   updateZoomControlledLayers, em panels.js). Fora desses limites só a
+   renderização é removida; dados e controle ON/OFF permanecem. */
+const ARRUAMENTO_OSM_MIN_ZOOM = 15;
+const ARRUAMENTO_OSM_MAX_SCALE = 4500;
+function arruamentoOsmPopupHTML(p){
+  p = p || {};
+  const has = v => !(v===undefined || v===null || String(v).trim()==="");
+  const rows = [];
+  if(has(p.fclass)) rows.push(`<b>Classe:</b> ${escapeHtml(String(p.fclass).trim())}`);
+  if(has(p.ref)) rows.push(`<b>Ref.:</b> ${escapeHtml(String(p.ref).trim())}`);
+  const sentidos = {B:"Mão dupla (B)", F:"Mão única (F)", T:"Mão única, sentido inverso (T)"};
+  if(has(p.oneway)) rows.push(`<b>Sentido:</b> ${escapeHtml(sentidos[String(p.oneway).trim()] || String(p.oneway).trim())}`);
+  if(has(p.maxspeed) && Number(p.maxspeed)>0) rows.push(`<b>Vel. máx.:</b> ${escapeHtml(p.maxspeed)} km/h`);
+  if(String(p.bridge).trim()==="T") rows.push(`<b>Ponte:</b> sim`);
+  if(String(p.tunnel).trim()==="T") rows.push(`<b>Túnel:</b> sim`);
+  if(has(p.layer) && Number(p.layer)!==0) rows.push(`<b>Nível (layer):</b> ${escapeHtml(p.layer)}`);
+  if(has(p.osm_id)) rows.push(`<b>OSM ID:</b> ${escapeHtml(p.osm_id)}`);
+  const title = has(p.name) ? String(p.name).trim() : "Via sem nome";
+  return `<b>${escapeHtml(title)}</b>${rows.length?"<br>"+rows.join("<br>"):""}`;
+}
+registerLayer("arruamento_osm", {
+  label:"Arruamento_OSM",
   category:"Infraestrutura",
-  defaultVisible:true,
-  count: DATA_VIAS.features.length,
+  defaultVisible:false,
+  zoomControlled:true,
+  minZoom:ARRUAMENTO_OSM_MIN_ZOOM,
+  maxScale:ARRUAMENTO_OSM_MAX_SCALE,
+  respectUserToggle:true,
+  count: DATA_ARRUAMENTO_OSM.features.length,
   swatch:{type:"line", color:"#FF8C00"},
-  leaflet: L.geoJSON(DATA_VIAS, {
+  tableColumns:["name","fclass","ref","oneway","maxspeed","bridge","tunnel","osm_id"],
+  leaflet: L.geoJSON(DATA_ARRUAMENTO_OSM, {
     pane:"paneOverlayLinhas",
-    style:{color:"#FF8C00", weight:1.5, opacity:0.95},
-    onEachFeature:(f,l)=> l.bindPopup(`<b>${escapeHtml(f.properties.NOME||"Via")}</b><br>${escapeHtml(f.properties.Classifica||"")}`)
+    /* Canvas (e não SVG): 13 mil linhas como elementos SVG deixam o navegador pesado; no Canvas só se desenha o que está na tela */
+    renderer:L.canvas({pane:"paneOverlayLinhas", tolerance:4}),
+    style:{color:"#FF8C00", weight:1.2, opacity:0.95},
+    onEachFeature:(f,l)=> l.bindPopup(arruamentoOsmPopupHTML(f.properties))
   })
 });
 
-// 4.1 Labels de sigla oficial sobre a camada "Principais Vias" (BR-XXX / RJ-XXX)
-// Siglas confirmadas por pesquisa (DER-RJ / DNIT / prefeitura / imprensa). Vias
-// sem designação oficial de rodovia estadual/federal cadastrada (as duas vias
-// classificadas como "Rodovia Municipal": Estrada de Xerém e Est. do Garrão)
-// permanecem intencionalmente sem sigla, para não inventar informação.
-const VIAS_SIGLAS = {
-  "Av. Automovel Clube": "RJ-107",
-  "Av. Pastor Manoel Avelino de Souza": "RJ-115",
-  "Av. Governador Leonel de Moura Brizola": "RJ-101",
-  "Rodovia Washington Luiz": "BR-040",
-  "Rodovia Rio-Magé": "BR-493",
-  "Arco Metropolitano": "BR-493",
-  "Rodovia Pastor Lourival Machado": "RJ-085",
-  "Av. Pres. Kennedy": "RJ-101",
-  "Av. Pres. Kennedy - Belford Roxo": "RJ-101",
-  "Est. Rio D'Ouro": "RJ-085"
-};
+/* ---- Labels da camada Arruamento_OSM ----
+   Como a camada usa Canvas renderer, os labels são marcadores posicionados nos
+   trechos visíveis da área atual, renovados ao mover/zoomar o mapa. */
+const ARRUAMENTO_OSM_LABEL_MARKERS = []; // L.Marker[]
+const ARRUAMENTO_OSM_LABEL_MAX_SCALE = 4200;
+const ARRUAMENTO_OSM_LABEL_REPEAT_GAP = 80;
+const ARRUAMENTO_OSM_LABEL_MIN_REPEAT_DISTANCE = 300;
+let arruamentoOsmLabelsView = null;
 
-const viasLabelsGroup = L.layerGroup();
-const VIAS_LABEL_REF_ZOOM = 15; // zoom de referência apenas p/ cálculo do ângulo (projeção conforme: ângulo não muda com o zoom)
-
-function viasFlattenParts(geometry){
-  if(!geometry) return [];
-  if(geometry.type === "LineString") return [geometry.coordinates];
-  if(geometry.type === "MultiLineString") return geometry.coordinates;
-  return [];
-}
-
-function viasLineLengthMeters(latlngs){
-  let d = 0;
-  for(let i=1;i<latlngs.length;i++) d += latlngs[i-1].distanceTo(latlngs[i]);
-  return d;
-}
-
-// Encontra o ponto central (por distância real) do trecho e o ângulo de alinhamento
-// com o sentido da linha naquele ponto, evitando texto de cabeça para baixo.
-function viasMidpointAndAngle(latlngs){
-  const total = viasLineLengthMeters(latlngs);
-  if(total <= 0) return null;
-  const half = total/2;
-  let acc = 0;
-  for(let i=1;i<latlngs.length;i++){
-    const segLen = latlngs[i-1].distanceTo(latlngs[i]);
-    if(segLen>0 && (acc+segLen >= half || i===latlngs.length-1)){
-      const t = Math.max(0, Math.min(1, (half-acc)/segLen));
-      const mid = L.latLng(
-        latlngs[i-1].lat + (latlngs[i].lat - latlngs[i-1].lat)*t,
-        latlngs[i-1].lng + (latlngs[i].lng - latlngs[i-1].lng)*t
-      );
-      const p1 = map.project(latlngs[i-1], VIAS_LABEL_REF_ZOOM);
-      const p2 = map.project(latlngs[i], VIAS_LABEL_REF_ZOOM);
-      let angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180/Math.PI;
-      // orientação automática: normaliza para o intervalo [-90, 90] para o texto nunca ficar invertido
-      if(angle > 90) angle -= 180;
-      if(angle < -90) angle += 180;
-      return {latlng:mid, angle};
+function arruamentoOsmSegmentInBounds(c0, c1, bounds){
+  const dx = c1[0] - c0[0], dy = c1[1] - c0[1];
+  const p = [-dx, dx, -dy, dy];
+  const q = [
+    c0[0] - bounds.getWest(), bounds.getEast() - c0[0],
+    c0[1] - bounds.getSouth(), bounds.getNorth() - c0[1]
+  ];
+  let t0 = 0, t1 = 1;
+  for(let i=0;i<4;i++){
+    if(p[i]===0){
+      if(q[i]<0) return null;
+      continue;
     }
-    acc += segLen;
+    const t = q[i] / p[i];
+    if(p[i]<0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if(t0>t1) return null;
   }
-  return null;
+  const start = [c0[0] + t0*dx, c0[1] + t0*dy];
+  const end = [c0[0] + t1*dx, c0[1] + t1*dy];
+  return {start, end};
 }
 
-function viasAddSiglaLabel(nome, geometry){
-  const sigla = VIAS_SIGLAS[nome];
-  if(!sigla) return; // sem sigla oficial cadastrada: não rotula (não inventar)
-  const parts = viasFlattenParts(geometry);
-  if(!parts.length) return;
-  // usa o trecho (sub-linha) mais longo em distância real como referência para o label
-  let best = null, bestLen = -1;
-  parts.forEach(coords=>{
-    if(!coords || coords.length<2) return;
-    const latlngs = coords.map(c=>L.latLng(c[1], c[0]));
-    const len = viasLineLengthMeters(latlngs);
-    if(len>bestLen){ bestLen = len; best = latlngs; }
-  });
-  if(!best) return;
-  const res = viasMidpointAndAngle(best);
-  if(!res) return;
-  const icon = L.divIcon({
-    className:"via-sigla-icon",
-    html:`<span class="via-sigla-text" style="transform:translate(-50%,-50%) rotate(${res.angle}deg)">${sigla}</span>`,
-    iconSize:[0,0],
-    iconAnchor:[0,0]
-  });
-  viasLabelsGroup.addLayer(L.marker(res.latlng, {icon, pane:"paneViasLabels", interactive:false, keyboard:false}));
+function arruamentoOsmSegmentAngle(c0, c1){
+  let deg = -Math.atan2(c1[1] - c0[1], c1[0] - c0[0]) * 180 / Math.PI;
+  if(deg > 90) deg -= 180;
+  if(deg < -90) deg += 180;
+  return deg;
 }
 
-DATA_VIAS.features.forEach(f=> viasAddSiglaLabel(f.properties && f.properties.NOME, f.geometry));
+function arruamentoOsmLabelBox(point, angle, width, height){
+  const rad = angle * Math.PI / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  const halfWidth = width / 2, halfHeight = height / 2;
+  const corners = [[-halfWidth,-halfHeight],[halfWidth,-halfHeight],[halfWidth,halfHeight],[-halfWidth,halfHeight]]
+    .map(([x,y])=>L.point(point.x + x*cos - y*sin, point.y + x*sin + y*cos));
+  const xs = corners.map(p=>p.x), ys = corners.map(p=>p.y);
+  return {
+    corners,
+    minX:Math.min(...xs), maxX:Math.max(...xs),
+    minY:Math.min(...ys), maxY:Math.max(...ys)
+  };
+}
 
-// Mantém o grupo de labels sincronizado com a visibilidade da camada "vias",
-// qualquer que seja o mecanismo usado para ligar/desligar a camada (painel de
-// camadas, "mostrar/ocultar todas", restaurar camada oculta etc.), sem alterar
-// nenhuma dessas funções existentes.
-map.on("layeradd", e=>{
-  if(e.layer === LAYERS.vias.leaflet && !map.hasLayer(viasLabelsGroup)) viasLabelsGroup.addTo(map);
-});
-map.on("layerremove", e=>{
-  if(e.layer === LAYERS.vias.leaflet && map.hasLayer(viasLabelsGroup)) map.removeLayer(viasLabelsGroup);
-});
+function arruamentoOsmLabelsOverlap(a, b){
+  if(a.maxX < b.minX || b.maxX < a.minX || a.maxY < b.minY || b.maxY < a.minY) return false;
+  const axes = [];
+  [a.corners,b.corners].forEach(corners=>{
+    for(let i=0;i<2;i++){
+      const edge = corners[i+1].subtract(corners[i]);
+      const length = Math.hypot(edge.x,edge.y);
+      axes.push(L.point(-edge.y/length,edge.x/length));
+    }
+  });
+  return axes.every(axis=>{
+    const project = box=>box.corners.map(p=>p.x*axis.x+p.y*axis.y);
+    const ap = project(a), bp = project(b);
+    return Math.max(...ap) >= Math.min(...bp) && Math.max(...bp) >= Math.min(...ap);
+  });
+}
+
+function updateArruamentoOsmLabels(){
+  const layer = LAYERS["arruamento_osm"];
+  const scaleY = map.getSize().y / 2;
+  const scaleStart = map.containerPointToLatLng([0, scaleY]);
+  const scaleEnd = map.containerPointToLatLng([148, scaleY]);
+  const scaleDenominator = scaleStart.distanceTo(scaleEnd) / (148 * 0.0254 / 96);
+  const layerVisible = layer && map.hasLayer(layer.leaflet);
+  const zoomOk = layer && map.getZoom() >= (layer.minZoom || 14);
+  const scaleOk = scaleDenominator <= ARRUAMENTO_OSM_LABEL_MAX_SCALE;
+  const show = layerVisible && zoomOk && scaleOk;
+  const bounds = show ? map.getBounds() : null;
+  const view = show ? `${map.getZoom()}|${scaleDenominator}|${bounds.toBBoxString()}` : "hidden";
+  if(view===arruamentoOsmLabelsView) return;
+  arruamentoOsmLabelsView = view;
+  ARRUAMENTO_OSM_LABEL_MARKERS.forEach(m=>map.removeLayer(m));
+  ARRUAMENTO_OSM_LABEL_MARKERS.length = 0;
+  if(!show) return;
+
+  const bestByNameAndCell = new Map();
+  DATA_ARRUAMENTO_OSM.features.forEach(f=>{
+    const name = f.properties && String(f.properties.name || "").trim();
+    if(!name) return;
+    const geometry = f.geometry;
+    if(!geometry || !geometry.coordinates) return;
+    const lines = geometry.type==="LineString" ? [geometry.coordinates]
+      : geometry.type==="MultiLineString" ? geometry.coordinates : [];
+    lines.forEach(coords=>{
+      for(let i=1;i<coords.length;i++){
+        const clipped = arruamentoOsmSegmentInBounds(coords[i-1], coords[i], bounds);
+        if(!clipped) continue;
+        const latlng = L.latLng(
+          (clipped.start[1] + clipped.end[1]) / 2,
+          (clipped.start[0] + clipped.end[0]) / 2
+        );
+        const point = map.latLngToContainerPoint(latlng);
+        const cell = `${Math.floor(point.x/300)},${Math.floor(point.y/300)}`;
+        const key = `${name.toLowerCase()}\\u0000${cell}`;
+        const length = map.distance(
+          L.latLng(clipped.start[1], clipped.start[0]),
+          L.latLng(clipped.end[1], clipped.end[0])
+        );
+        const existing = bestByNameAndCell.get(key);
+        if(!existing || length > existing.length){
+          bestByNameAndCell.set(key, {
+            name, latlng, length,
+            angle:arruamentoOsmSegmentAngle(clipped.start, clipped.end)
+          });
+        }
+      }
+    });
+  });
+
+  const measureCanvas = document.createElement("canvas");
+  const measureContext = measureCanvas.getContext("2d");
+  measureContext.font = "700 12px 'Segoe UI',Roboto,Arial,sans-serif";
+  const candidates = Array.from(bestByNameAndCell.values()).map(val=>{
+    const width = measureContext.measureText(val.name).width + 8;
+    const height = 20;
+    const point = map.latLngToContainerPoint(val.latlng);
+    return {
+      ...val,
+      point,
+      width,
+      box:arruamentoOsmLabelBox(point,val.angle,width,height)
+    };
+  }).sort((a,b)=>b.length-a.length);
+  const placed = [];
+  candidates.forEach(val=>{
+    const overlaps = placed.some(other=>{
+      if(arruamentoOsmLabelsOverlap(val.box,other.box)) return true;
+      if(val.name.toLowerCase()!==other.name.toLowerCase()) return false;
+      const minDistance = Math.max(
+        ARRUAMENTO_OSM_LABEL_MIN_REPEAT_DISTANCE,
+        (val.width+other.width)/2 + ARRUAMENTO_OSM_LABEL_REPEAT_GAP
+      );
+      return val.point.distanceTo(other.point) < minDistance;
+    });
+    if(!overlaps) placed.push(val);
+  });
+
+  placed.forEach(val=>{
+    const spanStyle = [
+      "position:absolute","left:0","top:0",
+      "transform:translate(-50%,-50%) rotate(" + val.angle.toFixed(1) + "deg)",
+      "transform-origin:center center"
+    ].join(";");
+    const marker = L.marker(val.latlng, {
+      icon:L.divIcon({
+        className:"via-nome-label",
+        html:`<span class="bairro-label" style="${spanStyle}">${escapeHtml(val.name)}</span>`,
+        iconSize:[0,0],
+        iconAnchor:[0,0]
+      }),
+      pane:"paneViasLabels",
+      interactive:false,
+      keyboard:false
+    });
+    ARRUAMENTO_OSM_LABEL_MARKERS.push(marker);
+    marker.addTo(map);
+  });
+}
+
+/* Sincroniza labels ao ligar/desligar a camada principal */
+LAYERS["arruamento_osm"].leaflet.on("add remove", updateArruamentoOsmLabels);
+map.on("moveend", updateArruamentoOsmLabels);
+
+
 
 const ESTACOES_IMAGENS = {
   "GRAMACHO": {
@@ -301,78 +407,6 @@ function saudeImagemHTML(props, placement){
   return `<figure class="ct-photo ct-photo--${placement}"><img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt)}" loading="lazy" decoding="async"><figcaption>Fonte da imagem: <a href="${escapeHtml(image.source)}" target="_blank" rel="noopener noreferrer">${escapeHtml(attribution)}</a></figcaption></figure>`;
 }
 
-
-/* ================= FACES DE LOGRADOURO — dados otimizados =================
-   Os dados são carregados como JavaScript local para funcionar tanto em servidor
-   web quanto quando o Geoportal é aberto localmente, sem depender de fetch/CORS.
-*/
-let facesLogradouroLoadPromise = null;
-
-function loadFacesLogradouroLayer(){
-  const layer = LAYERS["faces_logradouro"];
-  if(!layer) return Promise.resolve(false);
-  if(layer._loaded) return Promise.resolve(true);
-  if(facesLogradouroLoadPromise) return facesLogradouroLoadPromise;
-
-  facesLogradouroLoadPromise = Promise.resolve().then(()=>{
-    if(typeof DATA_FACES_LOGRADOURO === "undefined") throw new Error("Dados de Faces de Logradouro não encontrados.");
-    layer.leaflet.addData(DATA_FACES_LOGRADOURO);
-    // Os eventos de hover precisam ser vinculados depois que as feições
-    // são efetivamente adicionadas ao GeoJSON (a vinculação global ocorre
-    // antes do carregamento desta camada).
-    if(typeof bindHoverToLayer === "function") {
-      layer.leaflet.eachLayer(l => bindHoverToLayer(l, "faces_logradouro"));
-    }
-    layer._loaded = true;
-    layer.count = DATA_FACES_LOGRADOURO.features ? DATA_FACES_LOGRADOURO.features.length : layer.count;
-    return true;
-  }).catch(err=>{
-    console.error("Não foi possível carregar Faces de Logradouro:", err);
-    layer._loaded = false;
-    facesLogradouroLoadPromise = null;
-    if(typeof showToast==="function") showToast("Não foi possível carregar a camada Faces de Logradouro.");
-    return false;
-  });
-
-  return facesLogradouroLoadPromise;
-}
-
-registerLayer("faces_logradouro", {
-  label:"Faces de Logradouro",
-  category:"Infraestrutura",
-  defaultVisible:false,
-  geometry:"linha",
-  zoomControlled:true,
-  minZoom:15,
-  lazyLoad:true,
-  autoShowOnZoom:true,
-  _loaded:false,
-  count:31509,
-  swatch:{type:"line", color:"#FF0000"},
-  leaflet: L.geoJSON(null, {
-    pane:"paneOverlayLinhas",
-    style:{color:"#FF0000", weight:0.8, opacity:0.9},
-    onEachFeature:(f,l)=>{
-      const p=f.properties||{};
-      const tipo=[p.NM_TIP_LOG,p.NM_TIT_LOG].filter(Boolean).join(" ");
-      const nome=p.NM_LOG||"Logradouro sem nome";
-      const setor=p.CD_SETOR||"-";
-      const quadra=p.CD_QUADRA||"-";
-      const face=p.CD_FACE||"-";
-      const totalRes=p.TOT_RES ?? "-";
-      const totalGeral=p.TOT_GERAL ?? "-";
-      l.bindPopup(
-        `<b>${escapeHtml(nome)}</b>`+
-        `<br>${escapeHtml(tipo||"Logradouro")}`+
-        `<br>Face: ${escapeHtml(face)}`+
-        `<br>Setor: ${escapeHtml(setor)}`+
-        `<br>Quadra: ${escapeHtml(quadra)}`+
-        `<br>Residências: ${escapeHtml(totalRes)}`+
-        `<br>Total: ${escapeHtml(totalGeral)}`
-      );
-    }
-  })
-});
 
 // 5. Estações ferroviárias
 registerLayer("estacoes", {
@@ -474,6 +508,32 @@ registerLayer("censo", {
         }
       });
     }
+  })
+});
+
+/* AglomeradosSubormais: polígonos (25 feições). Poucas feições -> sem limite de zoom. */
+function aglomeradosSubormaisPopupHTML(p){
+  p = p || {};
+  const has = v => !(v===undefined || v===null || String(v).trim()==="");
+  const rows = [];
+  if(has(p.CodAGSN)) rows.push(`<b>Código:</b> ${escapeHtml(String(p.CodAGSN).trim())}`);
+  if(has(p.NM_MUNICIP)) rows.push(`<b>Município:</b> ${escapeHtml(String(p.NM_MUNICIP).trim())}`);
+  if(has(p.CD_GEOCODM)) rows.push(`<b>Cód. do município:</b> ${escapeHtml(String(p.CD_GEOCODM).trim())}`);
+  if(has(p.uf)) rows.push(`<b>UF (cód. IBGE):</b> ${escapeHtml(String(p.uf).trim())}`);
+  const title = has(p.NM_AGSN) ? String(p.NM_AGSN).trim() : "Aglomerado Subormal";
+  return `<b>${escapeHtml(title)}</b>${rows.length?"<br>"+rows.join("<br>"):""}`;
+}
+registerLayer("aglomerados_subormais", {
+  label:"AglomeradosSubormais",
+  category:"Estatísticas",
+  defaultVisible:false,
+  count: DATA_AGLOMERADOS_SUBORMAIS.features.length,
+  swatch:{type:"fill", color:"#E91E63"},
+  tableColumns:["NM_AGSN","CodAGSN","NM_MUNICIP","CD_GEOCODM","uf","FID"],
+  leaflet: L.geoJSON(DATA_AGLOMERADOS_SUBORMAIS, {
+    pane:"paneOverlayPoligonos",
+    style:{color:"#880E4F", weight:1.5, fillColor:"#E91E63", fillOpacity:0.5, opacity:0.9},
+    onEachFeature:(f,l)=> l.bindPopup(aglomeradosSubormaisPopupHTML(f.properties))
   })
 });
 
@@ -1194,7 +1254,7 @@ registerPointLayer("upgn", {
   tableColumns:["NOME","TIPO","TITULARIDA","MUNICIPIO","ESTADO","FONTE"]
 });
 
-const DRAW_ORDER = ["uso_ocupacao","censo","bairros","plano_diretor","municipio","ucs_estadual","ucs_federal","ucs_municipal","hidrografia","fbds_rios_simples","fbds_massas_dagua","fbds_rios_duplos","fbds_app","fbds_app_uso","uso_ocupacao_fbds","fbds_nascentes","vias","ferrovia","gasodutos","estacoes","terminais","terminais_combustiveis","terminais_gnl","upgn","saude","escolas","assistencia_social","secretarias","seguranca","cultura_turismo","cemiterios","religiao","reservatorio"];
+const DRAW_ORDER = ["uso_ocupacao","censo","aglomerados_subormais","bairros","plano_diretor","municipio","ucs_estadual","ucs_federal","ucs_municipal","hidrografia","fbds_rios_simples","fbds_massas_dagua","fbds_rios_duplos","fbds_app","fbds_app_uso","uso_ocupacao_fbds","fbds_nascentes","arruamento_osm","ferrovia","gasodutos","estacoes","terminais","terminais_combustiveis","terminais_gnl","upgn","saude","escolas","assistencia_social","secretarias","seguranca","cultura_turismo","cemiterios","religiao","reservatorio"];
 DRAW_ORDER.forEach(id=>{ if(LAYERS[id].defaultVisible) LAYERS[id].leaflet.addTo(map); });
 
 let extraLayerCount = 0; // user-added layers via file
