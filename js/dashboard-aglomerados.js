@@ -211,7 +211,7 @@ function computeAglomeradosStats(){
       const [x1, y1] = ring[(i + 1) % len];
       area += (x0 * DEG_LON_KM) * (y1 * DEG_LAT_KM) - (x1 * DEG_LON_KM) * (y0 * DEG_LAT_KM);
     }
-    return Math.abs(area / 2) / 1e6; // km²
+    return Math.abs(area / 2); // km²
   }
 
   function featureAreaKm2(geom){
