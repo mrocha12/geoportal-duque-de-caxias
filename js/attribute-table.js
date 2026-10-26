@@ -34,9 +34,27 @@ function atNormalizeText(s){
   return (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 }
 
-// Só troca "_" por espaço — não inventa tradução, respeitando o dado original.
 function atPrettyFieldLabel(key){
-  return String(key||"").replace(/_/g," ");
+  return fieldDisplayLabel(key);
+}
+
+function atDisplayFieldValue(field,value){
+  if(isBlank(value)) return "";
+  const key = canonicalFieldName(field);
+  const text = String(value);
+  if(key==="shape_area") return formatAreaPtBR(Number(value)||0);
+  if(["bridge","tunnel"].includes(key)){
+    if(text.trim().toUpperCase()==="T") return "Sim";
+    if(text.trim().toUpperCase()==="F") return "Não";
+  }
+  if(key==="oneway"){
+    return ({B:"Mão dupla",F:"Mão única",T:"Mão única (sentido inverso)"})[text.trim().toUpperCase()] || text;
+  }
+  if(/(^|_)(data|date|created_at|updated_at)(_|$)/.test(key)){
+    const formatted = formatDatePtBR(value);
+    if(formatted!==text) return formatted;
+  }
+  return text;
 }
 
 function atCollectFeatures(id){
@@ -483,7 +501,7 @@ function atRenderTable(){
       <th class="at-th-checkbox"><input type="checkbox" id="at-th-select-all" title="Selecionar/limpar página atual"></th>` +
     visibleCols.map(c=>{
       const arrow = atSortField===c ? (atSortDir==="asc" ? " ▲" : " ▼") : "";
-      return `<th data-field="${escapeHtml(c)}" title="${escapeHtml(c)}">${escapeHtml(atPrettyFieldLabel(c))}<span class="at-sort-arrow">${arrow}</span><span class="at-th-resize"></span></th>`;
+      return `<th data-field="${escapeHtml(c)}" title="${escapeHtml(canonicalFieldName(c))}">${escapeHtml(atPrettyFieldLabel(c))}<span class="at-sort-arrow">${arrow}</span><span class="at-th-resize"></span></th>`;
     }).join("") + `</tr></thead>`;
 
   let tbody = "<tbody>";
@@ -495,7 +513,7 @@ function atRenderTable(){
       `<td class="at-td-checkbox"><input type="checkbox" data-select-idx="${idx}" ${selected?"checked":""}></td>` +
       visibleCols.map(c=>{
         const v = props[c];
-        const vStr = isBlank(v) ? "" : String(v);
+        const vStr = atDisplayFieldValue(c,v);
         return `<td title="${escapeHtml(vStr)}">${escapeHtml(vStr)}</td>`;
       }).join("") + `</tr>`;
   });

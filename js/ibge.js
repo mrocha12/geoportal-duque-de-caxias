@@ -364,13 +364,13 @@ async function ibgeGetIndicador(agregadoIdPrincipal, varPatterns, codigoMunicipi
 
 function ibgeFmtNum(n, maxDec){
   if(n===null || n===undefined || isNaN(n)) return null;
-  return n.toLocaleString("pt-BR", {maximumFractionDigits: maxDec!==undefined?maxDec:2});
+  return formatNumberPtBR(n, {maximumFractionDigits: maxDec!==undefined?maxDec:2});
 }
 /* Ícones dos indicadores (mesmo padrão visual dos cartões do Dashboard dos Setores Censitários) */
 const IBGE_KPI_ICONS = {
   popEstimada:{bg:"rgba(59,130,246,.15)", fg:"#3b82f6", svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
   popCenso:   {bg:"rgba(139,92,246,.15)", fg:"#8b5cf6", svg:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/>'},
-  area:       {bg:"rgba(20,184,166,.15)", fg:"#14b8a6", svg:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
+  area:       {bg:"rgba(20,184,166,.15)", fg:"#14b8a6", svg:'<path d="m4 6 12-3 4 4-2 12-12 2-3-5z"/><path d="m4 6 5 3 11-2M9 9l-3 12M14 8l-2 12"/><path d="m16 3 1 4"/>'},
   densidade:  {bg:"rgba(6,182,212,.15)",  fg:"#06b6d4", svg:'<circle cx="6" cy="6" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="18" cy="6" r="1.6"/><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/><circle cx="6" cy="18" r="1.6"/><circle cx="12" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/>'},
   pibTotal:   {bg:"rgba(34,197,94,.15)",  fg:"#22c55e", svg:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'},
   pibPerCap:  {bg:"rgba(245,158,11,.15)", fg:"#f59e0b", svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'}
@@ -387,11 +387,13 @@ function ibgeCardHTML(label, indic, opts){
   if(!indic || indic.value===null || indic.value===undefined){
     return `<div class="dsh-kpi-card">${head}<div class="dsh-kpi-value ibge-na">Não disponível</div></div>`;
   }
-  const val = ibgeFmtNum(indic.value, opts.dec);
+  const val = opts.areaSourceUnit
+    ? formatAreaPtBR(indic.value,opts.areaSourceUnit)
+    : ibgeFmtNum(indic.value, opts.dec);
   return `<div class="dsh-kpi-card">
     ${head}
     <div class="dsh-kpi-value">${val}${opts.suffix||""}</div>
-    <div class="dsh-kpi-sub">${(opts.unidade || indic.unidade || "")}${indic.periodo?(" · "+indic.periodo):""}</div>
+    <div class="dsh-kpi-sub">${(opts.unidade !== undefined ? opts.unidade : indic.unidade || "")}${indic.periodo?(" · "+indic.periodo):""}</div>
   </div>`;
 }
 
@@ -485,7 +487,7 @@ async function ibgeLoadIndicadores(codigo, linkCidades){
     <div class="dsh-kpi-grid">
       ${ibgeCardHTML("População estimada", data.popEstimada, {icon:"popEstimada", dec:0})}
       ${ibgeCardHTML("População — Censo 2022", data.popCenso, {icon:"popCenso", dec:0})}
-      ${ibgeCardHTML("Área territorial", data.area, {icon:"area", dec:1, suffix:" km²"})}
+      ${ibgeCardHTML("Área territorial", data.area, {icon:"area", areaSourceUnit:"km2", unidade:""})}
       ${ibgeCardHTML("Densidade demográfica", data.densidade, {icon:"densidade", dec:2, suffix:" hab/km²"})}
       ${ibgeCardHTML("PIB a preços correntes", data.pibTotal, {icon:"pibTotal", dec:0})}
       ${ibgeCardHTML("PIB per capita", data.pibPerCap, {icon:"pibPerCap", dec:2})}

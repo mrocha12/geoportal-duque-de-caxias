@@ -7,7 +7,7 @@
 let usoLastStats = null;
 
 function usoFmtPct(p){
-  return (p||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+"%";
+  return `${formatNumberPtBR(p||0,{minimumFractionDigits:1,maximumFractionDigits:1})}%`;
 }
 function usoEscapeAttr(s){
   return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;");
@@ -22,7 +22,8 @@ function usoComputeStats(){
   let total = 0;
   feats.forEach(f=>{
     const p = f.properties || {};
-    const classe = (p.Classe===undefined || p.Classe===null || p.Classe==="") ? "Sem classe" : String(p.Classe);
+    const classValue = p[USO_SYMBOLOGY.property];
+    const classe = (classValue===undefined || classValue===null || classValue==="") ? "Sem classe" : String(classValue);
     const area = Number(p.Shape_Area) || 0;
     byClass[classe] = (byClass[classe]||0) + area;
     total += area;
@@ -89,7 +90,7 @@ function usoShowDonutTooltip(e, classe){
   const tip = document.getElementById("uso-donut-tooltip");
   const row = usoLastStats ? usoLastStats.rows.find(r=>r.classe===classe) : null;
   if(!tip || !row) return;
-  tip.innerHTML = `<b>${usoEscapeHtml(classe)}</b><br>${usoEscapeHtml(usoFormatArea(row.area))} · ${usoEscapeHtml(usoFmtPct(row.pct))}`;
+  tip.innerHTML = `<b><span class="feature-symbol-dot" style="background:${usoColor(classe)}"></span>${usoEscapeHtml(classe)}</b><br>${usoEscapeHtml(usoFormatArea(row.area))} · ${usoEscapeHtml(usoFmtPct(row.pct))}`;
   tip.style.display = "block";
   const wrap = tip.parentElement.getBoundingClientRect();
   tip.style.left = Math.max(0, e.clientX - wrap.left + 12) + "px";
@@ -254,14 +255,14 @@ function usoDownload(content, filename, mime){
 function usoExportData(format){
   const stats = usoLastStats || usoComputeStats();
   if(format==="csv"){
-    let csv = "Classe;Area_m2;Area_formatada;Percentual\n";
+    let csv = "classe;area_ha;area_formatada;percentual\n";
     stats.rows.forEach(r=>{
       const classeCsv = String(r.classe).replace(/"/g,'""');
-      csv += `"${classeCsv}";${r.area.toFixed(2)};"${usoFormatArea(r.area)}";${r.pct.toFixed(2)}\n`;
+      csv += `"${classeCsv}";${(r.area/10000).toFixed(2)};"${usoFormatArea(r.area)}";${r.pct.toFixed(2)}\n`;
     });
     usoDownload(csv, "uso_ocupacao_do_solo.csv", "text/csv;charset=utf-8;");
   } else {
-    const json = JSON.stringify(stats.rows.map(r=>({classe:r.classe, area_m2:r.area, area_formatada:usoFormatArea(r.area), percentual:Number(r.pct.toFixed(2))})), null, 2);
+    const json = JSON.stringify(stats.rows.map(r=>({classe:r.classe, area_ha:Number((r.area/10000).toFixed(2)), area_formatada:usoFormatArea(r.area), percentual:Number(r.pct.toFixed(2))})), null, 2);
     usoDownload(json, "uso_ocupacao_do_solo.json", "application/json;charset=utf-8;");
   }
 }

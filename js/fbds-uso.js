@@ -11,11 +11,11 @@ function fbdsUsoEscape(value){
 }
 
 function fbdsUsoFormatArea(hectares){
-  return `${Number(hectares||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})} ha`;
+  return formatAreaPtBR(hectares || 0, "ha");
 }
 
 function fbdsUsoFormatPct(value){
-  return `${Number(value||0).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})}%`;
+  return `${formatNumberPtBR(value||0,{minimumFractionDigits:1,maximumFractionDigits:1})}%`;
 }
 
 function fbdsUsoComputeStats(){
@@ -24,9 +24,10 @@ function fbdsUsoComputeStats(){
   const features = DATA_FBDS_USO_OCUPACAO.features;
   features.forEach(feature=>{
     const properties = feature.properties || {};
-    const className = properties.CLASSE_USO == null || properties.CLASSE_USO === ""
+    const classValue = properties[FBDS_USAGE_SYMBOLOGY.property];
+    const className = classValue == null || classValue === ""
       ? "Sem classe"
-      : String(properties.CLASSE_USO);
+      : String(classValue);
     const area = Number(properties.AREA_HA) || 0;
     const row = byClass.get(className) || {className,area:0,count:0};
     row.area += area;
@@ -60,7 +61,7 @@ function fbdsUsoRenderPanel(){
   const pctOfTotal=area=>fbdsUsoFormatPct(stats.totalArea>0?area/stats.totalArea*100:0);
   kpis.innerHTML = [
     {icon:"area",label:"Área total mapeada",value:fbdsUsoFormatArea(stats.totalArea),sub:""},
-    {icon:"classes",label:"Número de classes",value:stats.rows.length.toLocaleString("pt-BR"),sub:""},
+    {icon:"classes",label:"Número de classes",value:formatNumberPtBR(stats.rows.length),sub:""},
     {icon:"top",label:"Maior classe",value:maxRow?maxRow.className:"-",sub:maxRow?fbdsUsoFormatArea(maxRow.area):""},
     {icon:"percent",label:"% da maior classe",value:maxRow?fbdsUsoFormatPct(maxRow.pct):"-",sub:""},
     {icon:"built",label:"Área construída",value:fbdsUsoFormatArea(builtArea),sub:`${pctOfTotal(builtArea)} do total`},
@@ -202,7 +203,7 @@ function fbdsUsoDownloadCsv(){
   const stats=fbdsUsoComputeStats();
   const quote=value=>`"${String(value).replace(/"/g,'""')}"`;
   const rows=[
-    ["Classe de uso","Área (ha)","Percentual (%)","Quantidade de feições"],
+    ["classe_uso","area_ha","percentual","quantidade_de_feicoes"],
     ...stats.rows.map(row=>[row.className,row.area.toFixed(4),row.pct.toFixed(4),row.count])
   ];
   const csv="\uFEFF"+rows.map(row=>row.map(quote).join(";")).join("\r\n");

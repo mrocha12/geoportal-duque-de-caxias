@@ -173,6 +173,14 @@ function legendSymbolHTML(sw){
   return `<span class="${slotClass}">${inner}</span>`;
 }
 
+function layerSymbologyRowsHTML(id, marginLeft = 45){
+  const entries = layerSymbologyEntries(id);
+  if(!entries.length) return "";
+  return `<div class="lp-dist-list" style="margin-top:4px;margin-left:${marginLeft}px;">${entries.map(entry=>
+    `<div class="lp-row" style="padding:2px 4px;"><div class="lp-swatch lp-swatch-poly" style="width:28px;height:14px;flex:0 0 28px;background:${entry.color};"></div><span style="font-size:11px;">${escapeHtml(entry.name)}</span></div>`
+  ).join("")}</div>`;
+}
+
 function renderLegend(){
   let html = "";
   /* Na aba Interativo cada linha tem o botão ON/OFF (36px + espaçamento): recua as sub-listas na mesma medida */
@@ -229,12 +237,8 @@ function renderLegend(){
         html += `</div>`;
       }
     }
-    if(id==="plano_diretor" && (legendTab==="legenda"?visible:true) && typeof pdClassesPresent==="function"){
-      html += `<div class="lp-dist-list" style="margin-top:4px;margin-left:${45+subIndent}px;">`;
-      pdClassesPresent().forEach(c=>{
-        html += `<div class="lp-row" style="padding:2px 4px;"><div class="lp-swatch lp-swatch-poly" style="width:28px;height:14px;flex:0 0 28px;background:${pdColor(c)};"></div><span style="font-size:11px;">${escapeHtml(c)}</span></div>`;
-      });
-      html += `</div>`;
+    if(layer.symbology && (legendTab==="legenda"?visible:true)){
+      html += layerSymbologyRowsHTML(id,45+subIndent);
     }
     html += `</div>`;
   });
@@ -378,6 +382,7 @@ function renderLayersPanel(){
             <span class="opacity-val">${pct}%</span>
           </div>
           <div class="lay-detail-meta">${layer.count} feições · ${escapeHtml(layer.category)}</div>
+          ${layer.symbology?layerSymbologyRowsHTML(id,0):""}
           ${layer.sourceName?`<div class="lay-detail-source">Fonte: <a href="${layer.sourceUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(layer.sourceName)}</a>${layer.metadataUrl?` · <a href="${layer.metadataUrl}" target="_blank" rel="noopener noreferrer">Metadados</a>`:""}<br>Base: ${escapeHtml(layer.sourceDataset||"")}</div>`:""}
         </div>`;
       }

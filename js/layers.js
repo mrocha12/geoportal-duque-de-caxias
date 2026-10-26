@@ -65,7 +65,7 @@ registerLayer("bairros", {
     style:f=>({color:"#12140f", weight:1, fillColor:distColor(f.properties.Distrito), fillOpacity:0.55, opacity:0.6}),
     onEachFeature:(f,l)=>{
       const p=f.properties;
-      l.bindPopup(`<b>${escapeHtml(p.Name)}</b><br>${escapeHtml(p.Distrito||"")}<br>População (2022): ${escapeHtml(p.PopCenso22 ?? "-")}<br>Área: ${escapeHtml((p.Area||0).toFixed(2))} km²`);
+      l.bindPopup(`<b>${escapeHtml(p.Name)}</b><br>${escapeHtml(p.Distrito||"")}<br>População (2022): ${escapeHtml(formatNumberPtBR(p.PopCenso22 ?? "-"))}<br>Área: ${escapeHtml(formatAreaPtBR(p.Area||0,"km2"))}`);
       l.bindTooltip(p.Name||"", {permanent:true, direction:"center", className:"bairro-label"});
       BAIRRO_LABEL_LAYERS.push(l);
     }
@@ -482,7 +482,7 @@ function censoRangeIndex(v){
   return CENSO_BREAKS.length;
 }
 function censoRangeLabel(i){
-  const fmt = n=>Math.round(n).toLocaleString("pt-BR");
+  const fmt = n=>formatNumberPtBR(Math.round(n));
   const lo = i===0 ? popValues[0] : CENSO_BREAKS[i-1];
   const hi = i<CENSO_BREAKS.length ? CENSO_BREAKS[i] : popValues[popValues.length-1];
   return i===0 ? `até ${fmt(hi)}` : `${fmt(lo)} – ${fmt(hi)}`;
@@ -600,27 +600,32 @@ registerLayer("reservatorio", {
 });
 
 /* ================= USO E OCUPAÇÃO DO SOLO — cores dinâmicas por classe ================= */
-const USO_PALETTE = ["#2e7d32","#1e88e5","#fdd835","#8d6e63","#66bb6a","#fb8c00","#8e24aa","#00acc1","#e53935","#3949ab","#c0ca33","#00897b","#6d4c41","#d81b60","#546e7a","#f4511e"];
+const USO_SYMBOLOGY = {
+  property:"Classe",
+  outlineColor:"#12140f",
+  fillOpacity:0.62,
+  classColors:{
+    "agua":"#2196F3",
+    "vegetacao (arvores)":"#1B5E20",
+    "area construida":"#E53935",
+    "vegetacao inundada":"#81C784",
+    "pastagem natural":"#FFB74D",
+    "culturas":"#D4A017"
+  },
+  palette:["#2e7d32","#1e88e5","#fdd835","#8d6e63","#66bb6a","#fb8c00","#8e24aa","#00acc1","#e53935","#3949ab","#c0ca33","#00897b","#6d4c41","#d81b60","#546e7a","#f4511e"]
+};
 // Cores definidas especificamente para as classes existentes no GeoJSON.
 // A comparação é normalizada para manter o funcionamento mesmo com acentos,
  // maiúsculas/minúsculas ou pequenas variações de grafia.
-const USO_CLASS_COLORS = {
-  "agua": "#2196F3",
-  "vegetacao (arvores)": "#1B5E20",
-  "area construida": "#E53935",
-  "vegetacao inundada": "#81C784",
-  "pastagem natural": "#FFB74D",
-  "culturas": "#D4A017"
-};
 const USO_COLOR_CACHE = {};
 function usoColor(classe){
   const key = usoNormalize(classe);
-  if(Object.prototype.hasOwnProperty.call(USO_CLASS_COLORS, key)){
-    return USO_CLASS_COLORS[key];
+  if(Object.prototype.hasOwnProperty.call(USO_SYMBOLOGY.classColors, key)){
+    return USO_SYMBOLOGY.classColors[key];
   }
   if(!USO_COLOR_CACHE[classe]){
     const used = Object.keys(USO_COLOR_CACHE).length;
-    USO_COLOR_CACHE[classe] = USO_PALETTE[used % USO_PALETTE.length];
+    USO_COLOR_CACHE[classe] = USO_SYMBOLOGY.palette[used % USO_SYMBOLOGY.palette.length];
   }
   return USO_COLOR_CACHE[classe];
 }
@@ -628,25 +633,19 @@ function usoNormalize(s){
   return (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 }
 function usoFormatArea(m2){
-  m2 = m2 || 0;
-  const km2 = m2/1e6;
-  if(km2>=1){
-    return km2.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' km²';
-  }
-  const ha = m2/10000;
-  return ha.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ha';
+  return formatAreaPtBR(m2 || 0);
 }
 let usoSelectedClass = null;
 function usoFeatureStyle(f){
-  const classe = (f.properties && f.properties.Classe) || "Sem classe";
+  const classe = (f.properties && f.properties[USO_SYMBOLOGY.property]) || "Sem classe";
   const color = usoColor(classe);
   const isSelected = usoSelectedClass && classe===usoSelectedClass;
   const isDimmed = usoSelectedClass && classe!==usoSelectedClass;
   return {
-    color: isSelected ? "#ffffff" : "#12140f",
+    color: isSelected ? "#ffffff" : USO_SYMBOLOGY.outlineColor,
     weight: isSelected ? 2 : 0.6,
     fillColor: color,
-    fillOpacity: isDimmed ? 0.12 : 0.62,
+    fillOpacity: isDimmed ? 0.12 : USO_SYMBOLOGY.fillOpacity,
     opacity: isDimmed ? 0.25 : 0.85
   };
 }
@@ -674,15 +673,16 @@ registerLayer("uso_ocupacao", {
   defaultVisible:false,
   hasDashboard:true,
   count: DATA_USO_OCUPACAO.features.length,
+  symbology:USO_SYMBOLOGY,
   swatch:{type:"fill", color:"#66bb6a"},
   leaflet: L.geoJSON(DATA_USO_OCUPACAO, {
     pane:"paneOverlayPoligonos",
     style: f => usoFeatureStyle(f),
     onEachFeature:(f,l)=>{
       const p = f.properties || {};
-      const classe = p.Classe || "Sem classe";
+      const classe = p[USO_SYMBOLOGY.property] || "Sem classe";
       const area = usoFormatArea(p.Shape_Area||0);
-      l.bindPopup(`<b>${escapeHtml(classe)}</b><br>Área: ${escapeHtml(area)}`);
+      l.bindPopup(`<b><span class="feature-symbol-dot" style="background:${usoColor(classe)}"></span>${escapeHtml(classe)}</b><br>Área: ${escapeHtml(area)}`);
       l.on("click", ()=> usoSelectClass(classe));
     }
   })
@@ -769,9 +769,12 @@ function fbdsPopupHTML(layer, properties, fields){
     const value = properties[key];
     if(value === undefined || value === null || value === "") return "";
     const shown = typeof value === "number"
-      ? value.toLocaleString("pt-BR",{maximumFractionDigits:4})
+      ? formatNumberPtBR(value,{maximumFractionDigits:4})
       : String(value);
-    return `<b>${escapeHtml(label)}:</b> ${escapeHtml(shown)}`;
+    const symbol = key === FBDS_USAGE_SYMBOLOGY.property
+      ? `<span class="feature-symbol-dot" style="background:${fbdsUsageColor(value)}"></span>`
+      : "";
+    return `${symbol}<b>${escapeHtml(label)}:</b> ${escapeHtml(shown)}`;
   }).filter(Boolean).join("<br>");
   const source = layer.sourceUrl
     ? `<br>Fonte: <a class="fbds-popup-source" href="${layer.sourceUrl}" target="_blank" rel="noopener noreferrer">FBDS · ${escapeHtml(layer.sourceDataset||"dados da camada")}</a>`
@@ -782,32 +785,38 @@ function fbdsPopupHTML(layer, properties, fields){
   return `<b>${escapeHtml(layer.label)}</b>${rows?`<br>${rows}`:""}${source}${metadata}`;
 }
 
-function fbdsUsageColor(value){
-  const normalized = usoNormalize(value);
-  const colors = {
+const FBDS_USAGE_SYMBOLOGY = {
+  property:"CLASSE_USO",
+  outlineColor:"#243129",
+  fillOpacity:0.62,
+  classColors:{
     "formacao florestal":"#24733b",
     "formacao nao florestal":"#78a84a",
     "area antropizada":"#d6a43b",
     "area edificada":"#c7463b",
     "agua":"#277da1",
     "silvicultura":"#8d6e45"
-  };
-  return colors[normalized] || "#777777";
+  },
+  fallbackColor:"#777777"
+};
+function fbdsUsageColor(value){
+  const normalized = usoNormalize(value);
+  return FBDS_USAGE_SYMBOLOGY.classColors[normalized] || FBDS_USAGE_SYMBOLOGY.fallbackColor;
 }
 
 let fbdsUsageSelectedClass = null;
 function fbdsUsageFeatureStyle(feature){
   const properties = feature.properties || {};
-  const className = properties.CLASSE_USO || "Sem classe";
+  const className = properties[FBDS_USAGE_SYMBOLOGY.property] || "Sem classe";
   const color = fbdsUsageColor(className);
   const selected = fbdsUsageSelectedClass;
   const active = selected && className === selected;
   const dimmed = selected && !active;
   return {
-    color: active ? "#ffffff" : "#243129",
+    color: active ? "#ffffff" : FBDS_USAGE_SYMBOLOGY.outlineColor,
     weight: active ? 2 : 0.6,
     fillColor: color,
-    fillOpacity: dimmed ? 0.12 : 0.62,
+    fillOpacity: dimmed ? 0.12 : FBDS_USAGE_SYMBOLOGY.fillOpacity,
     opacity: dimmed ? 0.25 : 0.85
   };
 }
@@ -821,6 +830,7 @@ function fbdsRegisterGeoLayer(id, config){
     geometry:config.geometry,
     defaultVisible:false,
     hasDashboard:config.hasDashboard === true,
+    symbology:config.symbology,
     count:featureCollection.features.length,
     swatch:config.swatch,
     sourceName:"Fundação Brasileira para o Desenvolvimento Sustentável (FBDS)",
@@ -891,6 +901,7 @@ fbdsRegisterGeoLayer("fbds_app_uso",{
 fbdsRegisterGeoLayer("uso_ocupacao_fbds",{
   label:"Uso e ocupação do solo (FBDS)", geometry:"poligono", data:DATA_FBDS_USO_OCUPACAO,
   pane:"paneOverlayPoligonos", swatch:{type:"multi",color:"#24733b"}, hasDashboard:true,
+  symbology:FBDS_USAGE_SYMBOLOGY,
   sourceUrl:FBDS_USO_URL, sourceDataset:"RJ_3301702_USO",
   metadataUrl:FBDS_USO_URL+"RJ_3301702_USO.shp.xml",
   fields:[["CLASSE_USO","Classe de uso"],["AREA_HA","Área (ha)"],["GEOCODIGO","Código geográfico"]],
@@ -908,7 +919,7 @@ fbdsRegisterGeoLayer("uso_ocupacao_fbds",{
 function fmtFonteData(v){
   const n = Number(v);
   if(!Number.isFinite(n) || n<=0) return String(v);
-  return new Date(n).toLocaleDateString("pt-BR",{timeZone:"UTC"});
+  return formatDatePtBR(new Date(n),{timeZone:"UTC"});
 }
 const CULTURA_TURISMO_RESUMOS = {
   "TEATRO MUNICIPAL ARMANDO MELLO":"Fundado na década de 1960, é um dos equipamentos culturais mais tradicionais de Duque de Caxias, voltado para apresentações teatrais, oficinas, cursos de artes cênicas e eventos culturais comunitários.",
@@ -966,7 +977,7 @@ function fmtFluidoGas(v){
 }
 function fmtExtensaoKm(v){
   const n = Number(String(v).replace(",","."));
-  return Number.isFinite(n) ? n.toLocaleString("pt-BR",{maximumFractionDigits:3})+" km" : String(v);
+  return Number.isFinite(n) ? formatNumberPtBR(n,{maximumFractionDigits:3})+" km" : String(v);
 }
 function fmtDiametroPol(v){
   const s = String(v).trim();
@@ -1004,7 +1015,11 @@ function newLayerPopupHTML(id, p, extraHtml){
     if(!has(p[k])) return "";
     if(k===cfg.idField) return "";
     const val = typeof fmt==="function" ? fmt(p[k]) : String(p[k]).trim();
-    return `<b>${escapeHtml(label)}:</b> ${escapeHtml(val)}`;
+    const symbology = cfg.symbology || (id==="plano_diretor" ? PD_SYMBOLOGY : null);
+    const symbol = symbology && k===symbology.property
+      ? `<span class="feature-symbol-dot" style="background:${layerSymbologyColor(id,p[k])}"></span>`
+      : "";
+    return `${symbol}<b>${escapeHtml(label)}:</b> ${escapeHtml(val)}`;
   }).filter(Boolean).join("<br>");
   const summaryRow = has(summary) ? `<br><b>Resumo:</b> ${escapeHtml(summary)}` : "";
   const image = id==="cultura_turismo" ? culturaTurismoImagemHTML(p,"popup") : "";
@@ -1069,16 +1084,17 @@ const PD_CLASS_COLORS = {
   "cota 50":"#3B4452"
 };
 const PD_FALLBACK_COLORS = ["#2a9d8f","#e76f51","#8ab17d","#b5838d","#6d597a","#e9c46a"];
+const PD_SYMBOLOGY = {property:"Zona_2",classColors:PD_CLASS_COLORS,fallbackColors:PD_FALLBACK_COLORS,outlineColor:"#12140f"};
 const PD_COLOR_CACHE = {};
 function pdNormalize(s){ return (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," "); }
 function pdClassOf(f){
-  const v = f && f.properties ? f.properties.Zona_2 : null;
+  const v = f && f.properties ? f.properties[PD_SYMBOLOGY.property] : null;
   return (v===undefined || v===null || String(v).trim()==="") ? "Sem classificação" : String(v).trim();
 }
 function pdColor(cls){
   const k = pdNormalize(cls);
-  if(PD_CLASS_COLORS[k]) return PD_CLASS_COLORS[k];
-  if(!PD_COLOR_CACHE[k]) PD_COLOR_CACHE[k] = PD_FALLBACK_COLORS[Object.keys(PD_COLOR_CACHE).length % PD_FALLBACK_COLORS.length];
+  if(PD_SYMBOLOGY.classColors[k]) return PD_SYMBOLOGY.classColors[k];
+  if(!PD_COLOR_CACHE[k]) PD_COLOR_CACHE[k] = PD_SYMBOLOGY.fallbackColors[Object.keys(PD_COLOR_CACHE).length % PD_SYMBOLOGY.fallbackColors.length];
   return PD_COLOR_CACHE[k];
 }
 function pdIsContour(cls){ const k = pdNormalize(cls); return k.indexOf("curva de nivel")===0 || k==="cota 50"; }
@@ -1088,6 +1104,24 @@ function pdClassesPresent(){
   DATA_PLANO_DIRETOR.features.forEach(f=>{ const c=pdClassOf(f); area[c]=(area[c]||0)+(Number(f.properties.Shape_Area)||0); });
   return Object.keys(area).sort((a,b)=>area[b]-area[a]);
 }
+function layerSymbologyEntries(id){
+  const layer = LAYERS[id];
+  if(!layer || !layer.symbology) return [];
+  if(id==="plano_diretor") return pdClassesPresent().map(name=>({name,color:pdColor(name)}));
+  const config = id==="uso_ocupacao" ? USO_SYMBOLOGY : FBDS_USAGE_SYMBOLOGY;
+  const data = id==="uso_ocupacao" ? DATA_USO_OCUPACAO : DATA_FBDS_USO_OCUPACAO;
+  const names = new Set(data.features.map(feature=>feature.properties && feature.properties[config.property] || "Sem classe"));
+  return Array.from(names).sort((a,b)=>a.localeCompare(b,"pt-BR")).map(name=>({
+    name,
+    color:id==="uso_ocupacao" ? usoColor(name) : fbdsUsageColor(name)
+  }));
+}
+function layerSymbologyColor(id,value){
+  if(id==="uso_ocupacao") return usoColor(value);
+  if(id==="uso_ocupacao_fbds") return fbdsUsageColor(value);
+  if(id==="plano_diretor") return pdColor(value);
+  return null;
+}
 let pdSelectedClass = null;
 function pdFeatureStyle(f){
   const cls = pdClassOf(f);
@@ -1095,7 +1129,7 @@ function pdFeatureStyle(f){
   const dim = pdSelectedClass && cls!==pdSelectedClass;
   const contour = pdIsContour(cls);
   return {
-    color: sel ? "#ffffff" : "#12140f",
+    color: sel ? "#ffffff" : PD_SYMBOLOGY.outlineColor,
     weight: sel ? 2 : (contour ? 0.4 : 0.7),
     fillColor: pdColor(cls),
     fillOpacity: dim ? 0.08 : (contour ? 0.35 : 0.6),
@@ -1111,6 +1145,7 @@ registerLayer("plano_diretor", {
   category:"Planejamento Urbano",
   defaultVisible:false,
   hasDashboard:true,
+  symbology:PD_SYMBOLOGY,
   count: DATA_PLANO_DIRETOR.features.length,
   swatch:{type:"multi"},
   tableColumns:["Zona","Zona_2","Legislacao","AnoLei","OBJ_Estrat","Shape_Area","Tipo","Categoria","Ano","Elaboracao","Fonte","Contato"],

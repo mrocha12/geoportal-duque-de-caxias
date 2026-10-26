@@ -468,10 +468,12 @@ function planarAreaM2(latlngs){
 }
 
 function formatDistance(m){
-  return measureUnit.distance==="km" ? (m/1000).toFixed(2)+" km" : m.toFixed(0)+" m";
+  return measureUnit.distance==="km"
+    ? `${formatNumberPtBR(m/1000,{minimumFractionDigits:2,maximumFractionDigits:2})} km`
+    : `${formatNumberPtBR(m,{maximumFractionDigits:0})} m`;
 }
 function formatArea(m2){
-  return measureUnit.area==="ha" ? (m2/10000).toFixed(2)+" ha" : m2.toFixed(0)+" m²";
+  return measureUnit.area==="ha" ? formatAreaPtBR(m2) : `${formatNumberPtBR(m2,{maximumFractionDigits:0})} m²`;
 }
 function makeMeasureTooltip(latlng, text, extraClass){
   return L.tooltip({permanent:true, direction:"center", className:"measure-tooltip"+(extraClass?(" "+extraClass):""), interactive:false})
@@ -945,8 +947,8 @@ if(bmCloseBtn) bmCloseBtn.addEventListener("click", closeBookmarksBox);
 
 /* ================= COMPASS / SCALE ================= */
 function formatScaleDistance(meters){
-  if(meters >= 1000) return (meters/1000).toFixed(meters > 10000 ? 0 : 1).replace(".0", "") + " km";
-  return meters.toFixed(0) + " m";
+  if(meters >= 1000) return `${formatNumberPtBR(meters/1000,{maximumFractionDigits:meters>10000?0:1})} km`;
+  return `${formatNumberPtBR(meters,{maximumFractionDigits:0})} m`;
 }
 
 function updateScale(){
@@ -976,15 +978,15 @@ function updateScale(){
           ? Math.round(denominator / 10) * 10
           : Math.round(denominator);
 
-  ratioEl.textContent = "Escala: 1:" + roundedDenominator.toLocaleString("pt-BR");
+  ratioEl.textContent = "Escala: 1:" + formatNumberPtBR(roundedDenominator);
   el.textContent = formatScaleDistance(meters);
 
   // Mantém a barra gráfica proporcional e no formato do modelo: 0, 1/4, 1/2 e 1 comprimento.
   const quarter = meters / 4;
   const half = meters / 2;
   labels[0].textContent = "0";
-  labels[1].textContent = quarter >= 1000 ? (quarter/1000).toFixed(quarter >= 10000 ? 0 : 1).replace(".0", "") : Math.round(quarter) + " m";
-  labels[2].textContent = half >= 1000 ? (half/1000).toFixed(half >= 10000 ? 0 : 1).replace(".0", "") : Math.round(half) + " m";
+  labels[1].textContent = quarter >= 1000 ? formatNumberPtBR(quarter/1000,{maximumFractionDigits:quarter>=10000?0:1}) : `${formatNumberPtBR(Math.round(quarter))} m`;
+  labels[2].textContent = half >= 1000 ? formatNumberPtBR(half/1000,{maximumFractionDigits:half>=10000?0:1}) : `${formatNumberPtBR(Math.round(half))} m`;
   labels[3].textContent = formatScaleDistance(meters);
 }
 
@@ -1000,7 +1002,7 @@ function setScaleManualError(message){
 }
 
 function formatScaleDenominator(value){
-  return Number(value).toLocaleString("pt-BR", {maximumFractionDigits: 0, useGrouping: true});
+  return formatNumberPtBR(value,{maximumFractionDigits:0});
 }
 
 function parseManualScale(value){
@@ -1148,7 +1150,7 @@ const TOOLTIP_CONFIG = {
   terminais_gnl:      NEW_LAYER_CFG.terminais_gnl,
   upgn:               NEW_LAYER_CFG.upgn,
   plano_diretor:      NEW_LAYER_CFG.plano_diretor,
-  uso_ocupacao: { idField:"Classe", idFallback:"Uso e Ocupação do Solo", fields:[["Shape_Area","Área", v => typeof usoFormatArea === 'function' ? usoFormatArea(v||0) : v]] },
+  uso_ocupacao: { idField:USO_SYMBOLOGY.property, idFallback:"Uso e Ocupação do Solo", fields:[["Shape_Area","Área", v => typeof usoFormatArea === 'function' ? usoFormatArea(v||0) : v]] },
   /* APP · FBDS: o valor de HIDRO ocupa o lugar do título em negrito (antes mostrava o número FID); demais campos mantidos */
   fbds_app: { idField:"HIDRO", idFallback:"Área de Preservação Permanente", fields:[["GEOCODIGO","GEOCODIGO"],["MUNICIPIO","MUNICIPIO"],["UF","UF"],["CD_UF","CD_UF"]] }
 };
@@ -1184,7 +1186,10 @@ function buildTooltipHTML(feature, id){
     } else {
       vStr = String(v).trim();
     }
-    return `<div class="hv-row"><span class="hv-k">${escapeHtml(label)}</span><span class="hv-v" title="${escapeHtml(vStr)}">${escapeHtml(vStr)}</span></div>`;
+    const symbol = layer && layer.symbology && k===layer.symbology.property
+      ? `<span class="feature-symbol-dot" style="background:${layerSymbologyColor(id,v)}"></span>`
+      : "";
+    return `<div class="hv-row"><span class="hv-k">${symbol}${escapeHtml(label)}</span><span class="hv-v" title="${escapeHtml(vStr)}">${escapeHtml(vStr)}</span></div>`;
   }).join("");
   if(id==="cultura_turismo"){
     const summary = CULTURA_TURISMO_RESUMOS[String(props.NOME||"").trim().toUpperCase()];

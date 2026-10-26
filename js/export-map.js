@@ -179,7 +179,7 @@
       const north = Math.max(...corners.map(c => c.lat));
       const west  = Math.min(...corners.map(c => c.lng));
       const east  = Math.max(...corners.map(c => c.lng));
-      const fmt = v => v.toFixed(4) + "°";
+      const fmt = v => `${formatNumberPtBR(v,{minimumFractionDigits:4,maximumFractionDigits:4,useGrouping:false})}°`;
       document.getElementById("map-export-coordinates-value").textContent =
         `Lat. ${fmt(south)} a ${fmt(north)}\nLon. ${fmt(west)} a ${fmt(east)}`;
     } catch(e) { /* mapa pode ainda não estar pronto */ }
@@ -352,9 +352,11 @@
         addEntry(layer.swatch, layer.label);
         const data = id === "ucs_estadual" ? DATA_UCS_ESTADUAL : (id === "ucs_federal" ? DATA_UCS_FEDERAL : DATA_UCS_MUNICIPAL);
         ucCategoriesPresent(data).forEach(cat => addEntry({type:"fill",color:ucColor(cat)}, cat));
-      } else if(id === "plano_diretor" && typeof pdClassesPresent === "function"){
+      } else if(layer.symbology && typeof layerSymbologyEntries === "function"){
         addEntry(layer.swatch, layer.label);
-        pdClassesPresent().forEach(cat => addEntry({type:"fill",color:pdColor(cat)}, cat));
+        layerSymbologyEntries(id).forEach(entry =>
+          addEntry({type:"fill",color:entry.color,fillOpacity:layer.symbology.fillOpacity,outlineColor:layer.symbology.outlineColor}, entry.name)
+        );
       } else if(id !== "bairros") addEntry(layer.swatch, layer.label);
     });
     list.innerHTML = entries.join("") || '<div class="map-export-legend-entry">Nenhuma camada sobreposta visível</div>';
@@ -400,7 +402,7 @@
       const imgScale = Math.min(fW / Math.max(size.x,1), fH / Math.max(size.y,1));
       const denom = mpp * 96 / (0.0254 * imgScale * mapZoom);
       if(!Number.isFinite(denom) || denom <= 0) return;
-      document.getElementById("map-export-scale-value").textContent = `1:${Math.round(denom).toLocaleString("pt-BR")}`;
+      document.getElementById("map-export-scale-value").textContent = `1:${formatNumberPtBR(Math.round(denom))}`;
       const distances = [10000,5000,2000,1000,500,250,100];
       const dist = distances.find(d => d / denom * 96 / 0.0254 <= 145) || 100;
       const barW = Math.max(24, dist / denom * 96 / 0.0254);
@@ -620,7 +622,7 @@
     defaultTexts.crs    = "SIRGAS 2000 / UTM 23S · EPSG:31983";
     defaultTexts.brand  = ["GEOPORTAL","DUQUE DE CAXIAS"];
     document.getElementById("map-export-date-value").textContent =
-      new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+      formatDatePtBR(new Date());
     syncText();
     updateCoordinateText();
     setDefaultLayout();
@@ -915,7 +917,7 @@
   applyPageSize();
   syncText();
   document.getElementById("map-export-date-value").textContent =
-    new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"});
+    formatDatePtBR(new Date());
   updateCoordinateText();
   renderVisibleLegend();
   updateElementVisibility();

@@ -63,7 +63,7 @@ function censoRenderSelectionBanner(){
     el.innerHTML = "";
     return;
   }
-  const fmt = n => Math.round(n||0).toLocaleString("pt-BR");
+  const fmt = n => formatNumberPtBR(Math.round(n||0));
   const feats = LAYERS.censo ? layerFeatureList("censo").filter(f=>censoSelectedSectors.has(f.properties.CD_SETOR)) : [];
   const totalPop = feats.reduce((a,f)=>a+(f.properties.V0001||0),0);
   el.style.display = "flex";

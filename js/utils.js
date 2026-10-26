@@ -8,6 +8,77 @@ function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
 
+const ptBRNumberFormatters = new Map();
+function formatNumberPtBR(value, options = {}){
+  const number = Number(value);
+  if(!Number.isFinite(number)) return String(value);
+  const key = JSON.stringify(options);
+  if(!ptBRNumberFormatters.has(key)){
+    ptBRNumberFormatters.set(key, new Intl.NumberFormat("pt-BR", options));
+  }
+  return ptBRNumberFormatters.get(key).format(number);
+}
+
+function formatAreaPtBR(value, sourceUnit = "m2"){
+  const areaInHectares = Number(value) * (sourceUnit === "km2" ? 100 : sourceUnit === "ha" ? 1 : 0.0001);
+  return `${formatNumberPtBR(areaInHectares,{minimumFractionDigits:2,maximumFractionDigits:2})} ha`;
+}
+
+function formatDatePtBR(value, options = {day:"2-digit",month:"long",year:"numeric"}){
+  const date = value instanceof Date ? value : new Date(value);
+  if(Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("pt-BR", options).format(date);
+}
+
+const FIELD_DISPLAY_ALIASES = {
+  CD_SETOR:"Código do setor censitário",
+  V0001:"População residente",
+  SHAPE_AREA:"Área (ha)",
+  CLASSE:"Classe de uso",
+  CLASSE_USO:"Classe de uso",
+  AREA_HA:"Área (ha)",
+  GEOCODIGO:"Código geográfico",
+  HIDRO:"Identificação hidrográfica",
+  COMP_KM:"Comprimento (km)",
+  ZONA:"Zona",
+  ZONA_2:"Classe de zoneamento",
+  LEGISLACAO:"Legislação",
+  ANOLEI:"Ano da lei",
+  OBJ_ESTRAT:"Objetivo estratégico",
+  POPCENSO22:"População (Censo 2022)",
+  DISTRITO:"Distrito",
+  BAIRRO:"Bairro",
+  NOME:"Nome",
+  NAME:"Nome",
+  FCLASS:"Classe da via",
+  REF:"Referência",
+  ONEWAY:"Sentido de circulação",
+  MAXSPEED:"Velocidade máxima",
+  BRIDGE:"Ponte",
+  TUNNEL:"Túnel",
+  OSM_ID:"Identificador OSM",
+  ENDERECO:"Endereço",
+  SECRETARIA:"Secretaria",
+  FONTE:"Fonte",
+  MUNICIPIO:"Município",
+  UF:"Unidade federativa"
+};
+function canonicalFieldName(value){
+  return String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/([A-Z]+)([A-Z][a-z])/g,"$1_$2")
+    .replace(/([a-z0-9])([A-Z])/g,"$1_$2")
+    .replace(/[^a-zA-Z0-9]+/g,"_")
+    .replace(/_+/g,"_").replace(/^_|_$/g,"").toLowerCase();
+}
+function fieldDisplayLabel(field){
+  const key = String(field||"");
+  const alias = FIELD_DISPLAY_ALIASES[key.toUpperCase()];
+  if(alias) return alias;
+  return key.replace(/([a-z0-9])([A-Z])/g,"$1 $2").replace(/_/g," ")
+    .toLocaleLowerCase("pt-BR").replace(/(^|[\s(])([a-zà-ÿ])/g,(_,prefix,letter)=>prefix+letter.toLocaleUpperCase("pt-BR"));
+}
+
 /* ================= COORDENADAS DO CURSOR / TEMA ================= */
 const cursorCoordinates = document.getElementById("cursor-coordinates");
 const copyCoordinatesBtn = document.getElementById("copy-coordinates");
@@ -62,20 +133,22 @@ const coordinateX = document.getElementById("coordinate-x");
 const coordinateY = document.getElementById("coordinate-y");
 
 function formatUTMValue(value){
-  return Number(value).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  return formatNumberPtBR(value, {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 function formatSIRGAS2000(lat, lon){
   const utm = latLonToUTM23S(lat, lon);
-  return `SIRGAS 2000 / UTM 23S\nX: ${formatUTMValue(utm.easting)} | Y: ${formatUTMValue(utm.northing)}\nLat: ${lat.toFixed(6)} | Lon: ${lon.toFixed(6)}`;
+  const coordinateOptions = {minimumFractionDigits:6, maximumFractionDigits:6, useGrouping:false};
+  return `SIRGAS 2000 / UTM 23S\nX: ${formatUTMValue(utm.easting)} | Y: ${formatUTMValue(utm.northing)}\nLat: ${formatNumberPtBR(lat,coordinateOptions)} | Lon: ${formatNumberPtBR(lon,coordinateOptions)}`;
 }
 
 function updateCursorCoordinates(e){
   const lat = e.latlng.lat;
   const lon = e.latlng.lng;
   const utm = latLonToUTM23S(lat, lon);
-  coordinateLat.textContent = lat.toFixed(6);
-  coordinateLon.textContent = lon.toFixed(6);
+  const coordinateOptions = {minimumFractionDigits:6, maximumFractionDigits:6, useGrouping:false};
+  coordinateLat.textContent = formatNumberPtBR(lat,coordinateOptions);
+  coordinateLon.textContent = formatNumberPtBR(lon,coordinateOptions);
   coordinateX.textContent = formatUTMValue(utm.easting);
   coordinateY.textContent = formatUTMValue(utm.northing);
   lastCoordinateText = formatSIRGAS2000(lat, lon);
@@ -100,7 +173,9 @@ copyCoordinatesBtn.addEventListener("click", async ()=>{
 function applyTheme(theme){
   const light = theme === "light";
   document.body.classList.toggle("light-theme", light);
-  themeBtn.textContent = light ? "☀" : "☾";
+  themeBtn.innerHTML = light
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.7 8.7 0 1 0 20.5 15.2Z"></path></svg>';
   themeBtn.title = light ? "Usar tema escuro" : "Usar tema claro";
   themeBtn.setAttribute("aria-label", themeBtn.title);
 }
@@ -327,14 +402,14 @@ const ICON_UPGN = makeSymbolIcon(`
 /* Ícones dos indicadores dos Dashboards — mesmo padrão visual do Dashboard Setores Censitários
    (.dsh-kpi-icon: quadrado 26px, fundo translúcido, traço de 2px, ícone de 15px). */
 const DSH_KPI_ICONS = {
-  area:     {c:"59,130,246",  h:"#3b82f6", p:'<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'},
+  area:     {c:"59,130,246",  h:"#3b82f6", p:'<path d="m4 6 12-3 4 4-2 12-12 2-3-5z"/><path d="m4 6 5 3 11-2M9 9l-3 12M14 8l-2 12"/><path d="m16 3 1 4"/> '},
   classes:  {c:"139,92,246",  h:"#8b5cf6", p:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'},
-  features: {c:"139,92,246",  h:"#8b5cf6", p:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'},
+  features: {c:"139,92,246",  h:"#8b5cf6", p:'<circle cx="6" cy="7" r="2"/><circle cx="17" cy="5" r="2"/><circle cx="11" cy="17" r="2"/><circle cx="19" cy="16" r="2"/><path d="m8 6 7-1M7 9l3 6m3 1 4 0"/> '},
   top:      {c:"245,158,11",  h:"#f59e0b", p:'<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>'},
   percent:  {c:"6,182,212",   h:"#06b6d4", p:'<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>'},
   built:    {c:"239,68,68",   h:"#ef4444", p:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>'},
   veg:      {c:"34,197,94",   h:"#22c55e", p:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>'},
-  zones:    {c:"20,184,166",  h:"#14b8a6", p:'<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'},
+  zones:    {c:"20,184,166",  h:"#14b8a6", p:'<path d="m12 2 9 5-2 11-8 4-8-5 2-11z"/><path d="m5 6 6 4 10-3M11 10v12m0-12L5 17m6-7 8 8"/> '},
   legal:    {c:"99,102,241",  h:"#6366f1", p:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'}
 };
 function dshKpiIconHTML(key){

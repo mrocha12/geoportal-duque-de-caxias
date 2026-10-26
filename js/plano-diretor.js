@@ -18,8 +18,8 @@ let pdLastRows = [];
 let pdVisibilitySnapshot = null;
 
 function pdAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
-function pdFmtPct(p){ return (p||0).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%"; }
-function pdFmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
+function pdFmtPct(p){ return `${formatNumberPtBR(p||0,{minimumFractionDigits:1,maximumFractionDigits:1})}%`; }
+function pdFmtInt(n){ return formatNumberPtBR(n||0); }
 function pdArea(f){ return Number(f.properties && f.properties.Shape_Area) || 0; }
 function pdVal(f, k){
   const v = f.properties ? f.properties[k] : null;
@@ -309,11 +309,11 @@ function pdExport(format){
   const suffix = pdSelectedClass ? "_" + pdNormalize(pdSigla(pdSelectedClass)).replace(/[^a-z0-9]+/g,"_") : "";
   if(format==="csv"){
     const q = v => `"${String(v).replace(/"/g,'""')}"`;
-    let csv = "\uFEFFZona;Classe_de_zoneamento;Legislacao;Feicoes;Area_m2;Area_formatada\n";
-    rows.forEach(r=>{ csv += [q(r.zona),q(r.cls),q(r.leis.join(" | ")),r.n,r.area.toFixed(2),q(usoFormatArea(r.area))].join(";")+"\n"; });
+    let csv = "\uFEFFzona;classe_de_zoneamento;legislacao;feicoes;area_ha;area_formatada\n";
+    rows.forEach(r=>{ csv += [q(r.zona),q(r.cls),q(r.leis.join(" | ")),r.n,(r.area/10000).toFixed(2),q(usoFormatArea(r.area))].join(";")+"\n"; });
     pdDownload(csv, `plano_diretor_2022_zonas${suffix}.csv`, "text/csv;charset=utf-8;");
   }else{
-    const json = JSON.stringify(rows.map(r=>({zona:r.zona, classe_de_zoneamento:r.cls, legislacao:r.leis, feicoes:r.n, area_m2:Number(r.area.toFixed(2)), area_formatada:usoFormatArea(r.area)})), null, 2);
+    const json = JSON.stringify(rows.map(r=>({zona:r.zona, classe_de_zoneamento:r.cls, legislacao:r.leis, feicoes:r.n, area_ha:Number((r.area/10000).toFixed(2)), area_formatada:usoFormatArea(r.area)})), null, 2);
     pdDownload(json, `plano_diretor_2022_zonas${suffix}.json`, "application/json;charset=utf-8;");
   }
 }

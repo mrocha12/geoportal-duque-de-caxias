@@ -160,7 +160,7 @@ function radiusGetMeters(){
 }
 
 function radiusFormatDistance(m){
-  return m>=1000 ? (m/1000).toLocaleString("pt-BR",{maximumFractionDigits:2}) + " km" : m.toFixed(0) + " m";
+  return m>=1000 ? `${formatNumberPtBR(m/1000,{maximumFractionDigits:2})} km` : `${formatNumberPtBR(m,{maximumFractionDigits:0})} m`;
 }
 
 function radiusUpdateQueryButtonState(){
@@ -173,7 +173,8 @@ function radiusUpdatePointReadout(){
   const copyBtn = document.getElementById("rd-copy-point");
   if(!el) return;
   if(radiusCenter){
-    el.textContent = `Ponto definido: ${radiusCenter.lat.toFixed(6)}, ${radiusCenter.lng.toFixed(6)}`;
+    const coordinateOptions={minimumFractionDigits:6,maximumFractionDigits:6,useGrouping:false};
+    el.textContent = `Ponto definido: ${formatNumberPtBR(radiusCenter.lat,coordinateOptions)}, ${formatNumberPtBR(radiusCenter.lng,coordinateOptions)}`;
     if(copyBtn) copyBtn.hidden = false;
   } else {
     el.textContent = "Nenhum ponto definido. Arraste a alça do círculo para ajustar o raio.";
@@ -632,7 +633,8 @@ document.querySelectorAll("#rd-chips .rd-chip").forEach(chip=>{
 });
 document.getElementById("rd-copy-point").addEventListener("click", async ()=>{
   if(!radiusCenter) return;
-  const text = `${radiusCenter.lat.toFixed(6)}, ${radiusCenter.lng.toFixed(6)}`;
+  const coordinateOptions={minimumFractionDigits:6,maximumFractionDigits:6,useGrouping:false};
+  const text = `${formatNumberPtBR(radiusCenter.lat,coordinateOptions)}, ${formatNumberPtBR(radiusCenter.lng,coordinateOptions)}`;
   try{
     await navigator.clipboard.writeText(text);
     showToast("Coordenadas do ponto copiadas.");
