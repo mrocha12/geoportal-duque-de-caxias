@@ -395,6 +395,8 @@ function closeAglomeradosDashboard(){
 
 /* Botão de fechar dentro do modal */
 (function(){
+  const openBtn = document.getElementById("btn-aglomerados-top");
+  if(openBtn) openBtn.addEventListener("click", openAglomeradosDashboard);
   const btn = document.querySelector("[data-close=\"modal-dashboard-aglomerados\"]");
   if(btn) btn.addEventListener("click", closeAglomeradosDashboard);
 })();
