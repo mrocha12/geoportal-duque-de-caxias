@@ -734,23 +734,33 @@ body.light-theme .map-export-preview-stage{background-color:#dfe5e2;background-i
   cursor:not-allowed;
 }
 #layers-panel.censo-only-mode .lay-item[data-censo-disabled="true"]{opacity:.7;}
-#modal-dashboard-censo .modal-box{
+#modal-dashboard-censo .modal-box,
+#modal-dashboard-aglomerados .modal-box{
   pointer-events:auto;
   width:min(980px,95vw); height:min(720px,88vh);
   min-width:min(540px,92vw); min-height:min(380px,80vh); max-width:96vw; max-height:94vh;
   display:flex; flex-direction:column; overflow:hidden; position:relative;
 }
-#modal-dashboard-censo .modal-box.dsh-resizing{transition:none;}
-#modal-dashboard-censo .modal-head{flex:0 0 auto; touch-action:none;}
-#modal-dashboard-censo .dsh-head-left{display:flex;align-items:center;gap:8px;min-width:0;}
-#modal-dashboard-censo .dsh-head-left h3{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#modal-dashboard-censo .dsh-head-right{display:flex;align-items:center;gap:2px;flex:0 0 auto;}
-#modal-dashboard-censo .dsh-drag-grip{flex:0 0 auto;display:flex;color:var(--muted-text);opacity:.6;}
-#modal-dashboard-censo .dsh-drag-grip svg{width:15px;height:15px;display:block;}
+#modal-dashboard-censo .modal-box.dsh-resizing,
+#modal-dashboard-aglomerados .modal-box.dsh-resizing{transition:none;}
+#modal-dashboard-censo .modal-head,
+#modal-dashboard-aglomerados .modal-head{flex:0 0 auto; touch-action:none;}
+#modal-dashboard-censo .dsh-head-left,
+#modal-dashboard-aglomerados .dsh-head-left{display:flex;align-items:center;gap:8px;min-width:0;}
+#modal-dashboard-censo .dsh-head-left h3,
+#modal-dashboard-aglomerados .dsh-head-left h3{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#modal-dashboard-censo .dsh-head-right,
+#modal-dashboard-aglomerados .dsh-head-right{display:flex;align-items:center;gap:2px;flex:0 0 auto;}
+#modal-dashboard-censo .dsh-drag-grip,
+#modal-dashboard-aglomerados .dsh-drag-grip{flex:0 0 auto;display:flex;color:var(--muted-text);opacity:.6;}
+#modal-dashboard-censo .dsh-drag-grip svg,
+#modal-dashboard-aglomerados .dsh-drag-grip svg{width:15px;height:15px;display:block;}
 #modal-dashboard-censo #dsh-reset-size{font-size:15px;}
+#modal-dashboard-aglomerados #agl-reset-size{font-size:15px;}
 .dsh-icon-btn{background:none;border:none;color:var(--muted-text);font-size:15px;cursor:pointer;line-height:1;padding:2px;}
 .dsh-icon-btn:hover{color:var(--panel-text);}
-#modal-dashboard-censo .modal-body{flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;}
+#modal-dashboard-censo .modal-body,
+#modal-dashboard-aglomerados .modal-body{flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;}
 .dsh-rz{position:absolute;z-index:5;-webkit-tap-highlight-color:transparent;touch-action:none;}
 .dsh-rz:hover{background:rgba(120,170,255,.10);}
 .dsh-rz-n{top:0;left:12px;right:12px;height:6px;cursor:ns-resize;}
@@ -796,22 +806,38 @@ body.light-theme .map-export-preview-stage{background-color:#dfe5e2;background-i
 .dsh-selection-banner{margin:-6px 0 0;font-size:11.5px;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.4);border-radius:4px;padding:6px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .dsh-selection-banner button{background:none;border:none;color:var(--accent-blue-glow);cursor:pointer;font-size:11px;text-decoration:underline;flex:0 0 auto;}
 body.light-theme .dsh-selection-banner{background:rgba(0,180,200,.1);border-color:rgba(0,180,200,.35);}
-body.light-theme #modal-dashboard-censo .modal-box{background:#ffffff;color:#202428;border-color:#cfd5d9;}
-body.light-theme #modal-dashboard-censo .modal-head{border-bottom-color:#dfe3e6;}
-body.light-theme #modal-dashboard-censo .dsh-kpi-card{background:#f3f5f6;border-color:#dfe3e6;}
-body.light-theme #modal-dashboard-censo .dsh-kpi-value{color:#202428;}
+body.light-theme #modal-dashboard-censo .modal-box,
+body.light-theme #modal-dashboard-aglomerados .modal-box{background:#ffffff;color:#202428;border-color:#cfd5d9;}
+body.light-theme #modal-dashboard-censo .modal-head,
+body.light-theme #modal-dashboard-aglomerados .modal-head{border-bottom-color:#dfe3e6;}
+body.light-theme #modal-dashboard-censo .dsh-kpi-card,
+body.light-theme #modal-dashboard-aglomerados .dsh-kpi-card{background:#f3f5f6;border-color:#dfe3e6;}
+body.light-theme #modal-dashboard-censo .dsh-kpi-value,
+body.light-theme #modal-dashboard-aglomerados .dsh-kpi-value{color:#202428;}
 body.light-theme #modal-dashboard-censo .dsh-kpi-label,
 body.light-theme #modal-dashboard-censo .dsh-kpi-sub,
 body.light-theme #modal-dashboard-censo .dsh-note,
-body.light-theme #modal-dashboard-censo .dsh-bar-val{color:#5d6870;}
-body.light-theme #modal-dashboard-censo .dsh-section-title{color:#202428;border-bottom-color:#dfe3e6;}
-body.light-theme #modal-dashboard-censo .dsh-bar-label{color:#202428;}
-body.light-theme #modal-dashboard-censo .dsh-bar-track{background:#eef1f3;border-color:#dfe3e6;}
-body.light-theme #modal-dashboard-censo .dsh-table th{color:#5d6870;border-bottom-color:#dfe3e6;}
-body.light-theme #modal-dashboard-censo .dsh-table td{color:#202428;border-bottom-color:#eef1f3;}
-body.light-theme #modal-dashboard-censo .dsh-table tr:hover td{background:#f3f5f6;}
-body.light-theme #modal-dashboard-censo .dsh-bar-row.dsh-active .dsh-bar-label{color:var(--bar-blue-dark);}
-body.light-theme #modal-dashboard-censo .dsh-rz:hover{background:rgba(30,110,220,.08);}
+body.light-theme #modal-dashboard-censo .dsh-bar-val,
+body.light-theme #modal-dashboard-aglomerados .dsh-kpi-label,
+body.light-theme #modal-dashboard-aglomerados .dsh-kpi-sub,
+body.light-theme #modal-dashboard-aglomerados .dsh-note,
+body.light-theme #modal-dashboard-aglomerados .dsh-bar-val{color:#5d6870;}
+body.light-theme #modal-dashboard-censo .dsh-section-title,
+body.light-theme #modal-dashboard-aglomerados .dsh-section-title{color:#202428;border-bottom-color:#dfe3e6;}
+body.light-theme #modal-dashboard-censo .dsh-bar-label,
+body.light-theme #modal-dashboard-aglomerados .dsh-bar-label{color:#202428;}
+body.light-theme #modal-dashboard-censo .dsh-bar-track,
+body.light-theme #modal-dashboard-aglomerados .dsh-bar-track{background:#eef1f3;border-color:#dfe3e6;}
+body.light-theme #modal-dashboard-censo .dsh-table th,
+body.light-theme #modal-dashboard-aglomerados .dsh-table th{color:#5d6870;border-bottom-color:#dfe3e6;}
+body.light-theme #modal-dashboard-censo .dsh-table td,
+body.light-theme #modal-dashboard-aglomerados .dsh-table td{color:#202428;border-bottom-color:#eef1f3;}
+body.light-theme #modal-dashboard-censo .dsh-table tr:hover td,
+body.light-theme #modal-dashboard-aglomerados .dsh-table tr:hover td{background:#f3f5f6;}
+body.light-theme #modal-dashboard-censo .dsh-bar-row.dsh-active .dsh-bar-label,
+body.light-theme #modal-dashboard-aglomerados .dsh-bar-row.dsh-active .dsh-bar-label{color:var(--bar-blue-dark);}
+body.light-theme #modal-dashboard-censo .dsh-rz:hover,
+body.light-theme #modal-dashboard-aglomerados .dsh-rz:hover{background:rgba(30,110,220,.08);}
 
 /* ===== DADOS DO IBGE — PAINEL (mesma estrutura redimensionável/arrastável do dashboard) ===== */
 #modal-ibge .modal-box{
@@ -2195,6 +2221,7 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
    Ajustes apenas de apresentação e adaptação à viewport. Não altera funções.
 */
 #modal-dashboard-censo,
+#modal-dashboard-aglomerados,
 #modal-ibge,
 #modal-radius-results,
 #modal-table{
@@ -2205,6 +2232,7 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
 }
 
 #modal-dashboard-censo .modal-box,
+#modal-dashboard-aglomerados .modal-box,
 #modal-ibge .modal-box,
 #modal-radius-results .modal-box,
 #modal-table .modal-box{
@@ -2214,6 +2242,7 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
 }
 
 #modal-dashboard-censo .modal-head,
+#modal-dashboard-aglomerados .modal-head,
 #modal-ibge .modal-head,
 #modal-radius-results .modal-head,
 #modal-table .modal-head,
@@ -2222,12 +2251,14 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
 }
 
 #modal-dashboard-censo .dsh-head-right,
+#modal-dashboard-aglomerados .dsh-head-right,
 #modal-ibge .dsh-head-right,
 #uso-panel .uso-head-right{
   flex-shrink: 0;
 }
 
 #modal-dashboard-censo .modal-body,
+#modal-dashboard-aglomerados .modal-body,
 #modal-ibge .modal-body,
 #modal-radius-results .modal-body,
 #modal-table .modal-body{
@@ -2248,6 +2279,7 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
 
 @media (max-height: 760px) and (min-width: 561px){
   #modal-dashboard-censo,
+  #modal-dashboard-aglomerados,
   #modal-ibge,
   #modal-radius-results,
   #modal-table{
@@ -2256,6 +2288,11 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
   }
 
   #modal-dashboard-censo .modal-box{
+    height: min(680px, calc(100vh - 108px));
+    max-height: calc(100vh - 108px);
+  }
+
+  #modal-dashboard-aglomerados .modal-box{
     height: min(680px, calc(100vh - 108px));
     max-height: calc(100vh - 108px);
   }
@@ -2291,6 +2328,7 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
 
 @media (max-width: 560px){
   #modal-dashboard-censo,
+  #modal-dashboard-aglomerados,
   #modal-ibge,
   #modal-radius-results,
   #modal-table{
@@ -2299,6 +2337,7 @@ body.light-theme #mobile-toolbar-toggle{background:rgba(255,255,255,.96);color:#
   }
 
   #modal-dashboard-censo .modal-box,
+  #modal-dashboard-aglomerados .modal-box,
   #modal-ibge .modal-box,
   #modal-radius-results .modal-box,
   #modal-table .modal-box{
