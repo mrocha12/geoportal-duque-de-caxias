@@ -266,6 +266,15 @@ function usoExportData(format){
     usoDownload(json, "uso_ocupacao_do_solo.json", "application/json;charset=utf-8;");
   }
 }
+function usoExportFeatures(format){
+  const property = USO_SYMBOLOGY.property;
+  const features = DATA_USO_OCUPACAO.features.filter(feature=>{
+    if(!usoSelectedClass) return true;
+    const value = feature.properties && feature.properties[property];
+    return String(value == null || value === "" ? "Sem classe" : value) === usoSelectedClass;
+  });
+  dashboardExportFeatures("uso_ocupacao", features, format);
+}
 
 (function usoInitPanelEvents(){
   const filterSel = document.getElementById("uso-filter-select");
@@ -281,6 +290,12 @@ function usoExportData(format){
   if(exportCsvBtn) exportCsvBtn.addEventListener("click", ()=>usoExportData("csv"));
   const exportJsonBtn = document.getElementById("uso-export-json");
   if(exportJsonBtn) exportJsonBtn.addEventListener("click", ()=>usoExportData("json"));
+  const openTableBtn = document.getElementById("uso-open-table");
+  if(openTableBtn) openTableBtn.addEventListener("click", ()=>openAttributeTable("uso_ocupacao"));
+  const featureCsvBtn = document.getElementById("uso-export-features-csv");
+  if(featureCsvBtn) featureCsvBtn.addEventListener("click", ()=>usoExportFeatures("csv"));
+  const featureJsonBtn = document.getElementById("uso-export-features-json");
+  if(featureJsonBtn) featureJsonBtn.addEventListener("click", ()=>usoExportFeatures("json"));
   const closeBtn = document.getElementById("uso-close-btn");
   if(closeBtn) closeBtn.addEventListener("click", usoClosePanel);
   const minBtn = document.getElementById("uso-minimize-btn");

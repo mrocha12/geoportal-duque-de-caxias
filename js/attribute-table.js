@@ -772,6 +772,21 @@ function atBuildExportGeoJSON(indices){
   const features = indices.map(i=> JSON.parse(JSON.stringify(atFeatures[i].feature)));
   return {type:"FeatureCollection", features};
 }
+function dashboardExportFeatures(layerId, features, format){
+  if(!features.length){ showToast("Não há registros para exportar."); return; }
+  const geojson = {
+    type:"FeatureCollection",
+    features:features.map(feature=>JSON.parse(JSON.stringify(feature)))
+  };
+  const layerName = slugifyFileName(LAYERS[layerId].label);
+  if(format==="csv"){
+    downloadBlob(new Blob([geojsonToCSV(geojson)],{type:"text/csv;charset=utf-8;"}),`geoportal_dcx_${layerName}_dashboard.csv`);
+    showToast(`${features.length} registro(s) exportado(s) em CSV.`);
+    return;
+  }
+  downloadBlob(new Blob([JSON.stringify(geojson,null,2)],{type:"application/geo+json"}),`geoportal_dcx_${layerName}_dashboard.json`);
+  showToast(`${features.length} registro(s) exportado(s) em JSON.`);
+}
 document.getElementById("at-export-csv").addEventListener("click", ()=>{
   const indices = atSelectedIndices.size ? [...atSelectedIndices] : atFilteredIndices;
   if(!indices.length){ showToast("Não há registros para exportar."); return; }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Geoportal | Duque de Caxias</title>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css?v=20261026-dashboard-aglomerados-v1">
+    <link rel="stylesheet" href="css/style.css?v=20261030-dashboard-controls-v1">
   <link rel="stylesheet" href="css/topbar-fix.css?v=20261010-v1">
   <link rel="stylesheet" href="css/tema-grafite-azul.css?v=v28">
   <link rel="stylesheet" href="css/opening-logo.css?v=gif3">
@@ -444,9 +444,9 @@
         </div>
         <div class="uso-section">
           <div class="uso-filter-row">
-            <label for="uso-filter-select">Filtrar classe</label>
-            <select id="uso-filter-select"><option value="">Mostrar todas</option></select>
-            <button class="uso-mini-btn" id="uso-clear-filter">Mostrar todas</button>
+            <label for="uso-filter-select">Classe</label>
+            <select id="uso-filter-select"><option value="">Todas as classes</option></select>
+            <button class="uso-mini-btn" id="uso-clear-filter">Limpar filtro</button>
           </div>
         </div>
         <div class="uso-section">
@@ -459,8 +459,13 @@
           </div>
         </div>
         <div class="uso-footer">
-          <button class="uso-mini-btn" id="uso-export-csv">Exportar CSV</button>
-          <button class="uso-mini-btn" id="uso-export-json">Exportar JSON</button>
+          <button type="button" class="uso-mini-btn" id="uso-open-table">Tabela de atributos</button>
+          <button type="button" class="uso-mini-btn" id="uso-export-features-csv">Exportar CSV</button>
+          <button type="button" class="uso-mini-btn" id="uso-export-features-json">Exportar JSON</button>
+        </div>
+        <div class="uso-footer uso-summary-footer">
+          <button class="uso-mini-btn" id="uso-export-csv">Exportar resumo CSV</button>
+          <button class="uso-mini-btn" id="uso-export-json">Exportar resumo JSON</button>
         </div>
       </div>
     </div>
@@ -519,6 +524,10 @@
         </div>
         <div class="uso-footer">
           <button class="uso-mini-btn" id="fbds-uso-open-table" type="button">Tabela de atributos</button>
+          <button class="uso-mini-btn" id="fbds-uso-export-features-csv" type="button">Exportar CSV</button>
+          <button class="uso-mini-btn" id="fbds-uso-export-features-json" type="button">Exportar JSON</button>
+        </div>
+        <div class="uso-footer uso-summary-footer">
           <button class="uso-mini-btn" id="fbds-uso-export-csv" type="button">Exportar resumo CSV</button>
         </div>
       </div>
@@ -577,8 +586,12 @@
         <div class="uso-section"><div class="uso-section-title">Informações da base</div><div class="pd-meta" id="pd-meta"></div></div>
         <div class="uso-footer">
           <button type="button" class="uso-mini-btn" id="pd-open-table">Tabela de atributos</button>
-          <button type="button" class="uso-mini-btn" id="pd-export-csv">Exportar CSV</button>
-          <button type="button" class="uso-mini-btn" id="pd-export-json">Exportar JSON</button>
+          <button type="button" class="uso-mini-btn" id="pd-export-features-csv">Exportar CSV</button>
+          <button type="button" class="uso-mini-btn" id="pd-export-features-json">Exportar JSON</button>
+        </div>
+        <div class="uso-footer uso-summary-footer">
+          <button type="button" class="uso-mini-btn" id="pd-export-csv">Exportar resumo CSV</button>
+          <button type="button" class="uso-mini-btn" id="pd-export-json">Exportar resumo JSON</button>
         </div>
       </div>
     </div>
@@ -1114,17 +1127,17 @@
     <script src="data/aglomerados-subormais.js?v=20261011-aglomerados-v1"></script>
     <script src="js/layers.js?v=20261013-symbology-v1"></script>
     <script src="js/panels.js?v=20261013-symbology-v1"></script>
-    <script src="js/dashboard.js?v=20261013-kpi-icons-v2"></script>
-    <script src="js/dashboard-aglomerados.js?v=20261026-v2"></script>
+    <script src="js/dashboard.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/dashboard-aglomerados.js?v=20261030-dashboard-controls-v1"></script>
     <script src="js/setores-censitarios.js?v=20261013-ptbr-v1"></script>
     <script src="js/ibge.js?v=20261013-kpi-icons-v2"></script>
     <script src="js/global-search.js?v=20261012-search-flight-v2"></script>
     <script src="js/ferramentas.js?v=20261013-ptbr-v1"></script>
     <script src="js/radius.js?v=20261013-ptbr-v1"></script>
-    <script src="js/attribute-table.js?v=20261013-field-alias-v1"></script>
-    <script src="js/uso-ocupacao.js?v=20261013-ptbr-symbology-v1"></script>
-    <script src="js/plano-diretor.js?v=20261013-ptbr-v1"></script>
-    <script src="js/fbds-uso.js?v=20261013-ptbr-symbology-v1"></script>
+    <script src="js/attribute-table.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/uso-ocupacao.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/plano-diretor.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/fbds-uso.js?v=20261030-dashboard-controls-v1"></script>
     <script src="js/controls.js?v=20261001-map-composer"></script>
     <script src="js/export-map.js?v=20261013-ptbr-v1"></script>
     <script src="js/janelas.js?v=esc-fbds"></script>

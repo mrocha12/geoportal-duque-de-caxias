@@ -270,6 +270,8 @@ function computeAglomeradosStats(){
 }
 
 /* ================= RENDERIZAÇÃO DO DASHBOARD ================= */
+let aglSelectedRange = null;
+
 function renderAglomeradosDashboard(){
   const s = computeAglomeradosStats();
   const fmt  = v => formatNumberPtBR(Math.round(v || 0));
@@ -278,6 +280,11 @@ function renderAglomeradosDashboard(){
 
   const html = `
     <div class="dsh-note">Indicadores calculados dinamicamente a partir das <b>${fmt(s.n)}</b> feições de aglomerados subnormais carregadas (Censo IBGE 2010 — IBGE/AGSN). As áreas são estimativas calculadas no navegador a partir dos polígonos.</div>
+    <div class="uso-filter-row">
+      <label for="agl-range-select">Faixa de área</label>
+      <select id="agl-range-select"><option value="">Todas as faixas</option></select>
+      <button type="button" class="uso-mini-btn" id="agl-clear-range">Limpar filtro</button>
+    </div>
 
     <div class="dsh-kpi-grid">
       <div class="dsh-kpi-card"><div class="dsh-kpi-head"><span class="dsh-kpi-icon" aria-hidden="true" style="background:rgba(233,30,99,.12);color:#E91E63"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></span><div class="dsh-kpi-label">Aglomerados</div></div><div class="dsh-kpi-value">${fmt(s.n)}</div><div class="dsh-kpi-sub">total de polígonos</div></div>
@@ -305,10 +312,23 @@ function renderAglomeradosDashboard(){
         </div>
       </div>
     </div>
+    <div class="uso-footer dsh-dashboard-actions">
+      <button type="button" class="uso-mini-btn" id="agl-open-table">Tabela de atributos</button>
+      <button type="button" class="uso-mini-btn" id="agl-export-csv">Exportar CSV</button>
+      <button type="button" class="uso-mini-btn" id="agl-export-json">Exportar JSON</button>
+    </div>
   `;
 
   const body = document.getElementById("agl-body");
   body.innerHTML = html;
+  const rangeSelect = document.getElementById("agl-range-select");
+  rangeSelect.innerHTML = `<option value="">Todas as faixas</option>` + s.FAIXAS.map((range,index)=>`<option value="${index}">${escapeHtml(range.label)}</option>`).join("");
+  rangeSelect.value = aglSelectedRange===null ? "" : String(aglSelectedRange);
+  rangeSelect.addEventListener("change",()=>aglSetRange(rangeSelect.value==="" ? null : Number(rangeSelect.value)));
+  document.getElementById("agl-clear-range").addEventListener("click",()=>aglSetRange(null));
+  document.getElementById("agl-open-table").addEventListener("click",()=>openAttributeTable("aglomerados_subormais"));
+  document.getElementById("agl-export-csv").addEventListener("click",()=>aglExportFeatures("csv"));
+  document.getElementById("agl-export-json").addEventListener("click",()=>aglExportFeatures("json"));
 
   /* Barras de faixas */
   const faixasWrap = document.getElementById("agl-faixas");
@@ -328,22 +348,9 @@ function renderAglomeradosDashboard(){
   faixasWrap.querySelectorAll("[data-agl-faixa]").forEach(row => {
     row.style.cursor = "pointer";
     row.addEventListener("click", () => {
-      const label = row.getAttribute("data-agl-faixa");
-      const faixa = s.FAIXAS.find(f => f.label === label);
-      if(!faixa) return;
-      const layer = LAYERS["aglomerados_subormais"];
-      if(!layer) return;
-      if(!map.hasLayer(layer.leaflet)) toggleLayer("aglomerados_subormais", true);
-      const { aglAreas } = s;
-      layer.leaflet.eachLayer(l => {
-        const entry = aglAreas.find(e => e.f === l.feature);
-        const area = entry ? entry.area : 0;
-        const inFaixa = area >= faixa.min && area < faixa.max;
-        l.setStyle(inFaixa
-          ? { color:"#880E4F", weight:2.5, fillColor:"#E91E63", fillOpacity:0.85, opacity:1 }
-          : { fillOpacity:0.05, opacity:0.15, weight:0.8 });
-      });
-      faixasWrap.querySelectorAll(".dsh-bar-row").forEach(r => r.classList.toggle("dsh-active", r === row));
+      const index = s.FAIXAS.findIndex(f=>f.label===row.getAttribute("data-agl-faixa"));
+      if(index<0) return;
+      aglSetRange(aglSelectedRange===index ? null : index);
       showToast("Aglomerados da faixa destacados no mapa.");
     });
   });
@@ -369,6 +376,42 @@ function renderAglomeradosDashboard(){
   });
 }
 
+function aglSetRange(index){
+  aglSelectedRange=index;
+  const stats=computeAglomeradosStats();
+  const range=index===null ? null : stats.FAIXAS[index];
+  const areaByFeature=new Map(stats.aglAreas.map(entry=>[entry.f,entry.area]));
+  const layer=LAYERS["aglomerados_subormais"];
+  if(layer){
+    if(!map.hasLayer(layer.leaflet)) toggleLayer("aglomerados_subormais",true);
+    layer.leaflet.eachLayer(featureLayer=>{
+      if(!range){
+        featureLayer.setStyle({color:"#880E4F",weight:1.5,fillColor:"#E91E63",fillOpacity:0.5,opacity:0.9});
+        return;
+      }
+      const area=areaByFeature.get(featureLayer.feature)||0;
+      const selected=area>=range.min && area<range.max;
+      featureLayer.setStyle(selected
+        ? {color:"#880E4F",weight:2.5,fillColor:"#E91E63",fillOpacity:0.85,opacity:1}
+        : {fillOpacity:0.05,opacity:0.15,weight:0.8});
+    });
+  }
+  const select=document.getElementById("agl-range-select");
+  if(select) select.value=index===null ? "" : String(index);
+  document.querySelectorAll("#agl-faixas .dsh-bar-row").forEach(row=>{
+    const active=index!==null && stats.FAIXAS[index] && row.getAttribute("data-agl-faixa")===stats.FAIXAS[index].label;
+    row.classList.toggle("dsh-active",!!active);
+  });
+}
+
+function aglExportFeatures(format){
+  const stats=computeAglomeradosStats();
+  const features=aglSelectedRange===null ? DATA_AGLOMERADOS_SUBORMAIS.features : stats.aglAreas
+    .filter(entry=>entry.area>=stats.FAIXAS[aglSelectedRange].min && entry.area<stats.FAIXAS[aglSelectedRange].max)
+    .map(entry=>entry.f);
+  dashboardExportFeatures("aglomerados_subormais",features,format);
+}
+
 /* ================= ABRIR / FECHAR ================= */
 function openAglomeradosDashboard(){
   /* Restaura visibilidade de todas as camadas antes de abrir (não há modo exclusivo) */
@@ -382,6 +425,7 @@ function openAglomeradosDashboard(){
 
 function closeAglomeradosDashboard(){
   document.getElementById("modal-dashboard-aglomerados").classList.remove("open");
+  aglSelectedRange=null;
   const btn = document.getElementById("btn-aglomerados-top");
   if(btn) btn.setAttribute("aria-expanded","false");
   /* Remove destaques de filtro da camada */

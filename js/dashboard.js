@@ -250,6 +250,11 @@ function renderCensoDashboard(){
   const html = `
     <div class="dsh-note">Indicadores calculados dinamicamente a partir dos ${fmt(s.n)} setores censitários carregados na camada (Censo IBGE 2022 — campo <b>V0001</b> = população residente). Clique em um ou mais setores no mapa para selecioná-los.</div>
     <div class="dsh-selection-banner" id="dsh-selection-banner" style="display:none;"></div>
+    <div class="uso-filter-row">
+      <label for="dsh-range-select">Faixa de população</label>
+      <select id="dsh-range-select"><option value="">Todas as faixas</option></select>
+      <button type="button" class="uso-mini-btn" id="dsh-clear-range">Limpar filtro</button>
+    </div>
     <div class="dsh-kpi-grid">
       <div class="dsh-kpi-card"><div class="dsh-kpi-head"><span class="dsh-kpi-icon" aria-hidden="true" style="background:rgba(59,130,246,.15);color:#3b82f6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div class="dsh-kpi-label">População total</div></div><div class="dsh-kpi-value">${fmt(s.total)}</div><div class="dsh-kpi-sub">soma de V0001</div></div>
       <div class="dsh-kpi-card"><div class="dsh-kpi-head"><span class="dsh-kpi-icon" aria-hidden="true" style="background:rgba(139,92,246,.15);color:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 5 7-2 9 3v13l-8 2-9-3z"/><path d="m11 3 1 18M4 10l7 2m1-1 8 3m-12-2-4 5"/></svg></span><div class="dsh-kpi-label">Setores censitários</div></div><div class="dsh-kpi-value">${fmt(s.n)}</div><div class="dsh-kpi-sub">total de feições</div></div>
@@ -283,10 +288,33 @@ function renderCensoDashboard(){
       </table>
       </div>
     </div>
+    <div class="uso-footer dsh-dashboard-actions">
+      <button type="button" class="uso-mini-btn" id="dsh-open-table">Tabela de atributos</button>
+      <button type="button" class="uso-mini-btn" id="dsh-export-csv">Exportar CSV</button>
+      <button type="button" class="uso-mini-btn" id="dsh-export-json">Exportar JSON</button>
+    </div>
   `;
 
   const body = document.getElementById("dsh-body");
   body.innerHTML = html;
+  const rangeSelect = document.getElementById("dsh-range-select");
+  rangeSelect.innerHTML = `<option value="">Todas as faixas</option>` + s.faixas.map(f=>`<option value="${f.i}">${escapeHtml(f.label)}</option>`).join("");
+  rangeSelect.value = highlightedCensoRange===null ? "" : String(highlightedCensoRange);
+  rangeSelect.addEventListener("change",()=>{
+    const index = rangeSelect.value==="" ? null : Number(rangeSelect.value);
+    if(index===highlightedCensoRange) return;
+    filterCensoRange(index);
+  });
+  document.getElementById("dsh-clear-range").addEventListener("click",()=>filterCensoRange(null));
+  document.getElementById("dsh-open-table").addEventListener("click",()=>openAttributeTable("censo"));
+  document.getElementById("dsh-export-csv").addEventListener("click",()=>{
+    const features = layerFeatureList("censo").filter(f=>highlightedCensoRange===null || censoRangeIndex(f.properties.V0001||0)===highlightedCensoRange);
+    dashboardExportFeatures("censo",features,"csv");
+  });
+  document.getElementById("dsh-export-json").addEventListener("click",()=>{
+    const features = layerFeatureList("censo").filter(f=>highlightedCensoRange===null || censoRangeIndex(f.properties.V0001||0)===highlightedCensoRange);
+    dashboardExportFeatures("censo",features,"json");
+  });
   censoRenderSelectionBanner();
 
   const faixasWrap = document.getElementById("dsh-faixas");
@@ -359,6 +387,8 @@ function highlightDistrict(d){
 let highlightedCensoRange = null;
 function filterCensoRange(i){
   highlightedCensoRange = (highlightedCensoRange===i) ? null : i;
+  const rangeSelect = document.getElementById("dsh-range-select");
+  if(rangeSelect) rangeSelect.value = highlightedCensoRange===null ? "" : String(highlightedCensoRange);
   if(!map.hasLayer(LAYERS.censo.leaflet)) toggleLayer("censo", true);
   LAYERS.censo.leaflet.eachLayer(l=>{
     const v = l.feature.properties.V0001||0;

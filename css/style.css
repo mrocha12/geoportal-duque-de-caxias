@@ -1114,7 +1114,8 @@ body.light-theme .fbds-uso-metadata a{color:#202428;}
 .uso-table tr:hover td{background:rgba(255,255,255,.05);}
 .uso-table tr.uso-active td{background:rgba(59,158,255,.16);}
 .uso-table td.uso-num{text-align:right;white-space:nowrap;}
-.uso-footer{display:flex;gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid #262C34;}
+.uso-footer{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid #262C34;}
+.uso-summary-footer{margin-top:4px;padding-top:0;border-top:0;}
 .uso-rz{position:absolute;z-index:5;-webkit-tap-highlight-color:transparent;touch-action:none;}
 .uso-rz:hover{background:rgba(120,170,255,.10);}
 .uso-rz-n{top:0;left:12px;right:12px;height:6px;cursor:ns-resize;}

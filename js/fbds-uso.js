@@ -214,6 +214,15 @@ function fbdsUsoDownloadCsv(){
   link.click();
   URL.revokeObjectURL(url);
 }
+function fbdsUsoExportFeatures(format){
+  const property=FBDS_USAGE_SYMBOLOGY.property;
+  const features=DATA_FBDS_USO_OCUPACAO.features.filter(feature=>{
+    if(!fbdsUsageSelectedClass) return true;
+    const value=feature.properties && feature.properties[property];
+    return String(value==null || value==="" ? "Sem classe" : value)===fbdsUsageSelectedClass;
+  });
+  dashboardExportFeatures("uso_ocupacao_fbds",features,format);
+}
 
 function fbdsUsoResetGeometry(){
   const panel=document.getElementById("fbds-uso-panel");
@@ -242,6 +251,8 @@ function fbdsUsoResetGeometry(){
   document.getElementById("fbds-uso-clear-filter").addEventListener("click",()=>fbdsUsoSetClass(null));
   document.getElementById("fbds-uso-open-table").addEventListener("click",()=>openAttributeTable("uso_ocupacao_fbds"));
   document.getElementById("fbds-uso-export-csv").addEventListener("click",fbdsUsoDownloadCsv);
+  document.getElementById("fbds-uso-export-features-csv").addEventListener("click",()=>fbdsUsoExportFeatures("csv"));
+  document.getElementById("fbds-uso-export-features-json").addEventListener("click",()=>fbdsUsoExportFeatures("json"));
 
   header.addEventListener("pointerdown",event=>{
     if(event.button!==undefined && event.button!==0 || event.target.closest("button")) return;

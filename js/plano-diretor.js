@@ -317,6 +317,9 @@ function pdExport(format){
     pdDownload(json, `plano_diretor_2022_zonas${suffix}.json`, "application/json;charset=utf-8;");
   }
 }
+function pdExportFeatures(format){
+  dashboardExportFeatures(PD_ID,pdScopeFeats(),format);
+}
 
 /* ---------- eventos ---------- */
 (function pdInitEvents(){
@@ -337,6 +340,8 @@ function pdExport(format){
   $("pd-open-table").addEventListener("click", ()=>{ if(typeof openAttributeTable==="function") openAttributeTable(PD_ID); });
   $("pd-export-csv").addEventListener("click", ()=>pdExport("csv"));
   $("pd-export-json").addEventListener("click", ()=>pdExport("json"));
+  $("pd-export-features-csv").addEventListener("click", ()=>pdExportFeatures("csv"));
+  $("pd-export-features-json").addEventListener("click", ()=>pdExportFeatures("json"));
   map.on("layeradd layerremove", e=>{
     if(LAYERS[PD_ID] && e.layer===LAYERS[PD_ID].leaflet && $("pd-panel").classList.contains("open")) pdUpdateOfflineBanner();
   });
