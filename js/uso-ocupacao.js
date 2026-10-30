@@ -137,7 +137,7 @@ function usoRenderFilterSelect(stats){
   const sel = document.getElementById("uso-filter-select");
   if(!sel) return;
   const current = usoSelectedClass || "";
-  sel.innerHTML = `<option value="">Mostrar todas</option>` + stats.rows.map(row=>`<option value="${usoEscapeAttr(row.classe)}" ${row.classe===current?"selected":""}>${usoEscapeHtml(row.classe)}</option>`).join("");
+  sel.innerHTML = `<option value="">Todas as classes</option>` + stats.rows.map(row=>`<option value="${usoEscapeAttr(row.classe)}" ${row.classe===current?"selected":""}>${usoEscapeHtml(row.classe)}</option>`).join("");
 }
 
 function usoRenderSelectionBanner(stats){
