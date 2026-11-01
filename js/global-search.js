@@ -62,7 +62,6 @@
     }
     return layerIndex;
   }
-
   function searchLayers(q){
     const nq=norm(q); if(!nq) return [];
     const scored=[];

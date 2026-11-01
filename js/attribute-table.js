@@ -345,7 +345,7 @@ function atRenderFiltersList(){
   list.innerHTML = atFilters.map((f,i)=>{
     const opLabel = opLabels[f.op] || f.op;
     const valTxt = f.op==="between" ? `${f.value} — ${f.value2}` : f.value;
-    return `<div class="at-filter-chip"><span>${escapeHtml(atPrettyFieldLabel(f.field))} ${opLabel} <b>${escapeHtml(String(valTxt))}</b></span><span class="at-filter-remove" data-remove-filter="${i}" title="Remover filtro">✕</span></div>`;
+    return `<div class="at-filter-chip"><span>${escapeHtml(atPrettyFieldLabel(f.field))} ${opLabel} <b>${escapeHtml(String(valTxt))}</b></span><button type="button" class="at-filter-remove" data-remove-filter="${i}" aria-label="Remover filtro" title="Remover filtro">✕</button></div>`;
   }).join("");
   list.querySelectorAll("[data-remove-filter]").forEach(el=>{
     el.addEventListener("click", ()=>{

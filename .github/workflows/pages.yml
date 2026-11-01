@@ -23,6 +23,12 @@ jobs:
     steps:
       - name: Obter arquivos do projeto
         uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validar projeto
+        run: node scripts/validate-project.mjs
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
         with:

@@ -1,8 +1,18 @@
 # Geoportal Duque de Caxias — Histórico de modificações
 
-Arquivo único com todas as modificações, da versão mais recente (V34) para a mais antiga (V9).
+Arquivo único com todas as modificações, da versão mais recente (V36) para a mais antiga (V9).
+
+## V36 — Dados do IBGE junto aos dashboards
+- O atalho de Dados do IBGE foi movido da barra superior para a seção Dashboards da barra lateral.
+- A ação existente de abertura da consulta por município e o painel IBGE foram preservados.
+
+## V35 — Acessibilidade e validação no deploy
+- Ações da Tabela de Atributos, inclusive remover filtros, passam a ser botões acessíveis por teclado.
+- O workflow valida a sintaxe dos scripts e as referências locais antes de publicar.
 
 ## Índice
+- [V36 — Dados do IBGE junto aos dashboards](#v36--dados-do-ibge-junto-aos-dashboards)
+- [V35 — Acessibilidade e validação no deploy](#v35--acessibilidade-e-validação-no-deploy)
 - [V34 — Todas as janelas movíveis e redimensionáveis](#v34--todas-as-janelas-movíveis-e-redimensionáveis)
 - [V33 — Teste: leve transparência no corpo dos painéis e janelas](#v33--teste-leve-transparência-no-corpo-dos-painéis-e-janelas)
 - [V32 — Fechar janela desseleciona o elemento do mapa](#v32--fechar-janela-desseleciona-o-elemento-do-mapa)
@@ -363,11 +373,3 @@ A alteração é exclusivamente visual. Camadas, dados, URLs, scripts, APIs, IDs
 ### Não alterado nesta versão
 - `data/data.js` continua único (~5,8 MB); divisão por camada com carregamento sob demanda fica para uma próxima etapa.
 - Código duplicado das janelas arrastáveis (attribute-table, dashboard, ibge, panels, radius).
-
-- Faces de Logradouro: removida dependência de fetch/CORS; dados otimizados incorporados em data/faces-logradouros.js. Camada automática a partir do zoom 15.
-
-
-## Correção Faces de Logradouro – tooltip hover
-- Vinculado o hover após o carregamento das feições.
-- Tooltip usa `NM_TIP_LOG + espaço + NM_LOG` como nome da via.
-- Mantidas as demais configurações.

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Geoportal | Duque de Caxias</title>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css?v=20261030-dashboard-controls-v1">
+    <link rel="stylesheet" href="css/style.css?v=20261101-accessible-controls-v2">
   <link rel="stylesheet" href="css/topbar-fix.css?v=20261010-v1">
   <link rel="stylesheet" href="css/tema-grafite-azul.css?v=v28">
   <link rel="stylesheet" href="css/opening-logo.css?v=gif3">
@@ -63,10 +63,6 @@
       <div id="global-search-results" class="global-search-results" role="region" aria-label="Resultados da pesquisa" aria-live="polite" hidden></div>
     </div>
     <div class="spacer"></div>
-    <button class="icon-btn-ibge" id="btn-ibge-top" title="Consultar dados oficiais do IBGE por município" aria-label="Dados do IBGE">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-      <span>Dados do IBGE</span>
-    </button>
     <button class="icon-btn" id="btn-share" title="Copiar link desta vista do mapa" aria-label="Copiar link desta vista do mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg></button>
     <button class="icon-btn" id="btn-theme" title="Tema claro/escuro" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l-1.42 1.42M17.65 6.35l1.42-1.42"></path></svg></button>
     <button class="icon-btn" id="btn-help" title="Ajuda" aria-label="Ajuda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9a2.5 2.5 0 1 1 4.1 1.9c-1.1.9-1.7 1.4-1.7 2.8"></path><path d="M12 17.5h.01"></path></svg></button>
@@ -200,6 +196,12 @@
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
       </span>
       <span class="bb-label">Dashboard · Aglomerados Subnormais</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-ibge-top" title="Consultar dados oficiais do IBGE por município" aria-label="Dashboard · Dados do IBGE" aria-haspopup="dialog" aria-controls="modal-ibge">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+      </span>
+      <span class="bb-label">Dashboard · Dados do IBGE</span>
     </button>
 
 
@@ -622,13 +624,13 @@
             <input type="text" id="at-search" placeholder="Pesquisar registros..." aria-label="Pesquisar registros" disabled>
           </div>
           <div class="at-toolbar-row at-links-row" id="at-links-row" hidden>
-            <span class="at-link" id="at-add-filter">+ filtro</span>
-            <span class="at-link" id="at-clear-filters" hidden>limpar filtros</span>
+            <button type="button" class="at-link" id="at-add-filter">+ filtro</button>
+            <button type="button" class="at-link" id="at-clear-filters" hidden>limpar filtros</button>
             <span class="at-sep">·</span>
-            <span class="at-link" id="at-columns-toggle">colunas</span>
+            <button type="button" class="at-link" id="at-columns-toggle">colunas</button>
             <span class="at-sep">·</span>
-            <span class="at-link" id="at-export-csv">exportar CSV</span>
-            <span class="at-link" id="at-export-geojson">exportar GeoJSON</span>
+            <button type="button" class="at-link" id="at-export-csv">exportar CSV</button>
+            <button type="button" class="at-link" id="at-export-geojson">exportar GeoJSON</button>
           </div>
           <div class="at-filters-panel" id="at-filters-panel" hidden>
             <div id="at-filters-list"></div>
@@ -644,11 +646,11 @@
           <div class="at-status-row" id="at-status-row" hidden>
             <span id="at-status-text"></span>
             <span class="at-selection-actions" id="at-selection-actions">
-              <span class="at-link" id="at-select-all">selecionar todos</span>
-              <span class="at-link" id="at-select-clear">limpar seleção</span>
-              <span class="at-link" id="at-zoom-selection">zoom seleção</span>
-              <span class="at-link" id="at-zoom-all">zoom resultados</span>
-              <span class="at-link" id="at-open-popup">abrir popup</span>
+              <button type="button" class="at-link" id="at-select-all">selecionar todos</button>
+              <button type="button" class="at-link" id="at-select-clear">limpar seleção</button>
+              <button type="button" class="at-link" id="at-zoom-selection">zoom seleção</button>
+              <button type="button" class="at-link" id="at-zoom-all">zoom resultados</button>
+              <button type="button" class="at-link" id="at-open-popup">abrir popup</button>
             </span>
           </div>
           <div id="table-note" style="font-size:11.5px;color:var(--muted-text);"></div>
@@ -1125,16 +1127,16 @@
     <script src="js/utils.js?v=20261022-theme-icon-v1"></script>
     <script src="data/arruamento-osm.js?v=20261011-arruamento-v1"></script>
     <script src="data/aglomerados-subormais.js?v=20261011-aglomerados-v1"></script>
-    <script src="js/layers.js?v=20261013-symbology-v1"></script>
-    <script src="js/panels.js?v=20261013-symbology-v1"></script>
+    <script src="js/layers.js?v=20261101-simplified-layer-catalog-v1"></script>
+    <script src="js/panels.js?v=20261101-simplified-layer-catalog-v1"></script>
     <script src="js/dashboard.js?v=20261030-dashboard-controls-v1"></script>
     <script src="js/dashboard-aglomerados.js?v=20261030-dashboard-controls-v1"></script>
     <script src="js/setores-censitarios.js?v=20261013-ptbr-v1"></script>
     <script src="js/ibge.js?v=20261013-kpi-icons-v2"></script>
-    <script src="js/global-search.js?v=20261012-search-flight-v2"></script>
+    <script src="js/global-search.js?v=20261101-simplified-layer-catalog-v1"></script>
     <script src="js/ferramentas.js?v=20261013-ptbr-v1"></script>
     <script src="js/radius.js?v=20261013-ptbr-v1"></script>
-    <script src="js/attribute-table.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/attribute-table.js?v=20261101-faces-lazy-v2"></script>
     <script src="js/uso-ocupacao.js?v=20261030-dashboard-controls-v2"></script>
     <script src="js/plano-diretor.js?v=20261030-dashboard-controls-v1"></script>
     <script src="js/fbds-uso.js?v=20261030-dashboard-controls-v1"></script>
