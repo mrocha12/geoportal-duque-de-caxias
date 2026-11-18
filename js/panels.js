@@ -791,6 +791,13 @@ function updateZoomControlledLayers(){
 function toggleLayer(id, visible){
   const layer = LAYERS[id];
   if(!layer) return;
+  if(!layer.leaflet && visible && layer.lazySource){
+    ensureLayerReady(id).catch(()=>{});
+    if(layer.respectUserToggle) layer._userOff = false;
+    renderLayersPanel();
+    return;
+  }
+  if(!layer.leaflet) return;
   const censoDashboardOpen = !!document.getElementById("modal-dashboard-censo")?.classList.contains("open");
   const pdDashboardOpen = !!document.getElementById("pd-panel")?.classList.contains("open");
   if(censoDashboardOpen && id !== "censo") return;
@@ -817,6 +824,7 @@ function setAllLayers(visible){
     const exclusiveId = censoDashboardOpen ? "censo" : "plano_diretor";
     const censoLayer = LAYERS[exclusiveId];
     if(censoLayer){
+      if(!censoLayer.leaflet) return;
       if(visible && !map.hasLayer(censoLayer.leaflet)) censoLayer.leaflet.addTo(map);
       if(!visible && map.hasLayer(censoLayer.leaflet)) map.removeLayer(censoLayer.leaflet);
     }
@@ -826,6 +834,13 @@ function setAllLayers(visible){
   }
   Object.keys(LAYERS).forEach(id=>{
     const layer = LAYERS[id];
+    if(!layer.leaflet){
+      if(visible && layer.lazySource){
+        ensureLayerReady(id).catch(()=>{});
+        if(layer.respectUserToggle) layer._userOff = false;
+      }
+      return;
+    }
     let v = visible;
     if(layer.respectUserToggle) layer._userOff = !visible;
     if(layer.zoomControlled && v &&
