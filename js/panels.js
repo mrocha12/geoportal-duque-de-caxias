@@ -772,7 +772,11 @@ function updateZoomControlledLayers(){
     const shouldShow = map.getZoom() >= (layer.minZoom || 14) && isLayerWithinDisplayScale(layer);
     const isVisible = isLayerOnMap(id);
     if(shouldShow && !isVisible && !(layer.respectUserToggle && layer._userOff)){
-      layer.leaflet.addTo(map);
+      if(layer.lazySource && !layer.leaflet){
+        ensureLayerReady(id).catch(()=>{});
+      } else {
+        layer.leaflet.addTo(map);
+      }
       changed = true;
     } else if(!shouldShow && isVisible){
       map.removeLayer(layer.leaflet);

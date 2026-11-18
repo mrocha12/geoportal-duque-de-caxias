@@ -86,6 +86,12 @@ function ensureLayerReady(id){
         if(typeof rebuildSearchIndex === "function") rebuildSearchIndex();
       }
     }
+    if(layer.zoomControlled && layer.leaflet){
+      const shouldShow = map.getZoom() >= (layer.minZoom || 14) && isLayerWithinDisplayScale(layer);
+      if(shouldShow && !(layer.respectUserToggle && layer._userOff) && !map.hasLayer(layer.leaflet)){
+        layer.leaflet.addTo(map);
+      }
+    }
     layer._loading = false;
     if(typeof renderLayersPanel === "function") renderLayersPanel();
     if(typeof renderLegend === "function") renderLegend();
