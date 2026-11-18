@@ -1,0 +1,137 @@
+/* ============================================================
+   V29 — Efeito "cartões com faixa de destaque" no painel lateral esquerdo
+   Inspirado no painel de indicadores da imagem de referência:
+   painel de vidro com halo suave, itens em cartões arredondados com
+   faixa lateral de destaque e leve brilho ao passar o mouse.
+   Monocromático: usa só a paleta do geoportal (--tema-destaque).
+   Carregado por último; altera apenas a aparência.
+   ============================================================ */
+
+/* Painel: vidro com halo suave e reflexo no topo */
+#left-toolbar{
+  border-radius:16px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,0) 90px),
+    rgba(24,28,35,.92);
+  box-shadow:
+    0 0 0 1px rgba(59,158,255,.16),
+    0 0 26px rgba(59,158,255,.10),
+    0 12px 32px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+/* Cartões */
+#left-toolbar .lt-btn:not(.lt-collapse),
+#left-toolbar .bb-btn{
+  position:relative;
+  border-radius:10px !important;
+  border:1px solid rgba(255,255,255,.07);
+  border-left:3px solid rgba(59,158,255,.55);
+  background:linear-gradient(90deg,rgba(59,158,255,.10),rgba(255,255,255,.03) 62%);
+  box-shadow:0 2px 6px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04);
+  transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+
+#left-toolbar .lt-btn:not(.lt-collapse):hover,
+#left-toolbar .bb-btn:hover{
+  transform:translateX(3px);
+  background:linear-gradient(90deg,rgba(59,158,255,.20),rgba(255,255,255,.06) 70%);
+  border-color:rgba(125,189,255,.28);
+  border-left-color:var(--tema-destaque-claro,#7DBDFF);
+  box-shadow:0 4px 12px rgba(0,0,0,.34),0 0 14px rgba(59,158,255,.16);
+}
+
+#left-toolbar .lt-btn:not(.lt-collapse):active,
+#left-toolbar .bb-btn:active{transform:translateX(1px) scale(.99);}
+
+/* Item ativo: mantém o azul cheio e a faixa clara */
+#left-toolbar .lt-btn.active:not(.lt-collapse),
+#left-toolbar .bb-btn.active{
+  border-left-color:#fff;
+  box-shadow:0 5px 16px rgba(59,158,255,.30),inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+/* Ícone dentro de uma pequena "pastilha", como nos indicadores */
+#left-toolbar .lt-btn:not(.lt-collapse) > svg,
+#left-toolbar .bb-btn .bb-icon{
+  padding:3px;box-sizing:content-box;
+  width:21px;height:21px;
+  border-radius:7px;
+  background:rgba(59,158,255,.16);
+  color:var(--tema-destaque-claro,#7DBDFF);
+}
+#left-toolbar .lt-btn.active > svg,
+#left-toolbar .bb-btn.active .bb-icon{background:rgba(255,255,255,.20);color:#fff;}
+
+/* Título de seção ("Dados") no estilo do cabeçalho "Indicadores" */
+#left-toolbar .lt-group-label{
+  display:flex;align-items:center;gap:6px;
+  margin:2px 0 0 2px;font-size:9px;letter-spacing:.1em;
+  color:var(--tema-texto-2,#AEB6C2);
+}
+#left-toolbar .lt-group-label::before{
+  content:"";width:3px;height:11px;border-radius:2px;
+  background:var(--tema-destaque,#3B9EFF);
+}
+
+/* Entrada suave dos cartões (uma vez ao carregar) */
+@keyframes lt-card-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+#left-toolbar .lt-btn:not(.lt-collapse),
+#left-toolbar .bb-btn{animation:lt-card-in .45s ease both;}
+#left-toolbar > :nth-child(3){animation-delay:.04s}
+#left-toolbar > :nth-child(4){animation-delay:.08s}
+#left-toolbar > :nth-child(5){animation-delay:.12s}
+#left-toolbar > :nth-child(6){animation-delay:.16s}
+#left-toolbar > :nth-child(8){animation-delay:.20s}
+#left-toolbar > :nth-child(9){animation-delay:.24s}
+#left-toolbar > :nth-child(12){animation-delay:.28s}
+
+/* ---------- Tema claro ---------- */
+body.light-theme #left-toolbar{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.7) 90px),
+    rgba(255,255,255,.88);
+  box-shadow:
+    0 0 0 1px rgba(31,122,224,.18),
+    0 0 24px rgba(31,122,224,.10),
+    0 10px 26px rgba(21,26,33,.16);
+}
+body.light-theme #left-toolbar .lt-btn:not(.lt-collapse),
+body.light-theme #left-toolbar .bb-btn{
+  border-color:rgba(21,26,33,.10);
+  border-left-color:rgba(31,122,224,.65);
+  background:linear-gradient(90deg,rgba(31,122,224,.10),rgba(255,255,255,.9) 65%);
+  box-shadow:0 2px 6px rgba(21,26,33,.10);
+}
+body.light-theme #left-toolbar .lt-btn:not(.lt-collapse):hover,
+body.light-theme #left-toolbar .bb-btn:hover{
+  background:linear-gradient(90deg,rgba(31,122,224,.20),rgba(255,255,255,.95) 70%);
+  border-left-color:#1F7AE0;
+}
+body.light-theme #left-toolbar .lt-btn.active:not(.lt-collapse),
+body.light-theme #left-toolbar .bb-btn.active{
+  background:linear-gradient(180deg,#2D8BF0,#1F7AE0);border-left-color:#fff;
+}
+body.light-theme #left-toolbar .lt-btn:not(.lt-collapse) > svg,
+body.light-theme #left-toolbar .bb-btn .bb-icon{background:rgba(31,122,224,.14);color:#1F7AE0;}
+body.light-theme #left-toolbar .lt-btn.active > svg,
+body.light-theme #left-toolbar .bb-btn.active .bb-icon{background:rgba(255,255,255,.22);color:#fff;}
+
+/* Celular: sem deslocamento no hover (toque) */
+@media (max-width:768px){
+  #left-toolbar .lt-btn:not(.lt-collapse):hover,
+  #left-toolbar .bb-btn:hover{transform:none;}
+}
+@media (prefers-reduced-motion:reduce){
+  #left-toolbar .lt-btn,#left-toolbar .bb-btn{animation:none !important;transition:none !important;}
+}
+
+/* ---------- Marcadores: cabeçalho com botão de fechar ---------- */
+#bookmarks-box .bm-title{display:flex;align-items:center;gap:8px;}
+#bookmarks-box .bm-title .search-close{
+  flex:0 0 auto;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);
+  color:var(--tema-texto,#fff);font-size:14px;cursor:pointer;
+}
+#bookmarks-box .bm-title .search-close:hover{background:var(--tema-hover,#303740);}
+body.light-theme #bookmarks-box .bm-title .search-close{border-color:rgba(21,26,33,.25);background:rgba(21,26,33,.06);color:#151A21;}

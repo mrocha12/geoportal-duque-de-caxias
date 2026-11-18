@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geoportal | Duque de Caxias</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css?v=20261101-accessible-controls-v2">
+  <link rel="stylesheet" href="css/topbar-fix.css?v=20261010-v1">
+  <link rel="stylesheet" href="css/tema-grafite-azul.css?v=v28">
+  <link rel="stylesheet" href="css/opening-logo.css?v=gif3">
+  <link rel="stylesheet" href="css/painel-efeito.css?v=20261010-v1">
+  <link rel="stylesheet" href="css/janelas.css?v=20261010-v1">
+  <link rel="stylesheet" href="css/transparencia.css?v=v36">
+</head>
+<body>
+
+<!-- TELA INICIAL DE ABERTURA -->
+<div id="opening-screen" role="dialog" aria-modal="true" aria-labelledby="opening-title" aria-describedby="opening-subtitle">
+  <div class="opening-bg" aria-hidden="true"></div>
+  <div class="opening-vignette" aria-hidden="true"></div>
+  <div class="opening-scanline" aria-hidden="true"></div>
+  <svg class="opening-network" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+    <g class="opening-route opening-route-a">
+      <path d="M120 790 C340 640 500 710 690 530 C850 380 1010 455 1195 315 C1390 165 1530 275 1810 120"/>
+    </g>
+    <g class="opening-route opening-route-b">
+      <path d="M70 180 C290 305 450 215 625 330 C820 458 1000 365 1170 500 C1360 650 1565 535 1860 700"/>
+    </g>
+    <g class="opening-nodes">
+      <circle cx="690" cy="530" r="5"/><circle cx="850" cy="380" r="4"/><circle cx="1195" cy="315" r="5"/><circle cx="1530" cy="275" r="4"/>
+      <circle cx="625" cy="330" r="4"/><circle cx="1170" cy="500" r="5"/><circle cx="1565" cy="535" r="4"/>
+    </g>
+  </svg>
+  <button id="opening-close" class="opening-close" type="button" aria-label="Fechar tela inicial" title="Fechar">×</button>
+  <p class="opening-location">GEOPORTAL – DUQUE DE CAXIAS</p>
+  <main class="opening-content">
+    <div class="opening-kicker">GEOPORTAL</div>
+    <h1 id="opening-title">GEOPORTAL <span>–</span> DUQUE DE CAXIAS</h1>
+    <div class="opening-rule" aria-hidden="true"></div>
+    <p id="opening-subtitle">Mapa <span>•</span> Camadas <span>•</span> Dados</p>
+    <button id="opening-enter" class="opening-enter" type="button">
+      <span>ENTRAR NO GEOPORTAL</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+    </button>
+  </main>
+  <div class="opening-corner opening-corner-tl" aria-hidden="true"></div>
+  <div class="opening-corner opening-corner-br" aria-hidden="true"></div>
+</div>
+
+<div id="app">
+
+  <div id="topbar">
+    <a class="brand-logo-link" href="https://marcio-gis-portf.lovable.app" target="_blank" rel="noopener noreferrer" title="Abrir portfólio MR – Tecnologia que mapeia." aria-label="Abrir o portfólio MR – Tecnologia que mapeia. em uma nova aba"><img class="brand-logo" src="assets/images/logo-mr-completo.png?v=2" alt="MR – Geoprocessamento" width="113" height="67"></a><span class="brand-title"><span class="brand">Geoportal</span>
+    <span class="sep">|</span>
+    <span class="sub">Duque de Caxias</span></span>
+    <div id="global-search-box" class="global-search-box" aria-label="Pesquisar endereços e informações das camadas">
+      <div class="global-search-input-wrap">
+        <span class="global-search-input-icon" aria-hidden="true">⌕</span>
+        <input type="text" id="global-search-input" autocomplete="off" spellcheck="false" placeholder="Pesquisar endereço ou informações das camadas..." aria-label="Pesquisar endereço ou informações das camadas">
+        <button type="button" id="global-search-clear" title="Limpar pesquisa" aria-label="Limpar pesquisa" hidden>&#10005;</button>
+      </div>
+      <div id="global-search-results" class="global-search-results" role="region" aria-label="Resultados da pesquisa" aria-live="polite" hidden></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btn-share" title="Copiar link desta vista do mapa" aria-label="Copiar link desta vista do mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg></button>
+    <button class="icon-btn" id="btn-theme" title="Tema claro/escuro" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l-1.42 1.42M17.65 6.35l1.42-1.42"></path></svg></button>
+    <button class="icon-btn" id="btn-help" title="Ajuda" aria-label="Ajuda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9a2.5 2.5 0 1 1 4.1 1.9c-1.1.9-1.7 1.4-1.7 2.8"></path><path d="M12 17.5h.01"></path></svg></button>
+    <button class="icon-btn" id="btn-about" title="Sobre o Geoportal" aria-label="Sobre o Geoportal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></button>
+  </div>
+
+  <div id="map-wrap">
+    <div id="map"></div>
+
+    <button id="mobile-toolbar-toggle" type="button" title="Abrir ferramentas" aria-label="Abrir ferramentas" aria-expanded="false" aria-controls="left-toolbar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+
+    <!-- LEFT TOOLBAR -->
+    <div id="left-toolbar">
+      <button class="lt-btn lt-collapse" id="lt-collapse" type="button" title="Recolher painel lateral" aria-label="Recolher painel lateral" aria-expanded="true" aria-controls="left-toolbar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"></path></svg>
+        <span class="lt-collapse-label">Recolher</span>
+      </button>
+      <button class="lt-btn" id="lt-search" title="Buscar por categoria" aria-label="Buscar por categoria">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"></circle><path d="M15.5 15.5L21 21"></path></svg>
+      </button>
+      <button class="lt-btn" id="lt-home" title="Extensão inicial" aria-label="Extensão inicial">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5L12 3.5l8.5 7v9.5h-6v-6h-5v6h-6z"></path></svg>
+      </button>
+      <button class="lt-btn" id="lt-zoomin" title="Aumentar zoom" aria-label="Aumentar zoom"><span class="zoom-symbol">+</span></button>
+      <button class="lt-btn" id="lt-zoomout" title="Diminuir zoom" aria-label="Diminuir zoom"><span class="zoom-symbol">−</span></button>
+      <div class="lt-gap"></div>
+      <button class="lt-btn" id="lt-bookmark" title="Marcadores de extensão" aria-label="Marcadores de extensão">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h11v15l-5.5-3.4-5.5 3.4z"></path></svg>
+      </button>
+      <button class="lt-btn" id="lt-locate" title="Minha localização" aria-label="Minha localização">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"></path></svg>
+      </button>
+      <div class="lt-gap"></div>
+      <button class="lt-btn lt-tools-btn" id="bb-tools" title="Ferramentas" aria-label="Ferramentas" aria-haspopup="menu" aria-expanded="false" aria-controls="tools-menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.2a4.1 4.1 0 0 0-5.4 5.4L4 16.9a2 2 0 1 0 2.8 2.8l5.3-5.3a4.1 4.1 0 0 0 5.4-5.4l-2.5 2.5-2.8-.5-.5-2.8z"></path><path d="M17.2 4.1l2.7 2.7"></path></svg>
+      </button>
+      <div id="tools-menu" role="menu" aria-label="Ferramentas" hidden>
+        <div class="tools-menu-title">Ferramentas</div>
+        <button class="tools-menu-item" id="bb-measure" title="Medir" aria-label="Medir" aria-pressed="false" role="menuitem">
+          <span class="tools-menu-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 h5.5 M15.5 6.5 H21 M9.7 6.5 h4.6" stroke-width="1.3"></path><path d="M3 5 l-1.6 1.5 L3 8 M21 5 l1.6 1.5 L21 8" stroke-width="1.3"></path><rect x="2.5" y="12.5" width="19" height="6" rx="0.8"></rect><path d="M6 12.5 v2.4 M9.5 12.5 v2.4 M13 12.5 v3.6 M16.5 12.5 v2.4"></path></svg></span><span>Medir</span>
+        </button>
+        <button class="tools-menu-item" id="bb-sketch" title="Esboço" aria-label="Esboço" aria-pressed="false" role="menuitem">
+          <span class="tools-menu-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.8 3.6 a2 2 0 0 1 2.8 2.8 L8.2 16.8 l-3.8 1 l1-3.8 z"></path><path d="M14 5.4 l2.8 2.8"></path><path d="M3.4 20.6 c1.6 -1.4 2.6 -1.2 3.6 0" stroke-width="1.3"></path></svg></span><span>Esboço</span>
+        </button>
+        <button class="tools-menu-item" id="bb-radius" title="Consulta por Raio" aria-label="Consulta por Raio" aria-pressed="false" role="menuitem">
+          <span class="tools-menu-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" stroke-dasharray="2.4,2.6"></circle><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"></circle><path d="M12 2.6v2.6M12 18.8v2.6M2.6 12h2.6M18.8 12h2.6"></path></svg></span><span>Consulta por Raio</span>
+        </button>
+        <button class="tools-menu-item" id="bb-attrtable" title="Tabela de Atributos" aria-label="Tabela de Atributos" aria-haspopup="dialog" aria-expanded="false" aria-controls="modal-table" role="menuitem">
+          <span class="tools-menu-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="4.5" width="17.6" height="15" rx="1.3"></rect><path d="M3.2 9.5h17.6"></path><path d="M3.2 14.5h17.6"></path><path d="M9.5 4.5v15"></path></svg></span><span>Tabela de Atributos</span>
+        </button>
+        <button class="tools-menu-item" id="bb-export" title="Exportar / Salvar Camadas" aria-label="Exportar / Salvar Camadas" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel-export" role="menuitem">
+          <span class="tools-menu-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 v11.5"></path><path d="M8 11.5 l4 4 4-4"></path><path d="M4.5 15.7 v3.8 a1 1 0 0 0 1 1 h13 a1 1 0 0 0 1-1 v-3.8"></path></svg></span><span>Exportar / Salvar Camadas</span>
+        </button>
+        <button class="tools-menu-item" id="bb-map-export" title="Exportar Mapa" aria-label="Exportar Mapa" aria-haspopup="dialog" aria-expanded="false" aria-controls="modal-map-export" role="menuitem">
+          <span class="tools-menu-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1.5"></rect><path d="M7 16l3.5-4 2.5 2.5 2-2 3 3.5M8 8.5h.01"></path></svg></span><span>Exportar Mapa</span>
+        </button>
+      </div>
+      <div class="lt-gap lt-group-separator"></div>
+      <div class="lt-group-label" aria-hidden="true">Dados</div>
+      <button class="lt-btn bb-btn" id="bb-basemaps" title="Mapas Base" aria-label="Mapas Base" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel-basemap">
+      <span class="bb-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.2" y="2.2" width="8.4" height="8.4" rx="0.6"/><rect x="13.4" y="2.2" width="8.4" height="8.4" rx="0.6"/>
+          <rect x="2.2" y="13.4" width="8.4" height="8.4" rx="0.6"/><rect x="13.4" y="13.4" width="8.4" height="8.4" rx="0.6"/>
+          <path d="M2.2 10.6 L10.6 2.2 M13.4 10.6 L21.8 2.2 M2.2 21.8 L10.6 13.4 M13.4 21.8 L21.8 13.4"/>
+        </svg>
+      </span>
+      <span class="bb-label">Mapas Base</span>
+    </button>
+      <button class="lt-btn bb-btn" id="bb-layers" title="Camadas de mapa" aria-label="Camadas de mapa" aria-haspopup="dialog" aria-expanded="false" aria-controls="layers-panel">
+      <span class="bb-icon-wrap">
+        <span class="bb-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.2 4 L18.5 2.5 L19.8 18.8 L5.5 21.3 Z"/>
+            <path d="M4.2 4 L5.5 21.3"/>
+            <path d="M13.5 3 L14 15.5"/>
+            <path d="M7 8.5 c2 2.6 3.6 -1 5.6 1.4 c1.7 2 3 0.4 4.6 1.6" stroke-width="1.3"/>
+          </svg>
+        </span>
+        <span class="bb-badge" id="layers-badge" aria-live="polite">0</span>
+      </span>
+      <span class="bb-label">Camadas de mapa</span>
+    </button>
+      <button class="lt-btn bb-btn bb-collapsible" id="bb-addlayer" title="Adicionar camada" aria-label="Adicionar camada" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel-addlayer">
+      <span class="bb-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9.2"/><path d="M12 7.5 v9 M7.5 12 h9"/>
+        </svg>
+      </span>
+      <span class="bb-label">Adicionar camada</span>
+    </button>
+      <button class="lt-btn bb-btn bb-collapsible" id="bb-legend" title="Legenda" aria-label="Legenda" aria-haspopup="dialog" aria-expanded="false" aria-controls="legend-panel">
+      <span class="bb-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.3" y="3.3" width="3" height="3" rx="0.4"/>
+          <circle cx="3.8" cy="12" r="1.6"/>
+          <path d="M2.3 20.2 l1.5 -3 l1.5 3 z"/>
+          <path d="M8.3 4.8 h13.3 M8.3 12 h13.3 M8.3 19.2 h13.3"/>
+        </svg>
+      </span>
+      <span class="bb-label">Legenda</span>
+    </button>
+      <div class="lt-gap lt-group-separator"></div>
+      <div class="lt-group-label" aria-hidden="true">Dashboards</div>
+      <button class="lt-btn bb-btn" id="btn-dashboard-top" title="Abrir Dashboard · Setores Censitários" aria-label="Dashboard · Setores Censitários">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+      </span>
+      <span class="bb-label">Dashboard · Setores Censitários</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-uso-top" title="Abrir Dashboard · Uso e Ocupação" aria-label="Dashboard · Uso e Ocupação">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+      </span>
+      <span class="bb-label">Dashboard · Uso e Ocupação</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-fbds-uso-top" title="Abrir Dashboard · Uso e Ocupação (FBDS)" aria-label="Dashboard · Uso e Ocupação (FBDS)">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M7 15l4-5 3 3 5-7"></path></svg>
+      </span>
+      <span class="bb-label">Dashboard · Uso e Ocupação (FBDS)</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-plano-diretor-top" title="Abrir Dashboard · Plano Diretor" aria-label="Dashboard · Plano Diretor">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="M8 16v-5"></path><path d="M12 16V8"></path><path d="M16 16v-3"></path><path d="M20 16V6"></path></svg>
+      </span>
+      <span class="bb-label">Dashboard · Plano Diretor</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-aglomerados-top" title="Abrir Dashboard · Aglomerados Subnormais" aria-label="Dashboard · Aglomerados Subnormais" aria-expanded="false" aria-controls="modal-dashboard-aglomerados">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      </span>
+      <span class="bb-label">Dashboard · Aglomerados Subnormais</span>
+    </button>
+      <button class="lt-btn bb-btn" id="btn-ibge-top" title="Consultar dados oficiais do IBGE por município" aria-label="Dashboard · Dados do IBGE" aria-haspopup="dialog" aria-controls="modal-ibge">
+      <span class="bb-icon">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+      </span>
+      <span class="bb-label">Dashboard · Dados do IBGE</span>
+    </button>
+
+
+      <div class="lt-gap"></div>
+      <button class="lt-btn" id="fullscreen-btn" title="Tela cheia" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.5H4.5A1 1 0 0 0 3.5 4.5V8M16 3.5h3.5a1 1 0 0 1 1 1V8M8 20.5H4.5a1 1 0 0 1-1-1V16M16 20.5h3.5a1 1 0 0 0 1-1V16"/></svg>
+      </button>
+    </div>
+
+    <div id="search-box">
+      <div id="search-box-header">
+        <span>Buscar</span>
+        <button class="search-close" id="search-close" title="Fechar busca" aria-label="Fechar busca">&#10005;</button>
+      </div>
+      <div id="search-chips"></div>
+      <input type="text" id="search-input" placeholder="Buscar bairro, escola, saúde, via, rio...">
+      <div id="search-results"></div>
+    </div>
+
+    <div id="bookmarks-box">
+      <div class="bm-title"><span>Marcadores</span><button class="search-close" id="bookmarks-close" type="button" title="Fechar marcadores (Esc)" aria-label="Fechar marcadores">&#10005;</button></div>
+      <div id="bookmarks-list"></div>
+    </div>
+
+    <div id="sketch-box">
+      <div class="sk-title"><span class="win-title">Esboço</span> <span class="sk-title-actions"><span id="sketch-export">exportar</span><span id="sketch-clear">limpar</span></span><button class="win-x" type="button" data-close-panel title="Fechar (Esc)" aria-label="Fechar Esboço">&#10005;</button></div>
+      <div class="sk-item" data-mode="marker">&#128204; Ponto</div>
+      <div class="sk-item" data-mode="polyline">&#9585; Linha</div>
+      <div class="sk-item" data-mode="polygon">&#9723; Polígono</div>
+      <div class="sk-style-row">
+        <label for="sk-line-color">Cor da linha</label>
+        <input type="color" id="sk-line-color" value="#5eead4">
+        <label for="sk-line-weight" style="flex:0 0 60px;">Espessura</label>
+        <input type="range" id="sk-line-weight" min="1" max="10" value="3">
+        <span class="sk-style-val" id="sk-line-weight-val">3px</span>
+      </div>
+      <div class="sk-style-row">
+        <label for="sk-fill-color">Preenchimento</label>
+        <input type="color" id="sk-fill-color" value="#5eead4">
+        <label for="sk-fill-opacity" style="flex:0 0 60px;">Opacidade</label>
+        <input type="range" id="sk-fill-opacity" min="0" max="100" value="20">
+        <span class="sk-style-val" id="sk-fill-opacity-val">20%</span>
+      </div>
+      <div id="sk-list"></div>
+      <div class="sk-item" data-mode="off">&#10006; Desativar</div>
+    </div>
+
+    <div id="measure-box">
+      <div class="ms-title"><span class="win-title">Medir</span><button class="win-x" type="button" data-close-panel title="Fechar (Esc)" aria-label="Fechar Medir">&#10005;</button></div>
+      <div class="ms-item" data-mode="distance">&#128207; Distância</div>
+      <div class="ms-units" id="ms-units-distance">
+        <button type="button" class="ms-unit-btn active" data-unit-type="distance" data-unit="m">m</button>
+        <button type="button" class="ms-unit-btn" data-unit-type="distance" data-unit="km">km</button>
+      </div>
+      <div class="ms-item" data-mode="area">&#9633; Área</div>
+      <div class="ms-units" id="ms-units-area">
+        <button type="button" class="ms-unit-btn active" data-unit-type="area" data-unit="m2">m&sup2;</button>
+        <button type="button" class="ms-unit-btn" data-unit-type="area" data-unit="ha">ha</button>
+      </div>
+      <div id="ms-list"></div>
+      <div class="ms-item" data-mode="off">&#10006; Desativar / Limpar tudo</div>
+    </div>
+    <div id="measure-readout"></div>
+
+    <!-- RADIUS QUERY PANEL (Consulta por Raio) -->
+    <div id="radius-box">
+      <div class="rd-title"><span class="win-title">Consulta por Raio</span> <span class="rd-title-actions"><span id="radius-clear-title">limpar</span></span><button class="win-x" type="button" data-close-panel title="Fechar (Esc)" aria-label="Fechar Consulta por Raio">&#10005;</button></div>
+      <div class="rd-item" id="rd-define-point">&#128205; Definir ponto no mapa</div>
+      <div class="rd-item" id="rd-use-location">&#128758; Usar minha localização</div>
+      <div class="rd-row">
+        <label for="rd-radius-input">Raio</label>
+        <input type="number" id="rd-radius-input" min="1" step="1" value="300" inputmode="decimal" aria-label="Valor do raio de busca">
+        <div class="rd-units" id="rd-units">
+          <button type="button" class="rd-unit-btn active" data-unit="m">m</button>
+          <button type="button" class="rd-unit-btn" data-unit="km">km</button>
+        </div>
+      </div>
+      <div class="rd-chips" id="rd-chips">
+        <button type="button" class="rd-chip" data-value="100" data-unit="m">100 m</button>
+        <button type="button" class="rd-chip" data-value="500" data-unit="m">500 m</button>
+        <button type="button" class="rd-chip" data-value="1" data-unit="km">1 km</button>
+        <button type="button" class="rd-chip" data-value="2" data-unit="km">2 km</button>
+      </div>
+      <div class="rd-section-toggle" id="rd-layers-toggle" role="button" tabindex="0" aria-expanded="false">
+        <span>&#128193; Camadas a consultar</span>
+        <span class="rd-layers-summary" id="rd-layers-summary">todas</span>
+      </div>
+      <div class="rd-layers-panel" id="rd-layers-panel" hidden>
+        <div class="rd-layers-actions">
+          <span id="rd-layers-all">selecionar todas</span>
+          <span id="rd-layers-none">limpar seleção</span>
+        </div>
+        <div class="rd-layers-list" id="rd-layers-list"></div>
+      </div>
+      <div class="rd-point-row">
+        <span id="rd-point-readout">Nenhum ponto definido. Arraste a alça do círculo para ajustar o raio.</span>
+        <button type="button" class="rd-copy-btn" id="rd-copy-point" title="Copiar coordenadas do ponto" aria-label="Copiar coordenadas do ponto" hidden>&#128203;</button>
+      </div>
+      <div id="rd-preview"></div>
+      <div class="rd-actions">
+        <button type="button" class="lay-action-btn" id="rd-query-btn" disabled>Consultar</button>
+        <button type="button" class="lay-action-btn" id="rd-clear-btn">Limpar</button>
+      </div>
+      <div id="rd-summary"></div>
+    </div>
+
+    <!-- LEGEND PANEL -->
+    <div id="legend-panel">
+      <div class="lp-header">
+        <span class="lp-title">Legenda</span>
+        <button class="lp-close" id="legend-close" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+      </div>
+      <div class="lp-tabs">
+        <div class="lp-tab active" data-tab="legenda">Legenda</div>
+        <div class="lp-tab" data-tab="interativo">Interativo</div>
+      </div>
+      <div class="lp-body" id="legend-body"></div>
+    </div>
+
+    <!-- LAYERS PANEL -->
+    <div id="layers-panel" role="dialog" aria-label="Camadas de mapa">
+      <div class="dsh-rz dsh-rz-n" data-rz="n"></div>
+      <div class="dsh-rz dsh-rz-s" data-rz="s"></div>
+      <div class="dsh-rz dsh-rz-e" data-rz="e"></div>
+      <div class="dsh-rz dsh-rz-w" data-rz="w"></div>
+      <div class="dsh-rz dsh-rz-ne" data-rz="ne"></div>
+      <div class="dsh-rz dsh-rz-nw" data-rz="nw"></div>
+      <div class="dsh-rz dsh-rz-se" data-rz="se"></div>
+      <div class="dsh-rz dsh-rz-sw" data-rz="sw"></div>
+      <div class="lay-header" id="layers-head">
+        <div class="lay-header-left">
+          <span class="lay-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg></span>
+          <h3>Camadas <span class="lay-count" id="lay-count" aria-live="polite"></span></h3>
+        </div>
+        <div class="lay-header-right">
+          <button class="lay-icon-btn" id="lay-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+          <button class="lay-icon-btn" id="lay-minimize-btn" title="Minimizar/Restaurar" aria-label="Minimizar ou restaurar painel">&#8722;</button>
+          <button class="lp-close" id="layers-close" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+        </div>
+      </div>
+      <div class="lay-search">
+        <svg class="lay-search-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input type="text" id="lay-search" placeholder="Pesquisar camada..." aria-label="Pesquisar camada pelo nome" autocomplete="off" spellcheck="false">
+        <button type="button" class="lay-search-clear" id="lay-search-clear" title="Limpar pesquisa" aria-label="Limpar pesquisa" hidden>&#10005;</button>
+      </div>
+      <div class="lay-actions">
+        <button class="lay-action-btn" id="layers-all-on" title="Ligar todas as camadas" aria-label="Ligar todas as camadas">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>Ligar todas</button>
+        <button class="lay-action-btn" id="layers-all-off" title="Desligar todas as camadas" aria-label="Desligar todas as camadas">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.7A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-3.1 3.9M6.6 7.2A16 16 0 0 0 2.5 12S6 18.5 12 18.5a9.4 9.4 0 0 0 4-.9"/></svg>Desligar todas</button>
+        <span class="lay-sep" aria-hidden="true"></span>
+        <button class="lay-icon-btn" id="lay-expand-all" title="Expandir todos os grupos" aria-label="Expandir todos os grupos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9l5 5 5-5"/><path d="M7 4.5l5 5 5-5" opacity=".0"/><path d="M5 19h14"/></svg></button>
+        <button class="lay-icon-btn" id="lay-collapse-all" title="Recolher todos os grupos" aria-label="Recolher todos os grupos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15l5-5 5 5"/><path d="M5 5h14"/></svg></button>
+        <button class="lay-icon-btn" id="lay-unisolate" title="Sair do isolamento (restaurar camadas)" aria-label="Sair do isolamento" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4.5h4.5"/></svg></button>
+      </div>
+      <div class="lay-body" id="layers-body"></div>
+    </div>
+
+    <!-- BASEMAP PANEL -->
+    <div id="panel-basemap" class="side-panel">
+      <div class="lp-header">
+        <span class="lp-title">Mapas Base</span>
+        <button class="lp-close" data-panel="panel-basemap" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+      </div>
+      <div class="lp-body"><div id="basemap-grid"></div></div>
+    </div>
+
+    <!-- ADD LAYER PANEL -->
+    <div id="panel-addlayer" class="side-panel">
+      <div class="lp-header">
+        <span class="lp-title">Adicionar camada</span>
+        <button class="lp-close" data-panel="panel-addlayer" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+      </div>
+      <div class="lp-body">
+        <div id="addlayer-list"></div>
+        <div style="margin-top:14px;border-top:1px solid #262c28;padding-top:12px;">
+          <label style="font-size:12px;color:var(--muted-text);display:block;margin-bottom:6px;">Carregar arquivo GeoJSON local</label>
+          <input type="file" id="file-add-layer" accept=".json,.geojson" style="font-size:12px;color:#ccc;">
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORT LAYERS PANEL (Salvar Camadas) -->
+    <div id="panel-export" class="side-panel">
+      <div class="lp-header">
+        <span class="lp-title">Salvar Camadas</span>
+        <button class="lp-close" data-panel="panel-export" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+      </div>
+      <div class="lp-body">
+        <div class="exp-row">
+          <label for="exp-layer-select">Camada</label>
+          <select id="exp-layer-select"></select>
+        </div>
+        <div class="exp-row">
+          <label for="exp-format-select">Formato de exportação</label>
+          <select id="exp-format-select"></select>
+        </div>
+        <div id="exp-info" class="exp-info"></div>
+        <button type="button" class="lay-action-btn" id="exp-download-btn" style="width:100%;padding:8px 6px;font-size:12.5px;">&#8681; Baixar arquivo</button>
+        <div id="exp-status" class="exp-status"></div>
+        <div class="exp-note">Os arquivos preservam geometria, atributos e o sistema de referência original (WGS&nbsp;84 / EPSG:4326) sempre que o formato exportado permitir.<br>GeoPackage (.gpkg) não está disponível nesta versão: gerar esse formato no navegador exigiria uma biblioteca pesada (SQLite/WASM, dezenas de MB). Exporte em GeoJSON e converta externamente (ex.: QGIS, ogr2ogr) se precisar de .gpkg.</div>
+      </div>
+    </div>
+
+    <!-- USO E OCUPAÇÃO DO SOLO PANEL — flutuante, arrastável, redimensionável, minimizável -->
+    <div id="uso-panel" class="uso-panel" role="dialog" aria-label="Dashboard · Uso e Ocupação">
+      <div class="uso-rz uso-rz-n" data-rz="n"></div>
+      <div class="uso-rz uso-rz-s" data-rz="s"></div>
+      <div class="uso-rz uso-rz-e" data-rz="e"></div>
+      <div class="uso-rz uso-rz-w" data-rz="w"></div>
+      <div class="uso-rz uso-rz-ne" data-rz="ne"></div>
+      <div class="uso-rz uso-rz-nw" data-rz="nw"></div>
+      <div class="uso-rz uso-rz-se" data-rz="se"></div>
+      <div class="uso-rz uso-rz-sw" data-rz="sw"></div>
+      <div class="uso-head" id="uso-head">
+        <div class="uso-head-left">
+          <span class="uso-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg></span>
+          <h3>Dashboard · Uso e Ocupação</h3>
+        </div>
+        <div class="uso-head-right">
+          <button class="uso-icon-btn" id="uso-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+          <button class="uso-icon-btn" id="uso-minimize-btn" title="Minimizar/Restaurar" aria-label="Minimizar ou restaurar painel">&#8722;</button>
+          <button class="uso-icon-btn" id="uso-close-btn" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+        </div>
+      </div>
+      <div class="uso-body" id="uso-body">
+        <div id="uso-offline-banner" class="uso-offline-banner" style="display:none;">A camada está desativada no mapa. Os dados abaixo continuam disponíveis.</div>
+        <div class="uso-kpi-grid" id="uso-kpi-grid"></div>
+        <div class="uso-selection-banner" id="uso-selection-banner" style="display:none;"></div>
+        <div class="uso-section">
+          <div class="uso-section-title">Distribuição por classe</div>
+          <div class="uso-chart-row">
+            <div class="uso-chart-wrap">
+              <svg id="uso-donut" viewBox="0 0 200 200" width="170" height="170"></svg>
+              <div id="uso-donut-tooltip" class="uso-donut-tooltip" style="display:none;"></div>
+            </div>
+            <div class="uso-legend" id="uso-legend"></div>
+          </div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-filter-row">
+            <label for="uso-filter-select">Classe</label>
+            <select id="uso-filter-select"><option value="">Todas as classes</option></select>
+            <button class="uso-mini-btn" id="uso-clear-filter">Limpar filtro</button>
+          </div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-section-title">Classes</div>
+          <div class="uso-table-wrap">
+            <table class="uso-table" id="uso-table">
+              <thead><tr><th>Classe</th><th style="text-align:right;">Área</th><th style="text-align:right;">%</th></tr></thead>
+              <tbody id="uso-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="uso-footer">
+          <button type="button" class="uso-mini-btn" id="uso-open-table">Tabela de atributos</button>
+          <button type="button" class="uso-mini-btn" id="uso-export-features-csv">Exportar CSV</button>
+          <button type="button" class="uso-mini-btn" id="uso-export-features-json">Exportar JSON</button>
+        </div>
+        <div class="uso-footer uso-summary-footer">
+          <button class="uso-mini-btn" id="uso-export-csv">Exportar resumo CSV</button>
+          <button class="uso-mini-btn" id="uso-export-json">Exportar resumo JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD FBDS — Uso e Ocupação do Solo -->
+    <div id="fbds-uso-panel" class="uso-panel fbds-uso-panel" role="dialog" aria-label="Dashboard · Uso e Ocupação (FBDS)">
+      <div class="uso-rz uso-rz-n" data-rz="n"></div>
+      <div class="uso-rz uso-rz-s" data-rz="s"></div>
+      <div class="uso-rz uso-rz-e" data-rz="e"></div>
+      <div class="uso-rz uso-rz-w" data-rz="w"></div>
+      <div class="uso-rz uso-rz-ne" data-rz="ne"></div>
+      <div class="uso-rz uso-rz-nw" data-rz="nw"></div>
+      <div class="uso-rz uso-rz-se" data-rz="se"></div>
+      <div class="uso-rz uso-rz-sw" data-rz="sw"></div>
+      <div class="uso-head" id="fbds-uso-head">
+        <div class="uso-head-left">
+          <span class="uso-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg></span>
+          <h3>Dashboard · Uso e Ocupação (FBDS)</h3>
+        </div>
+        <div class="uso-head-right">
+          <button class="uso-icon-btn" id="fbds-uso-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+          <button class="uso-icon-btn" id="fbds-uso-minimize-btn" title="Minimizar/Restaurar" aria-label="Minimizar ou restaurar painel">&#8722;</button>
+          <button class="uso-icon-btn" id="fbds-uso-close-btn" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+        </div>
+      </div>
+      <div class="uso-body" id="fbds-uso-body">
+        <div class="fbds-uso-source">Base temática de uso e ocupação do solo da Fundação Brasileira para o Desenvolvimento Sustentável.</div>
+        <div class="uso-kpi-grid" id="fbds-uso-kpi-grid"></div>
+        <div class="uso-selection-banner" id="fbds-uso-selection-banner" style="display:none;"></div>
+        <div class="uso-section">
+          <div class="uso-section-title">Distribuição da área por classe <span class="pd-hint">selecione uma classe para realçar no mapa</span></div>
+          <div class="fbds-uso-donut" id="fbds-uso-stack" role="group" aria-label="Distribuição da área por classe de uso e ocupação"></div>
+          <div class="fbds-uso-legend" id="fbds-uso-legend"></div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-filter-row">
+            <label for="fbds-uso-filter">Classe</label>
+            <select id="fbds-uso-filter"><option value="">Todas as classes</option></select>
+            <button class="uso-mini-btn" id="fbds-uso-clear-filter" type="button">Limpar filtro</button>
+          </div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-section-title">Área por classe</div>
+          <div class="uso-table-wrap">
+            <table class="uso-table">
+              <thead><tr><th>Classe</th><th style="text-align:right;">Área</th><th style="text-align:right;">%</th></tr></thead>
+              <tbody id="fbds-uso-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="uso-section fbds-uso-metadata">
+          <div class="uso-section-title">Fonte e metadados</div>
+          <div>Base publicada para Duque de Caxias, RJ. Os valores de área são os do atributo original <b>AREA_HA</b>; as classes vêm de <b>CLASSE_USO</b>.</div>
+          <a href="https://geo.fbds.org.br/RJ/DUQUE_DE_CAXIAS/USO/" target="_blank" rel="noopener noreferrer">Consultar os arquivos da camada no repositório da FBDS</a><br>
+          <a href="https://geo.fbds.org.br/RJ/DUQUE_DE_CAXIAS/USO/RJ_3301702_USO.shp.xml" target="_blank" rel="noopener noreferrer">Consultar metadados técnicos da camada na FBDS</a>
+        </div>
+        <div class="uso-footer">
+          <button class="uso-mini-btn" id="fbds-uso-open-table" type="button">Tabela de atributos</button>
+          <button class="uso-mini-btn" id="fbds-uso-export-features-csv" type="button">Exportar CSV</button>
+          <button class="uso-mini-btn" id="fbds-uso-export-features-json" type="button">Exportar JSON</button>
+        </div>
+        <div class="uso-footer uso-summary-footer">
+          <button class="uso-mini-btn" id="fbds-uso-export-csv" type="button">Exportar resumo CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANO DIRETOR — DASHBOARD (flutuante, arrastável, redimensionável, minimizável) -->
+    <div id="pd-panel" class="uso-panel pd-panel" role="dialog" aria-label="Dashboard · Plano Diretor 2022">
+      <div class="uso-rz uso-rz-n" data-rz="n"></div>
+      <div class="uso-rz uso-rz-s" data-rz="s"></div>
+      <div class="uso-rz uso-rz-e" data-rz="e"></div>
+      <div class="uso-rz uso-rz-w" data-rz="w"></div>
+      <div class="uso-rz uso-rz-ne" data-rz="ne"></div>
+      <div class="uso-rz uso-rz-nw" data-rz="nw"></div>
+      <div class="uso-rz uso-rz-se" data-rz="se"></div>
+      <div class="uso-rz uso-rz-sw" data-rz="sw"></div>
+      <div class="uso-head" id="pd-head">
+        <div class="uso-head-left">
+          <span class="uso-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg></span>
+          <h3>Dashboard · Plano Diretor 2022 <span class="pd-head-sub">· Zoneamento</span></h3>
+        </div>
+        <div class="uso-head-right">
+          <button class="uso-icon-btn" id="pd-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+          <button class="uso-icon-btn" id="pd-minimize-btn" title="Minimizar/Restaurar" aria-label="Minimizar ou restaurar painel">&#8722;</button>
+          <button class="uso-icon-btn" id="pd-close-btn" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+        </div>
+      </div>
+      <div class="uso-body" id="pd-body">
+        <div id="pd-offline-banner" class="uso-offline-banner" style="display:none;">A camada está desativada no mapa. Os dados abaixo continuam disponíveis. <button type="button" class="uso-mini-btn" id="pd-enable-layer">Ativar camada</button></div>
+        <div class="uso-kpi-grid pd-kpi-grid" id="pd-kpi-grid"></div>
+        <div class="uso-selection-banner" id="pd-selection-banner" style="display:none;"></div>
+        <div class="uso-section">
+          <div class="uso-section-title">Área por classe de zoneamento <span class="pd-hint">clique para filtrar</span></div>
+          <div class="fbds-uso-donut" id="pd-stack" role="group" aria-label="Distribuição da área por classe de zoneamento"></div>
+          <div class="pd-bars" id="pd-class-bars"></div>
+        </div>
+        <div class="uso-section">
+          <div class="uso-filter-row">
+            <label for="pd-filter-select">Classe</label>
+            <select id="pd-filter-select"><option value="">Todas as classes</option></select>
+            <button type="button" class="uso-mini-btn" id="pd-clear-filter">Limpar filtro</button>
+          </div>
+        </div>
+        <div class="uso-section"><div class="uso-section-title">Objetivos estratégicos</div><div class="pd-bars" id="pd-obj-bars"></div></div>
+        <div class="uso-section"><div class="uso-section-title">Legislação</div><div class="pd-bars" id="pd-leg-bars"></div></div>
+        <div class="uso-section"><div class="uso-section-title">Ano da lei <span class="pd-hint">feições por AnoLei</span></div><div class="pd-years" id="pd-years"></div><div class="pd-note" id="pd-years-note"></div></div>
+        <div class="uso-section">
+          <div class="uso-section-title">Zonas <span class="pd-hint" id="pd-zonas-count"></span></div>
+          <input type="search" id="pd-search" class="pd-search" placeholder="Buscar zona, classe ou legislação…" aria-label="Buscar zona, classe ou legislação" autocomplete="off">
+          <div class="uso-table-wrap pd-table-wrap">
+            <table class="uso-table" id="pd-table">
+              <thead><tr><th>Zona</th><th>Classe</th><th style="text-align:right;">Área</th></tr></thead>
+              <tbody id="pd-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="uso-section"><div class="uso-section-title">Informações da base</div><div class="pd-meta" id="pd-meta"></div></div>
+        <div class="uso-footer">
+          <button type="button" class="uso-mini-btn" id="pd-open-table">Tabela de atributos</button>
+          <button type="button" class="uso-mini-btn" id="pd-export-features-csv">Exportar CSV</button>
+          <button type="button" class="uso-mini-btn" id="pd-export-features-json">Exportar JSON</button>
+        </div>
+        <div class="uso-footer uso-summary-footer">
+          <button type="button" class="uso-mini-btn" id="pd-export-csv">Exportar resumo CSV</button>
+          <button type="button" class="uso-mini-btn" id="pd-export-json">Exportar resumo JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTRIBUTE TABLE MODAL -->
+    <div class="modal-overlay" id="modal-table">
+      <div class="modal-box" id="attr-table-box" role="dialog" aria-modal="true" aria-labelledby="table-title" tabindex="-1">
+        <div class="dsh-rz dsh-rz-n" data-rz="n"></div>
+        <div class="dsh-rz dsh-rz-s" data-rz="s"></div>
+        <div class="dsh-rz dsh-rz-e" data-rz="e"></div>
+        <div class="dsh-rz dsh-rz-w" data-rz="w"></div>
+        <div class="dsh-rz dsh-rz-ne" data-rz="ne"></div>
+        <div class="dsh-rz dsh-rz-nw" data-rz="nw"></div>
+        <div class="dsh-rz dsh-rz-se" data-rz="se"></div>
+        <div class="dsh-rz dsh-rz-sw" data-rz="sw"></div>
+        <div class="modal-head">
+          <h3 id="table-title">Tabela de Atributos</h3>
+          <span style="display:flex;align-items:center;gap:2px;">
+            <button class="dsh-icon-btn" id="attr-table-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+            <button class="modal-close" data-close="modal-table" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+          </span>
+        </div>
+        <div class="modal-body at-modal-body">
+          <div class="at-toolbar-row">
+            <select id="at-layer-select" aria-label="Selecione a camada">
+              <option value="">Selecione uma camada...</option>
+            </select>
+            <input type="text" id="at-search" placeholder="Pesquisar registros..." aria-label="Pesquisar registros" disabled>
+          </div>
+          <div class="at-toolbar-row at-links-row" id="at-links-row" hidden>
+            <button type="button" class="at-link" id="at-add-filter">+ filtro</button>
+            <button type="button" class="at-link" id="at-clear-filters" hidden>limpar filtros</button>
+            <span class="at-sep">·</span>
+            <button type="button" class="at-link" id="at-columns-toggle">colunas</button>
+            <span class="at-sep">·</span>
+            <button type="button" class="at-link" id="at-export-csv">exportar CSV</button>
+            <button type="button" class="at-link" id="at-export-geojson">exportar GeoJSON</button>
+          </div>
+          <div class="at-filters-panel" id="at-filters-panel" hidden>
+            <div id="at-filters-list"></div>
+            <div class="at-filter-builder" id="at-filter-builder">
+              <select id="at-filter-field"></select>
+              <select id="at-filter-op"></select>
+              <select id="at-filter-value" aria-label="Valor do filtro"></select>
+              <select id="at-filter-value2" aria-label="Valor final do intervalo" hidden></select>
+              <button type="button" class="lay-action-btn" id="at-filter-add-btn">Adicionar</button>
+            </div>
+          </div>
+          <div class="at-columns-panel" id="at-columns-panel" hidden></div>
+          <div class="at-status-row" id="at-status-row" hidden>
+            <span id="at-status-text"></span>
+            <span class="at-selection-actions" id="at-selection-actions">
+              <button type="button" class="at-link" id="at-select-all">selecionar todos</button>
+              <button type="button" class="at-link" id="at-select-clear">limpar seleção</button>
+              <button type="button" class="at-link" id="at-zoom-selection">zoom seleção</button>
+              <button type="button" class="at-link" id="at-zoom-all">zoom resultados</button>
+              <button type="button" class="at-link" id="at-open-popup">abrir popup</button>
+            </span>
+          </div>
+          <div id="table-note" style="font-size:11.5px;color:var(--muted-text);"></div>
+          <div class="at-table-scroll" id="at-table-scroll">
+            <table id="attr-table"></table>
+          </div>
+          <div class="at-pager" id="at-pager" hidden>
+            <button type="button" id="at-prev-page" class="lay-action-btn">‹ Anterior</button>
+            <span id="at-page-info"></span>
+            <button type="button" id="at-next-page" class="lay-action-btn">Próxima ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RADIUS QUERY RESULTS MODAL -->
+    <div class="modal-overlay" id="modal-radius-results">
+      <div class="modal-box" id="radius-results-box" role="dialog" aria-modal="true" aria-labelledby="radius-results-title" tabindex="-1">
+        <div class="dsh-rz dsh-rz-n" data-rz="n"></div>
+        <div class="dsh-rz dsh-rz-s" data-rz="s"></div>
+        <div class="dsh-rz dsh-rz-e" data-rz="e"></div>
+        <div class="dsh-rz dsh-rz-w" data-rz="w"></div>
+        <div class="dsh-rz dsh-rz-ne" data-rz="ne"></div>
+        <div class="dsh-rz dsh-rz-nw" data-rz="nw"></div>
+        <div class="dsh-rz dsh-rz-se" data-rz="se"></div>
+        <div class="dsh-rz dsh-rz-sw" data-rz="sw"></div>
+        <div class="modal-head">
+          <h3 id="radius-results-title">Resultado da Consulta por Raio</h3>
+          <span style="display:flex;align-items:center;gap:2px;">
+            <button class="dsh-icon-btn" id="radius-results-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+            <button class="modal-close" data-close="modal-radius-results" title="Fechar" aria-label="Fechar painel">&#10005;</button>
+          </span>
+        </div>
+        <div class="modal-body">
+          <div id="radius-results-note" style="font-size:11.5px;color:var(--muted-text);margin-bottom:8px;"></div>
+          <div class="rd-res-toolbar" id="rd-res-toolbar" hidden>
+            <input type="text" id="rd-res-search" placeholder="Buscar nos resultados..." aria-label="Buscar nos resultados">
+            <select id="rd-res-sort" aria-label="Ordenar resultados">
+              <option value="layer">Por camada</option>
+              <option value="distance">Por distância</option>
+            </select>
+            <span class="rd-res-export" id="rd-res-export-geojson" title="Exportar todos os resultados como GeoJSON">GeoJSON</span>
+            <span class="rd-res-export" id="rd-res-export-csv" title="Exportar todos os resultados como CSV">CSV</span>
+          </div>
+          <div id="radius-results-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD MODAL — Aglomerados Subnormais -->
+    <div class="modal-overlay" id="modal-dashboard-aglomerados">
+      <div class="modal-box" id="agl-modal-box" role="dialog" aria-modal="true" aria-labelledby="agl-modal-title" tabindex="-1">
+        <div class="dsh-rz dsh-rz-n" data-rz="n"></div>
+        <div class="dsh-rz dsh-rz-s" data-rz="s"></div>
+        <div class="dsh-rz dsh-rz-e" data-rz="e"></div>
+        <div class="dsh-rz dsh-rz-w" data-rz="w"></div>
+        <div class="dsh-rz dsh-rz-ne" data-rz="ne"></div>
+        <div class="dsh-rz dsh-rz-nw" data-rz="nw"></div>
+        <div class="dsh-rz dsh-rz-se" data-rz="se"></div>
+        <div class="dsh-rz dsh-rz-sw" data-rz="sw"></div>
+        <div class="modal-head">
+          <div class="dsh-head-left">
+            <span class="dsh-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+            <span class="dsh-dashboard-chip" aria-hidden="true" title="Painel de Dashboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            </span>
+            <h3 id="agl-modal-title">Dashboard · Aglomerados Subnormais</h3>
+          </div>
+          <div class="dsh-head-right">
+            <button class="dsh-icon-btn" id="agl-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+            <button class="modal-close" data-close="modal-dashboard-aglomerados" title="Fechar" aria-label="Fechar painel do dashboard de Aglomerados Subnormais">&#10005;</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="dsh-wrap" id="agl-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD MODAL — Setores Censitários (Pop. 2022) -->
+    <div class="modal-overlay" id="modal-dashboard-censo">
+      <div class="modal-box" id="dsh-modal-box" role="dialog" aria-modal="true" aria-labelledby="dsh-modal-title" tabindex="-1">
+        <div class="dsh-rz dsh-rz-n" data-rz="n"></div>
+        <div class="dsh-rz dsh-rz-s" data-rz="s"></div>
+        <div class="dsh-rz dsh-rz-e" data-rz="e"></div>
+        <div class="dsh-rz dsh-rz-w" data-rz="w"></div>
+        <div class="dsh-rz dsh-rz-ne" data-rz="ne"></div>
+        <div class="dsh-rz dsh-rz-nw" data-rz="nw"></div>
+        <div class="dsh-rz dsh-rz-se" data-rz="se"></div>
+        <div class="dsh-rz dsh-rz-sw" data-rz="sw"></div>
+        <div class="modal-head">
+          <div class="dsh-head-left">
+            <span class="dsh-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+            <span class="dsh-dashboard-chip" aria-hidden="true" title="Painel de Dashboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+            </span>
+            <h3 id="dsh-modal-title">Dashboard · Setores Censitários (Pop. 2022)</h3>
+          </div>
+          <div class="dsh-head-right">
+            <button class="dsh-icon-btn" id="dsh-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+            <button class="modal-close" data-close="modal-dashboard-censo" title="Fechar" aria-label="Fechar painel do dashboard">&#10005;</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="dsh-wrap" id="dsh-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DADOS DO IBGE MODAL -->
+    <div class="modal-overlay" id="modal-ibge">
+      <div class="modal-box" id="ibge-modal-box" role="dialog" aria-modal="true" aria-labelledby="ibge-modal-title" tabindex="-1">
+        <div class="dsh-rz dsh-rz-n" data-rz="n"></div>
+        <div class="dsh-rz dsh-rz-s" data-rz="s"></div>
+        <div class="dsh-rz dsh-rz-e" data-rz="e"></div>
+        <div class="dsh-rz dsh-rz-w" data-rz="w"></div>
+        <div class="dsh-rz dsh-rz-ne" data-rz="ne"></div>
+        <div class="dsh-rz dsh-rz-nw" data-rz="nw"></div>
+        <div class="dsh-rz dsh-rz-se" data-rz="se"></div>
+        <div class="dsh-rz dsh-rz-sw" data-rz="sw"></div>
+        <div class="modal-head">
+          <div class="dsh-head-left">
+            <span class="dsh-drag-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+            <h3 id="ibge-modal-title">Dados do IBGE — Cidades</h3>
+          </div>
+          <div class="dsh-head-right">
+            <button class="dsh-icon-btn" id="ibge-reset-size" title="Restaurar tamanho e posição padrão" aria-label="Restaurar tamanho e posição padrão do painel">&#8635;</button>
+            <button class="modal-close" data-close="modal-ibge" title="Fechar" aria-label="Fechar painel de dados do IBGE">&#10005;</button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="dsh-wrap">
+            <div class="ibge-search-row">
+              <input type="text" id="ibge-search-input" placeholder="Buscar município (ex.: Duque de Caxias, Niterói, São Paulo...)" autocomplete="off">
+              <button class="ibge-search-btn" id="ibge-search-btn">Buscar</button>
+              <div class="ibge-suggest" id="ibge-suggest"></div>
+            </div>
+            <div id="ibge-body"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HELP MODAL -->
+    <div class="modal-overlay" id="modal-help">
+      <div class="modal-box" id="help-box" style="width:min(720px,94vw);max-height:88vh;">
+        <div class="modal-head"><h3>Ajuda — Como usar o Geoportal</h3><button class="modal-close" data-close="modal-help" title="Fechar" aria-label="Fechar ajuda">&#10005;</button></div>
+        <div class="modal-body help-body">
+          <p class="help-intro">Este guia reúne as funções disponíveis atualmente no Geoportal. Use os botões e painéis para navegar, consultar camadas, analisar dados e exportar informações.</p>
+
+          <div class="help-section">
+            <div class="help-section-title">Menu superior</div>
+            <div class="help-row"><span class="help-icn">MR</span><div><b>Logotipo</b> — abre o portfólio externo de MR – Geoprocessamento em uma nova aba.</div></div>
+            <div class="help-row"><span class="help-icn">⌕</span><div><b>Pesquisa global</b> — pesquisa endereços e valores presentes nos atributos das camadas. Digite pelo menos três caracteres e escolha um resultado para centralizar o mapa; resultados de feições também são destacados e podem abrir seus detalhes. A busca de endereços depende de um serviço externo e pode ficar indisponível temporariamente.</div></div>
+            <div class="help-row"><span class="help-icn">IBGE</span><div><b>Dados do IBGE</b> — abre o painel de consulta por município. Pesquise e selecione uma cidade para ver indicadores disponíveis, como população estimada, população do Censo 2022, área territorial, densidade demográfica e PIB. Também é possível solicitar a exibição do limite municipal oficial do IBGE no mapa. Os dados dependem dos serviços do IBGE e da conexão com a internet.</div></div>
+            <div class="help-row"><span class="help-icn">↗</span><div><b>Copiar link desta vista</b> — copia um endereço que guarda o centro e o zoom atuais do mapa, o mapa base selecionado e as camadas visíveis. Ao abrir o link, o Geoportal tenta reconstruir essa vista. Se a área de transferência não estiver disponível, o endereço pode ser copiado pela caixa de diálogo do navegador.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.7 8.7 0 1 0 20.5 15.2Z"></path></svg></span><div><b>Tema claro/escuro</b> — alterna entre os temas. A escolha fica salva neste navegador para as próximas visitas.</div></div>
+            <div class="help-row"><span class="help-icn">?</span><div><b>Ajuda</b> — abre este guia de uso.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span><div><b>Sobre o Geoportal</b> — apresenta a finalidade do sistema, um resumo do município e links para fontes oficiais.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Barra lateral esquerda</div>
+            <div class="help-row"><span class="help-icn">☰</span><div><b>Recolher painel lateral</b> — oculta ou reabre a barra para ampliar a área visível do mapa. Em telas menores, o botão de menu abre ou fecha essa barra.</div></div>
+            <div class="help-row"><span class="help-icn">⌕</span><div><b>Buscar por categoria</b> — abre uma busca temática própria para localizar itens por categoria. Ela é diferente da pesquisa global do menu superior.</div></div>
+            <div class="help-row"><span class="help-icn">⌂</span><div><b>Extensão inicial</b> — retorna ao enquadramento inicial do município.</div></div>
+            <div class="help-row"><span class="help-icn">+</span><div><b>Aumentar/diminuir zoom</b> — aproxima ou afasta o mapa. Também é possível navegar com os gestos ou controles de zoom do mapa.</div></div>
+            <div class="help-row"><span class="help-icn">★</span><div><b>Marcadores de extensão</b> — leva rapidamente à extensão completa do município ou à extensão de cada distrito.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"></path><circle cx="12" cy="9" r="2.3"></circle></svg></span><div><b>Minha localização</b> — solicita a localização ao navegador e, se autorizada e disponível, centraliza o mapa nessa posição.</div></div>
+            <div class="help-row"><span class="help-icn">▣</span><div><b>Tela cheia</b> — fica no final da barra lateral e alterna a tela cheia quando o navegador oferece suporte.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Interação com o mapa</div>
+            <div class="help-row"><span class="help-icn">↔</span><div><b>Navegar</b> — arraste o mapa para deslocar a vista e use os controles disponíveis para mudar o zoom.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3 19 13l-6 1.5L10 20 5 3Z"></path><path d="m13 14 4 5"></path></svg></span><div><b>Consultar feições</b> — quando uma camada oferece detalhes, passe o cursor sobre a feição para ver um resumo e clique para abrir seu popup com os atributos disponíveis. O conteúdo varia conforme a camada.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Dados, camadas e painéis da barra lateral</div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1"></rect><rect x="13" y="4" width="8" height="7" rx="1"></rect><rect x="3" y="13" width="8" height="7" rx="1"></rect><rect x="13" y="13" width="8" height="7" rx="1"></rect></svg></span><div><b>Mapas Base</b> — escolhe o mapa de fundo, por exemplo imagem de satélite, ruas, topográfico, terreno ou mapas em tons de cinza, entre as opções disponíveis.</div></div>
+            <div class="help-row"><span class="help-icn">▱</span><div><b>Camadas de mapa</b> — mostra as camadas disponíveis e permite ligar ou desligar cada uma. O painel também oferece pesquisa de camadas, controles para ligar/desligar todas, expandir/recolher grupos e, quando disponível, ajustar a opacidade ou isolar uma camada. O número junto ao botão indica quantas camadas estão ativas.</div></div>
+            <div class="help-row"><span class="help-icn">⊕</span><div><b>Adicionar camada</b> — apresenta camadas adicionais disponíveis e permite carregar um arquivo local <b>GeoJSON/JSON</b> válido.</div></div>
+            <div class="help-row"><span class="help-icn">☷</span><div><b>Legenda</b> — explica os símbolos das camadas. Na aba <b>Interativo</b>, os itens compatíveis permitem realçar distritos no mapa.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 7 6-3 6 3 6-3v13l-6 3-6-3-6 3V7Z"></path><path d="M9 4v13M15 7v13"></path></svg></span><div><b>Dashboard · Setores Censitários</b> — abre a análise dos dados de população do Censo 2022. Enquanto aberto, o painel mantém temporariamente ativa a camada de setores censitários; ao fechá-lo, restaura a visibilidade anterior das camadas.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5c-7.8 0-13 2.8-15.3 7.2-1.7 3.2-.6 7.8 3.1 8.6 5.7 1.2 11.5-5.1 12.2-15.8Z"></path><path d="M4 21c2.5-5 6.1-8.2 11-10.8"></path></svg></span><div><b>Dashboard · Uso e Ocupação</b> — abre o painel com indicadores, distribuição por classe, seleção no mapa e exportação dos dados em CSV ou JSON.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-8M22 20V3"></path><path d="M2 20h21"></path></svg></span><div><b>Dashboard · Uso e Ocupação (FBDS)</b> — abre um dashboard separado com a área por classe da base da Fundação Brasileira para o Desenvolvimento Sustentável. As camadas ambientais FBDS ficam no grupo <b>Meio Ambiente</b> e incluem nascentes, rios, massas d'água, APP, uso do solo em APP e uso e ocupação; os popups e detalhes das camadas indicam a fonte e dão acesso aos metadados publicados.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V8l7-5 7 5v13"></path><path d="M9 21v-6h6v6M9 10h.01M15 10h.01"></path></svg></span><div><b>Dashboard · Plano Diretor</b> — abre a análise temática do Plano Diretor, com consulta e seleção de classes/zonas, informações associadas e opções de exportação disponíveis no painel.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Escala e coordenadas</div>
+            <div class="help-row"><span class="help-icn">1:</span><div><b>Escala do mapa</b> — o painel de status cartográfico mostra a escala numérica e a barra gráfica. Para definir uma escala, use o botão ao lado do valor numérico, digite somente o denominador (por exemplo, <b>200000</b>) e aplique.</div></div>
+            <div class="help-row"><span class="help-icn">XY</span><div><b>Coordenadas do cursor</b> — ao mover o cursor sobre o mapa, são exibidas latitude/longitude e coordenadas <b>SIRGAS 2000 / UTM 23S (EPSG:31983)</b>. A UTM é uma conversão para consulta; não altera a referência de visualização do mapa.</div></div>
+            <div class="help-row"><span class="help-icn">⧉</span><div><b>Copiar coordenadas</b> — copia as coordenadas mostradas. Se ainda não houver coordenada, posicione o cursor sobre o mapa primeiro.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Dashboard — Setores Censitários</div>
+            <div class="help-row"><span class="help-icn">▥</span><div><b>Indicadores</b> — resume população total, quantidade de setores, média e mediana por setor, maiores e menores valores e setores com população zero. Os cálculos são feitos com os setores carregados e o campo <b>V0001</b> (população residente do Censo 2022).</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M5 16h3v4H5zM10 11h3v9h-3zM15 5h3v15h-3z"></path></svg></span><div><b>Faixas de população</b> — selecione uma faixa para destacar no mapa os setores correspondentes.</div></div>
+            <div class="help-row"><span class="help-icn">✓</span><div><b>Selecionar setores</b> — com o Dashboard aberto, clique nos setores para marcar ou desmarcar a seleção. O painel mostra a quantidade selecionada e a soma da população; use <b>limpar seleção</b> para remover o destaque.</div></div>
+            <div class="help-row"><span class="help-icn">↗</span><div><b>Top 5 setores por população</b> — selecione uma linha para localizar o setor no mapa e consultar seus detalhes.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Restaurar tamanho e posição</b> — retorna o Dashboard à configuração padrão.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Uso e Ocupação do Solo</div>
+            <div class="help-row"><span class="help-icn">◔</span><div><b>Indicadores e gráfico</b> — apresenta os principais indicadores e a distribuição das áreas por classe de uso e ocupação.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M7 12h10M10 19h4"></path><circle cx="8" cy="5" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg></span><div><b>Filtro e tabela</b> — permite selecionar uma classe, consultar área e percentual e retornar à visualização de todas as classes.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Restaurar tamanho e posição</b> — retorna o painel à configuração padrão.</div></div>
+            <div class="help-row"><span class="help-icn">−</span><div><b>Minimizar/Restaurar</b> — reduz o painel sem fechá-lo e permite restaurá-lo posteriormente.</div></div>
+            <div class="help-row"><span class="help-icn">⇩</span><div><b>Exportar CSV / JSON</b> — exporta os dados apresentados pelo painel nos formatos correspondentes.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Dashboard · Uso e Ocupação (FBDS)</div>
+            <div class="help-row"><span class="help-icn">◔</span><div><b>Indicadores e classes</b> — resume a área total, a quantidade de feições e as áreas/percentuais por classe, usando os campos originais <b>AREA_HA</b> e <b>CLASSE_USO</b>.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 10 6l4 8 3-5 3 9H4Z"></path><circle cx="10" cy="6" r="1.5"></circle><circle cx="14" cy="14" r="1.5"></circle></svg></span><div><b>Selecionar classe</b> — use o gráfico, a legenda, a tabela ou o filtro para destacar no mapa a classe escolhida; limpar a seleção volta a mostrar todas as classes.</div></div>
+            <div class="help-row"><span class="help-icn">↗</span><div><b>Fonte e metadados</b> — consulta os metadados técnicos publicados pela FBDS. A tabela de atributos abre os registros da camada, e o botão de exportação baixa o resumo por classe em CSV.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Janela</b> — pode ser movida, redimensionada, minimizada e restaurada ao tamanho e à posição padrão. Ao fechar o dashboard, a visibilidade anterior das camadas é recuperada.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Ferramentas da barra lateral esquerda</div>
+            <div class="help-row"><span class="help-icn">⌖</span><div><b>Medir</b> — escolha distância ou área e desenhe a medição no mapa. Os resultados e unidades são exibidos na ferramenta; as medições podem ser removidas pela própria janela.</div></div>
+            <div class="help-row"><span class="help-icn">✎</span><div><b>Esboço</b> — desenhe pontos, linhas ou polígonos, ajuste cor e espessura, edite vértices, exporte ou limpe os esboços.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1"></circle><path d="M12 1.5v3M12 19.5v3"></path></svg></span><div><b>Consulta por Raio</b> — defina um ponto no mapa (ou tente usar sua localização), informe o raio e escolha as camadas a consultar. Os resultados são destacados no mapa e listados por camada; podem ser pesquisados, ordenados e exportados em CSV ou GeoJSON.</div></div>
+            <div class="help-row"><span class="help-icn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1.5"></rect><path d="M3 9h18M3 14h18M9 9v11M15 9v11"></path></svg></span><div><b>Tabela de Atributos</b> — escolha uma camada para ver seus registros em tabela: pesquise, filtre por campo, ordene colunas, selecione um ou vários registros (refletido no mapa com destaque), dê zoom, abra o popup completo ou exporte os resultados filtrados/selecionados em CSV ou GeoJSON.</div></div>
+            <div class="help-row"><span class="help-icn">⇩</span><div><b>Exportar / Salvar Camadas</b> — selecione a camada e um dos formatos oferecidos para ela. Os formatos disponíveis podem incluir GeoJSON, Shapefile, KML/KMZ e CSV, conforme a geometria e os atributos; GeoPackage não está disponível.</div></div>
+            <div class="help-row"><span class="help-icn">▧</span><div><b>Exportar Mapa</b> — prepara uma composição cartográfica com mapa, título, legenda, escala, norte, coordenadas, fonte e identidade visual. É possível ajustar a página e os elementos do layout e exportar em <b>PDF, PNG ou JPG</b>.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Comportamento dos painéis</div>
+            <div class="help-row"><span class="help-icn">↔</span><div><b>Mover e redimensionar</b> — as janelas podem ser arrastadas pelo cabeçalho e redimensionadas pelas bordas ou pelos cantos. Em telas menores, mantenha o cabeçalho e os controles dentro da área visível.</div></div>
+            <div class="help-row"><span class="help-icn">↻</span><div><b>Restaurar tamanho e posição padrão</b> — use o botão de seta circular no cabeçalho para devolver a janela ao tamanho e à posição originais. A opção está disponível em todas as janelas, inclusive painéis, ferramentas e modais.</div></div>
+            <div class="help-row"><span class="help-icn">▧</span><div><b>Transparência</b> — os corpos, cabeçalhos e áreas internas das janelas são semitransparentes para deixar o mapa aparecer ao fundo. O efeito acompanha os temas claro e escuro.</div></div>
+            <div class="help-row"><span class="help-icn">×</span><div><b>Fechar</b> — use o botão <b>×</b> do cabeçalho ou pressione <b>Esc</b> para fechar a janela ativa. Clicar fora de uma janela não a fecha.</div></div>
+            <div class="help-row"><span class="help-icn">▣</span><div><b>Tela cheia</b> — use o botão no final da barra lateral esquerda para alternar a tela cheia, quando suportada pelo navegador.</div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">Dica geral</div>
+            <div class="help-row" style="grid-template-columns:1fr;"><div>Os painéis de análise que precisam controlar camadas (como o Dashboard · Setores Censitários) podem alterar temporariamente quais camadas estão visíveis. Ao fechar o painel, o Geoportal restaura o estado anterior. A pesquisa global e a busca por categoria são ferramentas diferentes e podem ser usadas de forma independente.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT MODAL -->
+    <div class="modal-overlay" id="modal-about">
+      <div class="modal-box" id="about-box" style="width:420px;">
+        <div class="modal-head"><h3>Sobre o Geoportal</h3><button class="modal-close" data-close="modal-about" title="Fechar" aria-label="Fechar painel">&#10005;</button></div>
+        <div class="modal-body" style="font-size:13px;line-height:1.6;">
+          <p><b>Geoportal | Duque de Caxias</b> é uma ferramenta de consulta e análise territorial que organiza informações geográficas em um mapa interativo. É possível explorar camadas, comparar temas, localizar áreas e consultar atributos das feições.</p>
+          <p>O mapa reúne informações sobre limites municipais e distritais, bairros, vias, ferrovias, equipamentos públicos e setores censitários do Censo 2022. As ferramentas incluem busca, mapas base, medição, esboços, consulta por raio, tabela de atributos e exportação de dados.</p>
+          <p>Duque de Caxias está situado na Baixada Fluminense e integra a Região Metropolitana do Rio de Janeiro, no estado do Rio de Janeiro, Região Sudeste do Brasil. O município recebeu o nome em homenagem a Luís Alves de Lima e Silva, o Duque de Caxias, nascido na região em 1803.</p>
+          <p><b>Referência cartográfica:</b> SIRGAS 2000. <b>Mapas base:</b> serviços da Esri, incluindo imagens, ruas, relevo e mapas em tons de cinza.</p>
+          <p class="about-sources"><b>Fontes e informações oficiais:</b><br>
+            <a href="https://portal.duquedecaxias.rj.gov.br/pagina/conheca-duque-de-caxias" target="_blank" rel="noopener noreferrer">Prefeitura de Duque de Caxias — Conheça Duque de Caxias</a><br>
+            <a href="https://servicodados.ibge.gov.br/api/v1/localidades/municipios/3301702" target="_blank" rel="noopener noreferrer">IBGE — Localização e divisão territorial do município</a><br>
+            <a href="https://www.ibge.gov.br/cidades-e-estados/rj/duque-de-caxias.html" target="_blank" rel="noopener noreferrer">IBGE — Cidades e Estados: Duque de Caxias</a>
+          </p>
+          <hr style="border:none;border-top:1px solid var(--muted-text,#ccc);margin:12px 0;">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay map-export-overlay" id="modal-map-export">
+      <section class="modal-box map-export-dialog" id="map-export-box" role="dialog" aria-modal="true" aria-labelledby="map-export-heading" tabindex="-1">
+        <div class="modal-head map-export-head">
+          <h3 id="map-export-heading">Exportar Mapa</h3>
+          <button class="modal-close" data-close="modal-map-export" title="Fechar" aria-label="Fechar Exportar Mapa">&#10005;</button>
+        </div>
+        <div class="map-export-toolbar" aria-label="Página e exportação">
+          <div class="map-export-field"><label for="map-export-format">Formato</label><select id="map-export-format"><option value="pdf">PDF</option><option value="png">PNG</option><option value="jpg">JPG</option></select></div>
+          <div class="map-export-field"><label for="map-export-paper">Página</label><select id="map-export-paper"><option value="A4">A4</option><option value="A3">A3</option><option value="A2">A2</option></select></div>
+          <div class="map-export-field"><label for="map-export-orientation">Orientação</label><select id="map-export-orientation"><option value="portrait">Retrato</option><option value="landscape">Paisagem</option></select></div>
+          <div class="map-export-field"><label for="map-export-dpi">Resolução</label><select id="map-export-dpi"><option value="96">Padrão 96 dpi</option><option value="150" selected>Alta 150 dpi</option><option value="300">Impressão 300 dpi</option></select></div>
+        </div>
+        <div class="map-export-body">
+          <section class="map-export-preview" aria-label="Pré-visualização do mapa">
+            <div class="map-export-preview-head">
+              <span>Pré-visualização</span>
+              <span class="map-export-preview-head-right">
+                <span id="map-export-preview-scale" class="map-export-preview-scale-label" aria-label="Escala da pré-visualização"></span>
+                <span id="map-export-preview-status" role="status" aria-live="polite"></span>
+                <button class="map-export-icon-button" id="map-export-refresh" type="button" title="Atualizar extensão do mapa" aria-label="Atualizar extensão do mapa">
+                  <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 3.5A7.5 7.5 0 1 1 9 1.5c2.2 0 4.2.9 5.6 2.4"/><polyline points="11 1 15.5 1 15.5 5.5"/></svg>
+                </button>
+              </span>
+            </div>
+            <div class="map-export-preview-stage" id="map-export-preview-stage">
+              <div class="map-export-preview-wrap" id="map-export-preview-wrap">
+                <article class="map-export-page" id="map-export-page">
+                  <div class="map-export-item map-export-map" data-map-export-item="map" aria-label="Mapa">
+                    <img id="map-export-image" alt="Pré-visualização das camadas visíveis no mapa">
+                    <button type="button" class="map-export-grip" aria-label="Mover quadro do mapa">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar quadro do mapa"></button>
+                  </div>
+                  <div class="map-export-item map-export-title" data-map-export-item="title"><span id="map-export-title-value"></span><button type="button" class="map-export-grip" aria-label="Mover título">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar título"></button></div>
+                  <div class="map-export-item map-export-legend" data-map-export-item="legend"><strong>LEGENDA</strong><div class="map-export-legend-grid" id="map-export-legend-list"></div><button type="button" class="map-export-grip" aria-label="Mover legenda">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar legenda"></button></div>
+                  <div class="map-export-item map-export-scale-bar" data-map-export-item="scaleBar"><div class="map-export-scale-line"><span></span><span></span></div><small id="map-export-scale-distance"></small><button type="button" class="map-export-grip" aria-label="Mover escala gráfica">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar escala gráfica"></button></div>
+                  <div class="map-export-item map-export-scale-text" data-map-export-item="scaleText"><span id="map-export-scale-value"></span><button type="button" class="map-export-grip" aria-label="Mover escala numérica">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar escala numérica"></button></div>
+                  <div class="map-export-item map-export-north" data-map-export-item="north"><b>N</b><span aria-hidden="true">&#9650;</span><button type="button" class="map-export-grip" aria-label="Mover indicação do norte">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar indicação do norte"></button></div>
+                  <div class="map-export-item map-export-crs" data-map-export-item="crs"><span id="map-export-crs-value"></span><button type="button" class="map-export-grip" aria-label="Mover sistema de coordenadas">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar sistema de coordenadas"></button></div>
+                  <div class="map-export-item map-export-source" data-map-export-item="source"><span id="map-export-source-value"></span><button type="button" class="map-export-grip" aria-label="Mover fonte dos dados">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar fonte dos dados"></button></div>
+                  <div class="map-export-item map-export-date" data-map-export-item="date"><span id="map-export-date-value"></span><button type="button" class="map-export-grip" aria-label="Mover data">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar data"></button></div>
+                  <div class="map-export-item map-export-brand" data-map-export-item="brand"><b id="map-export-brand">GEOPORTAL</b><span id="map-export-brand-subtitle">DUQUE DE CAXIAS</span><button type="button" class="map-export-grip" aria-label="Mover identificação do Geoportal">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar identificação do Geoportal"></button></div>
+                  <div class="map-export-item map-export-coordinates" data-map-export-item="coordinates"><span id="map-export-coordinates-value"></span><button type="button" class="map-export-grip" aria-label="Mover coordenadas da extensão">&#8285;</button><button type="button" class="map-export-resize" aria-label="Redimensionar coordenadas da extensão"></button></div>
+                  <div class="map-export-guide map-export-guide-x" aria-hidden="true"></div>
+                  <div class="map-export-guide map-export-guide-y" aria-hidden="true"></div>
+                </article>
+              </div>
+            </div>
+          </section>
+          <div class="map-export-editor">
+            <aside class="map-export-elements-panel" aria-label="Elementos do layout">
+              <div class="map-export-panel-heading">
+                <strong>Elementos</strong>
+                <div class="map-export-panel-actions">
+                  <button type="button" class="map-export-icon-button" id="map-export-add-text" title="Adicionar caixa de texto" aria-label="Adicionar caixa de texto">
+                    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 4h12M9 4v10M6 14h6"/></svg>
+                  </button>
+                  <button type="button" class="map-export-icon-button" id="map-export-add-logo" title="Adicionar logotipo" aria-label="Adicionar logotipo">
+                    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="14" height="12" rx="1.5"/><path d="M2 12l4-4 3 3 2-2 5 5"/><circle cx="13" cy="6.5" r="1.5"/></svg>
+                  </button>
+                </div>
+              </div>
+              <input id="map-export-logo-file" type="file" accept="image/*" hidden>
+              <fieldset class="map-export-elements" id="map-export-element-list">
+                <legend>Visibilidade e seleção</legend>
+                <label data-map-export-entry="title"><button type="button" data-map-export-select="title">Título</button><input type="checkbox" data-map-export-toggle="title" checked aria-label="Exibir título"></label>
+                <label data-map-export-entry="legend"><button type="button" data-map-export-select="legend">Legenda das camadas</button><input type="checkbox" data-map-export-toggle="legend" checked aria-label="Exibir legenda"></label>
+                <label data-map-export-entry="north"><button type="button" data-map-export-select="north">Norte</button><input type="checkbox" data-map-export-toggle="north" checked aria-label="Exibir norte"></label>
+                <label data-map-export-entry="scaleBar"><button type="button" data-map-export-select="scaleBar">Escala gráfica</button><input type="checkbox" data-map-export-toggle="scaleBar" checked aria-label="Exibir escala gráfica"></label>
+                <label data-map-export-entry="scaleText"><button type="button" data-map-export-select="scaleText">Escala numérica</button><input type="checkbox" data-map-export-toggle="scaleText" checked aria-label="Exibir escala numérica"></label>
+                <label data-map-export-entry="coordinates"><button type="button" data-map-export-select="coordinates">Coordenadas</button><input type="checkbox" data-map-export-toggle="coordinates" checked aria-label="Exibir coordenadas"></label>
+                <label data-map-export-entry="crs"><button type="button" data-map-export-select="crs">Projeção</button><input type="checkbox" data-map-export-toggle="crs" checked aria-label="Exibir projeção"></label>
+                <label data-map-export-entry="source"><button type="button" data-map-export-select="source">Fonte dos dados</button><input type="checkbox" data-map-export-toggle="source" checked aria-label="Exibir fonte dos dados"></label>
+                <label data-map-export-entry="date"><button type="button" data-map-export-select="date">Data</button><input type="checkbox" data-map-export-toggle="date" checked aria-label="Exibir data"></label>
+                <label data-map-export-entry="brand"><button type="button" data-map-export-select="brand">Geoportal</button><input type="checkbox" data-map-export-toggle="brand" checked aria-label="Exibir identificação do Geoportal"></label>
+                <label data-map-export-entry="map"><button type="button" data-map-export-select="map">Moldura do mapa</button><input type="checkbox" data-map-export-toggle="map" checked aria-label="Exibir moldura do mapa"></label>
+              </fieldset>
+              <p class="map-export-hint">Setas: mover &nbsp; Shift+setas: redimensionar &nbsp; Del: remover</p>
+            </aside>
+            <aside class="map-export-inspector" aria-label="Propriedades do elemento selecionado">
+              <div class="map-export-panel-heading">
+                <strong>Propriedades</strong>
+                <span id="map-export-selected-name">Mapa</span>
+              </div>
+              <div class="map-export-property-group" id="map-export-text-property">
+                <label for="map-export-element-text">Texto</label>
+                <textarea id="map-export-element-text" rows="3" maxlength="240"></textarea>
+              </div>
+              <div class="map-export-property-group" id="map-export-logo-property" hidden>
+                <label for="map-export-logo-file-name">Arquivo de logotipo</label>
+                <span id="map-export-logo-file-name">Nenhum logotipo selecionado</span>
+              </div>
+              <div class="map-export-inspector-section">
+                <div class="map-export-inspector-section-label">Posicao e tamanho</div>
+                <div class="map-export-property-pair">
+                  <label>X (%)<input id="map-export-x" type="number" min="0" max="100" step="1"></label>
+                  <label>Y (%)<input id="map-export-y" type="number" min="0" max="100" step="1"></label>
+                  <label>Largura (%)<input id="map-export-width" type="number" min="5" max="100" step="1"></label>
+                  <label>Altura (%)<input id="map-export-height" type="number" min="2" max="100" step="1"></label>
+                </div>
+              </div>
+              <div class="map-export-inspector-section">
+                <div class="map-export-inspector-section-label">Tipografia e cor</div>
+                <div class="map-export-property-pair">
+                  <label>Tamanho fonte<input id="map-export-font-size" type="number" min="7" max="72" step="1"></label>
+                  <label>Alinhamento<select id="map-export-align"><option value="left">Esquerda</option><option value="center">Centro</option><option value="right">Direita</option></select></label>
+                </div>
+                <label class="map-export-color-property">Cor do elemento<input id="map-export-color" type="color" value="#202820"></label>
+              </div>
+              <div class="map-export-inspector-section" id="map-export-map-property">
+                <div class="map-export-inspector-section-label">Enquadramento do mapa</div>
+                <div class="map-export-field map-export-zoom-field">
+                  <label for="map-export-zoom">Zoom <output id="map-export-zoom-value">100%</output></label>
+                  <input id="map-export-zoom" type="range" min="100" max="300" value="100">
+                </div>
+                <button type="button" class="map-export-zoom-reset lay-action-btn" id="map-export-zoom-reset">Resetar zoom</button>
+              </div>
+              <button type="button" class="lay-action-btn map-export-remove" id="map-export-remove-element" hidden>Remover elemento</button>
+            </aside>
+          </div>
+        </div>
+        <div class="map-export-footer">
+          <button type="button" class="lay-action-btn map-export-reset" id="map-export-reset">&#8635; Restaurar layout</button>
+          <span id="map-export-status" role="status" aria-live="polite"></span>
+          <div>
+            <button class="lay-action-btn" type="button" data-close="modal-map-export">Cancelar</button>
+            <button class="lay-action-btn map-export-submit" id="map-export-submit" type="button">
+              <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14h12M9 3v8M6 8l3 3 3-3"/></svg>
+              Exportar
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="hover-tooltip"></div>
+  </div>
+
+  <!-- LINHA INFERIOR: escala/coordenadas + barra de ferramentas + atribuição, alinhadas na mesma linha -->
+  <div id="bottom-row">
+    <div id="bottom-left">
+      <!-- SCALE -->
+      <div id="map-status-bar" aria-label="Status cartográfico">
+        <div id="compass-scale">
+          <div id="north-compass" aria-label="Norte">
+            <span class="north-label">N</span>
+            <svg viewBox="0 0 30 38" aria-hidden="true">
+              <path d="M15 2 L7 32 L15 24 Z" fill="currentColor"/>
+              <path d="M15 2 L23 32 L15 24 Z" fill="currentColor" opacity="0.35"/>
+            </svg>
+          </div>
+          <div id="scalebox">
+            <div class="scale-current-row">
+              <span id="scale-ratio">Escala: 1:—</span>
+              <button id="scale-manual-toggle" type="button" title="Definir escala manualmente" aria-label="Definir escala manualmente">⌕</button>
+            </div>
+            <div class="scale-distance-row">
+              <div class="scale-labels" aria-hidden="true">
+                <span id="scale-label-0">0</span>
+                <span id="scale-label-1">—</span>
+                <span id="scale-label-2">—</span>
+                <span id="scale-label-3">—</span>
+              </div>
+              <div class="scale-bar-wrap"><div class="scale-bar" id="scale-bar-el"></div></div>
+              <span id="scale-text">0 km</span>
+            </div>
+            <div id="scale-manual-box" aria-label="Escala manual">
+              <input id="scale-manual-input" type="text" inputmode="numeric" placeholder="200000" aria-label="Informe apenas o valor da escala, por exemplo 200000">
+              <button id="scale-manual-apply" type="button">Aplicar</button>
+              <div id="scale-manual-error" role="alert"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="coordinate-status" aria-live="polite">
+          <div id="coordinate-crs">SIRGAS 2000<br>UTM 23S</div>
+          <div id="coordinate-values">
+            <div class="coord-row coord-latlon"><span class="coord-key">Lat:</span><span id="coordinate-lat">—</span><span class="coord-separator">|</span><span class="coord-key">Lon:</span><span id="coordinate-lon">—</span></div>
+            <div class="coord-row coord-utm"><span class="coord-key">X:</span><span id="coordinate-x">—</span><span class="coord-separator">|</span><span class="coord-key">Y:</span><span id="coordinate-y">—</span></div>
+          </div>
+          <span id="cursor-coordinates">Lat: — | Lon: —</span>
+          <button id="copy-coordinates" type="button" title="Copiar coordenadas" aria-label="Copiar coordenadas">⧉</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="bottom-right">
+      <div id="attribution">
+        <span>Alimentado por Esri</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<!-- Bibliotecas para a ferramenta "Salvar Camadas" (exportação de camadas) -->
+<script src="vendor/jszip.min.js"></script>
+<script src="vendor/shpwrite.js"></script>
+<script src="vendor/tokml.js"></script>
+<script src="vendor/html2canvas.min.js?v=1.4.1"></script>
+<!-- Dados -->
+    <script src="data/data.js?v=20261011-sem-vias-v1"></script>
+<script src="data/meio-ambiente-fbds.js?v=20261007-fbds-v1"></script>
+    <!-- Modulos JS -->
+    <script src="js/map.js"></script>
+    <script src="js/utils.js?v=20261022-theme-icon-v1"></script>
+    <script src="data/arruamento-osm.js?v=20261117-arruamento-no-unnamed-v1"></script>
+    <script src="data/aglomerados-subormais.js?v=20261011-aglomerados-v1"></script>
+    <script src="js/layers.js?v=20261101-simplified-layer-catalog-v1"></script>
+    <script src="js/panels.js?v=20261101-simplified-layer-catalog-v1"></script>
+    <script src="js/dashboard.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/dashboard-aglomerados.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/setores-censitarios.js?v=20261013-ptbr-v1"></script>
+    <script src="js/ibge.js?v=20261013-kpi-icons-v2"></script>
+    <script src="js/global-search.js?v=20261101-simplified-layer-catalog-v1"></script>
+    <script src="js/ferramentas.js?v=20261013-ptbr-v1"></script>
+    <script src="js/radius.js?v=20261013-ptbr-v1"></script>
+    <script src="js/attribute-table.js?v=20261101-faces-lazy-v2"></script>
+    <script src="js/uso-ocupacao.js?v=20261030-dashboard-controls-v2"></script>
+    <script src="js/plano-diretor.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/fbds-uso.js?v=20261030-dashboard-controls-v1"></script>
+    <script src="js/controls.js?v=20261001-map-composer"></script>
+    <script src="js/export-map.js?v=20261013-ptbr-v1"></script>
+    <script src="js/janelas.js?v=esc-fbds"></script>
+    <script src="js/janelas-mover.js?v=v34"></script>
+    <script src="js/app.js"></script>
+<script src="js/permalink.js"></script>
+<script src="js/opening.js?v=v3"></script>
+</body>
+</html>

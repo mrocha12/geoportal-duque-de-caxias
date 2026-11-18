@@ -1,0 +1,105 @@
+/* ============================================================
+   V33 — Transparência dos painéis e janelas
+   Corpos, cabeçalhos e cartões internos deixam o mapa aparecer ao fundo.
+   Para ajustar: edite --janela-alpha e --janela-alpha-int (valores
+   menores deixam as janelas mais transparentes). Para desfazer:
+   remova este arquivo e a linha
+   <link ... css/transparencia.css> do index.html.
+   Altera só a aparência.
+   ============================================================ */
+:root{
+  --janela-alpha:.68;        /* corpo das janelas */
+  --janela-alpha-int:.56;    /* faixas e cartões dentro do corpo */
+  --janela-header-alpha:.80; /* cabeçalhos das janelas */
+  --janela-blur:8px;         /* desfoque do mapa atrás da janela */
+}
+
+/* Fundo (corpo) das janelas, painéis flutuantes, modais e painel lateral */
+#search-box,#bookmarks-box,#sketch-box,#measure-box,#radius-box,
+#legend-panel,#layers-panel,#panel-basemap,#panel-addlayer,#panel-export,
+#uso-panel,#pd-panel,#left-toolbar,.modal-box{
+  background-color:rgba(32,37,45,var(--janela-alpha)) !important;
+  background-image:none !important;
+  -webkit-backdrop-filter:blur(var(--janela-blur)) saturate(1.1);
+  backdrop-filter:blur(var(--janela-blur)) saturate(1.1);
+}
+
+/* Cabeçalhos também acompanham a transparência dos corpos das janelas */
+.lp-header,.lay-header,.uso-head,.modal-head,#search-box-header,
+#bookmarks-box .bm-title,#sketch-box .sk-title,#measure-box .ms-title,
+#radius-box .rd-title,.tools-menu-title{
+  background-color:rgba(21,26,33,var(--janela-header-alpha)) !important;
+  background-image:none !important;
+  -webkit-backdrop-filter:blur(var(--janela-blur));
+  backdrop-filter:blur(var(--janela-blur));
+}
+
+/* Áreas de corpo transparentes (mostram o fundo semitransparente da janela) */
+.lp-body,.lay-body,.uso-body,.at-modal-body,.help-body,.map-export-body,.modal-body{
+  background-color:transparent !important;
+}
+
+/* Faixas e cartões internos: também semitransparentes (antes eram sólidos) */
+.rd-row,.ms-units,.sk-style-row,.rd-layers-panel{
+  background-color:rgba(32,37,45,var(--janela-alpha-int)) !important;
+}
+.uso-kpi-card,.dsh-kpi-card,.lay-detail,.lay-row.expanded,.ibge-muni-head,
+.lp-tab:not(.active),.help-icn{
+  background-color:rgba(38,44,52,var(--janela-alpha-int)) !important;
+}
+
+/* ---------- Tema claro ---------- */
+body.light-theme #search-box,body.light-theme #bookmarks-box,body.light-theme #sketch-box,
+body.light-theme #measure-box,body.light-theme #radius-box,body.light-theme #legend-panel,
+body.light-theme #layers-panel,body.light-theme #panel-basemap,body.light-theme #panel-addlayer,
+body.light-theme #panel-export,body.light-theme #uso-panel,body.light-theme #pd-panel,
+body.light-theme #left-toolbar,body.light-theme .modal-box{
+  background-color:rgba(255,255,255,var(--janela-alpha)) !important;
+}
+body.light-theme .lp-header,body.light-theme .lay-header,body.light-theme .uso-head,
+body.light-theme .modal-head,body.light-theme #search-box-header,
+body.light-theme #bookmarks-box .bm-title,body.light-theme #sketch-box .sk-title,
+body.light-theme #measure-box .ms-title,body.light-theme #radius-box .rd-title,
+body.light-theme .tools-menu-title{
+  background-color:rgba(233,238,245,var(--janela-header-alpha)) !important;
+  background-image:none !important;
+}
+body.light-theme .rd-row,body.light-theme .ms-units,body.light-theme .sk-style-row,
+body.light-theme .rd-layers-panel{
+  background-color:rgba(247,249,250,var(--janela-alpha-int)) !important;
+}
+body.light-theme .uso-kpi-card,body.light-theme .dsh-kpi-card,body.light-theme .lay-detail,
+body.light-theme .lay-row.expanded,body.light-theme .ibge-muni-head,
+body.light-theme .lp-tab:not(.active),body.light-theme .help-icn{
+  background-color:rgba(238,242,247,var(--janela-alpha-int)) !important;
+}
+#about-box .about-sources a{
+  color:#fff !important;
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:2px;
+}
+#about-box .about-sources a:hover{
+  color:#fff !important;
+  text-decoration-thickness:2px;
+}
+body.light-theme #about-box .about-sources a{
+  display:inline-block;
+  margin:2px 0;
+  padding:1px 6px;
+  border:1px solid #173b5e;
+  border-radius:4px;
+  background:#214f78;
+}
+body.light-theme #about-box .about-sources a:hover{
+  background:#173b5e;
+}
+body.light-theme #about-box .about-sources a:focus-visible{
+  outline:2px solid #1f7ae0;
+  outline-offset:2px;
+}
+
+/* Navegadores sem backdrop-filter: um pouco mais opaco para manter a leitura */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root{--janela-alpha:.82;--janela-alpha-int:.70;--janela-header-alpha:.90;}
+}

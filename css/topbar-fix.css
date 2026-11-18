@@ -1,0 +1,132 @@
+/* ===== CORREÇÃO V14 — barra superior responsiva =====
+   Mantém a busca centralizada na área realmente disponível e reserva o
+   espaço dos botões à direita, evitando sobreposição em diferentes larguras. */
+#topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  overflow:visible;
+  white-space:nowrap;
+}
+
+#topbar .brand,
+#topbar .sep,
+#topbar .sub{
+  flex:0 0 auto;
+}
+
+/* A busca deixa de ser posicionada por coordenada absoluta. Ela passa a
+   ocupar somente o espaço livre entre a identificação e os controles. */
+#topbar .global-search-box{
+  position:relative;
+  top:auto;
+  left:auto;
+  right:auto;
+  transform:none;
+  flex:1 1 520px;
+  width:auto;
+  min-width:220px;
+  max-width:520px;
+  margin:0 auto;
+  z-index:1600;
+}
+
+/* O spacer antigo não é mais necessário e não deve consumir espaço que
+   poderia ser usado pela busca. */
+#topbar .spacer{display:none;}
+
+/* Os controles permanecem agrupados naturalmente à direita. */
+#topbar .icon-btn-ibge,
+#topbar .icon-btn{
+  flex:0 0 auto;
+}
+
+@media (min-width:1101px){
+  #topbar .global-search-box{min-width:300px;}
+}
+
+@media (min-width:769px) and (max-width:1100px){
+  #topbar{gap:7px;padding-left:12px;padding-right:12px;}
+  #topbar .global-search-box{
+    flex:1 1 340px;
+    min-width:180px;
+    max-width:420px;
+  }
+  #topbar .icon-btn-ibge{
+    padding-left:9px;
+    padding-right:9px;
+    font-size:11px;
+    gap:5px;
+  }
+  #topbar .icon-btn-ibge svg{width:16px;height:16px;}
+  #topbar .icon-btn{width:34px;height:34px;}
+  #topbar .icon-btn-ibge + .icon-btn-ibge,
+  #topbar .icon-btn-ibge + .icon-btn,
+  #topbar .icon-btn + .icon-btn{margin-left:2px;}
+}
+
+@media (max-width:768px){
+  #topbar{
+    gap:5px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+  }
+  #topbar::-webkit-scrollbar{display:none;}
+  #topbar .global-search-box{
+    position:relative;
+    flex:0 1 clamp(150px,46vw,245px);
+    width:clamp(150px,46vw,245px);
+    min-width:150px;
+    max-width:245px;
+    margin:0 auto;
+  }
+}
+
+@media (max-width:480px){
+  #topbar .global-search-box{
+    flex:0 1 180px;
+    width:180px;
+    min-width:145px;
+    max-width:190px;
+  }
+}
+
+/* ===== LOGO MR completo na barra superior (V27) ===== */
+#topbar{height:76px;flex-basis:76px;}
+#topbar .brand-logo{
+  flex:0 0 auto;height:68px;width:auto;display:block;
+  margin-right:4px;border-radius:6px;object-fit:contain;
+  box-shadow:none;
+}
+body.light-theme #topbar .brand-logo{box-shadow:none;filter:drop-shadow(0 0 .6px rgba(20,32,48,.9)) drop-shadow(0 1px 1.5px rgba(20,32,48,.45));}
+@media (max-width:760px){
+  #topbar{height:60px;flex-basis:60px;}
+  #topbar .brand-logo{height:52px;}
+}
+
+/* Painéis flutuantes acompanham a barra mais alta (+10px) */
+@media (min-width:761px){
+  #layers-panel{top:76px;}
+}
+
+/* Logo clicável (abre o portfólio em nova aba) */
+#topbar .brand-logo-link{
+  flex:0 0 auto;display:flex;align-items:center;border-radius:6px;
+  cursor:pointer;text-decoration:none;
+  transition:transform .15s ease,filter .15s ease;
+}
+#topbar .brand-logo-link:hover{transform:scale(1.04);filter:brightness(1.12);}
+#topbar .brand-logo-link:focus-visible{outline:2px solid #3B9EFF;outline-offset:3px;}
+
+/* Título em duas linhas: "Geoportal" acima, "Duque de Caxias" abaixo (tamanhos originais) */
+#topbar .brand-title{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;
+  justify-content:center;gap:5px;
+}
+#topbar .brand-title .brand{line-height:1.05;}
+#topbar .brand-title .sep{display:none;}
+#topbar .brand-title .sub{line-height:1.15;}
+@media (max-width:430px){#topbar .brand-title{display:none;}}
+/* Mantém a barra de pesquisa na mesma posição de antes em telas largas */
+@media (min-width:1100px){#topbar .brand-title{min-width:289px;}}

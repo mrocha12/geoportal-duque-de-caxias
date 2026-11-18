@@ -1,0 +1,91 @@
+/* ============================================================
+   V31 — Padronização visual dos cabeçalhos das janelas
+   [Título] [Recolher] [X]   — X sempre no extremo direito.
+   ============================================================ */
+
+/* Botão X padronizado (área de clique 30×30) */
+.lp-close,
+.win-x,
+.modal-close,
+#uso-close-btn,
+#pd-close-btn,
+#bookmarks-box .bm-title .search-close,
+#search-box-header .search-close{
+  flex:0 0 auto;
+  width:30px;height:30px;min-width:30px;
+  display:inline-flex;align-items:center;justify-content:center;
+  margin:0 0 0 2px;padding:0;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:6px;
+  background:rgba(255,255,255,.08);
+  color:#fff;font-size:15px;line-height:1;cursor:pointer;
+  transition:background .15s ease,border-color .15s ease;
+}
+.lp-close:hover,.win-x:hover,.modal-close:hover,
+#uso-close-btn:hover,#pd-close-btn:hover,
+#bookmarks-box .bm-title .search-close:hover,
+#search-box-header .search-close:hover{
+  background:rgba(229,72,77,.85);border-color:rgba(255,160,160,.9);color:#fff;
+}
+.lp-close:focus-visible,.win-x:focus-visible,.modal-close:focus-visible,
+#uso-close-btn:focus-visible,#pd-close-btn:focus-visible{outline:2px solid var(--tema-destaque,#3B9EFF);outline-offset:2px;}
+
+body.light-theme .lp-close,body.light-theme .win-x,body.light-theme .modal-close,
+body.light-theme #uso-close-btn,body.light-theme #pd-close-btn,
+body.light-theme #bookmarks-box .bm-title .search-close,
+body.light-theme #search-box-header .search-close{
+  border-color:rgba(21,26,33,.28);background:rgba(21,26,33,.06);color:#151A21;
+}
+body.light-theme .lp-close:hover,body.light-theme .win-x:hover,body.light-theme .modal-close:hover,
+body.light-theme #uso-close-btn:hover,body.light-theme #pd-close-btn:hover{
+  background:#E5484D;border-color:#E5484D;color:#fff;
+}
+
+/* Recolher separado do X */
+.window-collapse-btn{margin-right:8px;}
+
+/* Cabeçalhos das ferramentas simples: título, ações, Recolher, X */
+#sketch-box .sk-title,#measure-box .ms-title,#radius-box .rd-title,#bookmarks-box .bm-title{
+  display:flex;align-items:center;justify-content:flex-start;gap:8px;
+}
+#sketch-box .win-title,#measure-box .win-title,#radius-box .win-title,#bookmarks-box .win-title{flex:0 1 auto;}
+#sketch-box .sk-title-actions,#radius-box .rd-title-actions{margin-left:4px;}
+
+/* Janela recolhida: só o cabeçalho; modais não escurecem nem bloqueiam o mapa */
+.modal-box.window-collapsed{height:auto !important;min-height:0 !important;max-height:none !important;overflow:hidden;}
+.modal-box.window-collapsible.window-collapsed > :not(.window-collapse-header){display:none !important;}
+.modal-overlay:has(.modal-box.window-collapsed){background:transparent;pointer-events:none;}
+.modal-overlay:has(.modal-box.window-collapsed) .modal-box{pointer-events:auto;}
+
+/* ============================================================
+   V34 — Janelas movíveis e redimensionáveis
+   ============================================================ */
+.win-arrastavel{cursor:move;touch-action:none;user-select:none;-webkit-user-select:none;}
+.win-arrastavel button,.win-arrastavel a,.win-arrastavel input{cursor:pointer;}
+.win-dragging{user-select:none;-webkit-user-select:none;}
+
+/* Alças de redimensionamento (bordas e cantos) */
+.win-rz{position:absolute;z-index:6;touch-action:none;background:transparent;}
+.win-rz-n{top:0;left:12px;right:12px;height:7px;cursor:ns-resize;}
+.win-rz-s{bottom:0;left:12px;right:12px;height:7px;cursor:ns-resize;}
+.win-rz-e{top:12px;bottom:12px;right:0;width:7px;cursor:ew-resize;}
+.win-rz-w{top:12px;bottom:12px;left:0;width:7px;cursor:ew-resize;}
+.win-rz-ne{top:0;right:0;width:14px;height:14px;cursor:nesw-resize;}
+.win-rz-nw{top:0;left:0;width:14px;height:14px;cursor:nwse-resize;}
+.win-rz-se{bottom:0;right:0;width:14px;height:14px;cursor:nwse-resize;}
+.win-rz-sw{bottom:0;left:0;width:14px;height:14px;cursor:nesw-resize;}
+.win-rz-se::after{
+  content:"";position:absolute;right:3px;bottom:3px;width:7px;height:7px;
+  border-right:2px solid rgba(255,255,255,.35);border-bottom:2px solid rgba(255,255,255,.35);
+}
+body.light-theme .win-rz-se::after{border-color:rgba(21,26,33,.35);}
+
+/* Janela já movida/redimensionada: conteúdo se adapta (rolagem; cabeçalho fixo no topo) */
+.win-movel.win-user-sized{box-sizing:border-box;}
+.win-movel.win-rolagem.win-user-sized{overflow:auto !important;}
+.win-movel.win-rolagem.win-user-sized > .window-collapse-header{position:sticky;top:0;z-index:5;}
+.win-movel.win-user-sized.window-collapsed{height:auto !important;min-height:0 !important;overflow:hidden !important;}
+.win-movel.window-collapsed > .win-rz{display:none;}
+
+/* Exportar Mapa em tela cheia no celular: a janela vira "janela" quando movida */
+#map-export-box.win-user-sized{max-width:none;max-height:none;}
