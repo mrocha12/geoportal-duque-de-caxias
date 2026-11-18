@@ -59,7 +59,7 @@
       }
 
       if(state.layers){
-        setAllLayers(false);
+        setAllLayers(false, true);
         state.layers.forEach(id=> toggleLayer(id, true));
       }
     }catch(err){

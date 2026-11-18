@@ -821,7 +821,7 @@ function toggleLayer(id, visible){
   if(id==="uso_ocupacao" && typeof usoUpdateOfflineBanner==="function") usoUpdateOfflineBanner();
 }
 
-function setAllLayers(visible){
+function setAllLayers(visible, preserveZoomControlledIntent){
   const censoDashboardOpen = !!document.getElementById("modal-dashboard-censo")?.classList.contains("open");
   const pdDashboardOpen = !!document.getElementById("pd-panel")?.classList.contains("open");
   if(censoDashboardOpen || pdDashboardOpen){
@@ -838,6 +838,9 @@ function setAllLayers(visible){
   }
   Object.keys(LAYERS).forEach(id=>{
     const layer = LAYERS[id];
+    if(preserveZoomControlledIntent && layer.zoomControlled){
+      layer._userOff = false;
+    }
     if(!layer.leaflet){
       if(visible && layer.lazySource){
         ensureLayerReady(id).catch(()=>{});
@@ -846,7 +849,9 @@ function setAllLayers(visible){
       return;
     }
     let v = visible;
-    if(layer.respectUserToggle) layer._userOff = !visible;
+    if(layer.respectUserToggle && !(preserveZoomControlledIntent && layer.zoomControlled)){
+      layer._userOff = !visible;
+    }
     if(layer.zoomControlled && v &&
       (map.getZoom() < (layer.minZoom || 14) || !isLayerWithinDisplayScale(layer))) v = false;
     if(v && !map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
