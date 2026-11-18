@@ -72,7 +72,7 @@
   /* ---------- escrita ---------- */
   function currentHash(){
     const ctr = map.getCenter();
-    const active = Object.keys(LAYERS).filter(id=> map.hasLayer(LAYERS[id].leaflet));
+    const active = Object.keys(LAYERS).filter(id=> isLayerOnMap(id));
     return "#z=" + map.getZoom().toFixed(2)
          + "&c=" + ctr.lat.toFixed(5) + "," + ctr.lng.toFixed(5)
          + "&b=" + activeBasemapId

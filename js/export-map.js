@@ -310,7 +310,7 @@
   /* ── Legenda ─────────────────────────────────────────────── */
   function renderVisibleLegend(){
     const list = document.getElementById("map-export-legend-list");
-    const visibleIds = DRAW_ORDER.filter(id => LAYERS[id] && map.hasLayer(LAYERS[id].leaflet));
+    const visibleIds = DRAW_ORDER.filter(id => LAYERS[id] && isLayerOnMap(id));
     const entries = [];
 
     const colorWithAlpha = (color, alpha) => {

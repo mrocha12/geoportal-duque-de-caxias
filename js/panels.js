@@ -3,6 +3,7 @@
    Geoportal Duque de Caxias
    ============================================================ */
 
+
 /* ================= RECOLHER JANELAS FLUTUANTES ================= */
 (function initWindowCollapseButtons(){
   const windows = [
@@ -759,7 +760,7 @@ function updateZoomControlledLayers(){
     Object.keys(LAYERS).forEach(id=>{
       if(id === keepId) return;
       const layer = LAYERS[id];
-      if(map.hasLayer(layer.leaflet)){ map.removeLayer(layer.leaflet); changed = true; }
+      if(isLayerOnMap(id)){ map.removeLayer(layer.leaflet); changed = true; }
     });
     if(changed){ renderLegend(); renderLayersPanel(); }
     return;
@@ -769,7 +770,7 @@ function updateZoomControlledLayers(){
     const layer = LAYERS[id];
     if(!layer.zoomControlled) return;
     const shouldShow = map.getZoom() >= (layer.minZoom || 14) && isLayerWithinDisplayScale(layer);
-    const isVisible = map.hasLayer(layer.leaflet);
+    const isVisible = isLayerOnMap(id);
     if(shouldShow && !isVisible && !(layer.respectUserToggle && layer._userOff)){
       layer.leaflet.addTo(map);
       changed = true;
