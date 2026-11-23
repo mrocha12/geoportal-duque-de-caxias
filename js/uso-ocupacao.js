@@ -184,13 +184,14 @@ function usoOpenPanel(){
     if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel==="function") fbdsUsoClosePanel();
     usoVisibilitySnapshot = {};
     Object.keys(LAYERS).forEach(id=>{
-      usoVisibilitySnapshot[id] = map.hasLayer(LAYERS[id].leaflet);
+      usoVisibilitySnapshot[id] = isLayerOnMap(id);
     });
 
     // Torna a camada de Uso e Ocupação visível e oculta temporariamente
     // todas as demais camadas, sem removê-las nem criar uma nova instância.
     Object.keys(LAYERS).forEach(id=>{
       const layer = LAYERS[id];
+      if(!layer || !layer.leaflet) return;
       if(id === "uso_ocupacao"){
         if(!map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
       }else{
@@ -217,6 +218,7 @@ function usoClosePanel(){
   if(panel.classList.contains("open") && usoVisibilitySnapshot){
     Object.keys(LAYERS).forEach(id=>{
       const layer = LAYERS[id];
+      if(!layer || !layer.leaflet) return;
       const shouldBeVisible = usoVisibilitySnapshot[id] === true;
       const isVisible = map.hasLayer(layer.leaflet);
 

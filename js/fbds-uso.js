@@ -164,10 +164,11 @@ function fbdsUsoOpenPanel(){
 
   fbdsUsoVisibilitySnapshot={};
   Object.keys(LAYERS).forEach(id=>{
-    fbdsUsoVisibilitySnapshot[id]=map.hasLayer(LAYERS[id].leaflet);
+    fbdsUsoVisibilitySnapshot[id]=isLayerOnMap(id);
   });
   Object.keys(LAYERS).forEach(id=>{
     const layer=LAYERS[id];
+    if(!layer || !layer.leaflet) return;
     if(id==="uso_ocupacao_fbds"){
       if(!map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
     }else if(map.hasLayer(layer.leaflet)){
@@ -188,6 +189,7 @@ function fbdsUsoClosePanel(){
   if(panel.classList.contains("open") && fbdsUsoVisibilitySnapshot){
     Object.keys(fbdsUsoVisibilitySnapshot).forEach(id=>{
       if(!LAYERS[id]) return;
+      if(!LAYERS[id].leaflet) return;
       const shouldBeVisible=fbdsUsoVisibilitySnapshot[id]===true;
       const isVisible=map.hasLayer(LAYERS[id].leaflet);
       if(shouldBeVisible && !isVisible) LAYERS[id].leaflet.addTo(map);

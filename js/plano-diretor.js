@@ -264,9 +264,10 @@ function pdOpenPanel(cls){
     if(document.getElementById("uso-panel")?.classList.contains("open") && typeof usoClosePanel === "function") usoClosePanel();
     if(document.getElementById("fbds-uso-panel")?.classList.contains("open") && typeof fbdsUsoClosePanel === "function") fbdsUsoClosePanel();
     pdVisibilitySnapshot = {};
-    Object.keys(LAYERS).forEach(id=>{ pdVisibilitySnapshot[id] = map.hasLayer(LAYERS[id].leaflet); });
+    Object.keys(LAYERS).forEach(id=>{ pdVisibilitySnapshot[id] = isLayerOnMap(id); });
     Object.keys(LAYERS).forEach(id=>{
       const layer = LAYERS[id];
+      if(!layer || !layer.leaflet) return;
       if(id === PD_ID){ if(!map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map); }
       else if(map.hasLayer(layer.leaflet)) map.removeLayer(layer.leaflet);
     });
@@ -283,7 +284,10 @@ function pdClosePanel(){
   if(!panel) return;
   if(panel.classList.contains("open") && pdVisibilitySnapshot){
     Object.keys(LAYERS).forEach(id=>{
-      const layer = LAYERS[id]; const shouldBeVisible = pdVisibilitySnapshot[id] === true; const isVisible = map.hasLayer(layer.leaflet);
+      const layer = LAYERS[id];
+      if(!layer || !layer.leaflet) return;
+      const shouldBeVisible = pdVisibilitySnapshot[id] === true;
+      const isVisible = map.hasLayer(layer.leaflet);
       if(shouldBeVisible && !isVisible) layer.leaflet.addTo(map);
       else if(!shouldBeVisible && isVisible) map.removeLayer(layer.leaflet);
     });

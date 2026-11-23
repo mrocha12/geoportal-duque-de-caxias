@@ -415,7 +415,8 @@ function aglExportFeatures(format){
 /* ================= ABRIR / FECHAR ================= */
 function openAglomeradosDashboard(){
   /* Restaura visibilidade de todas as camadas antes de abrir (não há modo exclusivo) */
-  if(!map.hasLayer(LAYERS["aglomerados_subormais"].leaflet)){
+  const aglomeradosLayer = LAYERS["aglomerados_subormais"];
+  if(aglomeradosLayer && aglomeradosLayer.leaflet && !map.hasLayer(aglomeradosLayer.leaflet)){
     toggleLayer("aglomerados_subormais", true);
   }
   renderAglomeradosDashboard();

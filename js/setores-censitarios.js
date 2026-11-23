@@ -80,12 +80,13 @@ function openCensoDashboard(){
   if(!overlay.classList.contains("open")){
     censoVisibilitySnapshot = {};
     Object.keys(LAYERS).forEach(id=>{
-      censoVisibilitySnapshot[id] = map.hasLayer(LAYERS[id].leaflet);
+      censoVisibilitySnapshot[id] = isLayerOnMap(id);
     });
 
     // Enquanto o Dashboard estiver aberto, somente Setores Censitários fica ativo.
     Object.keys(LAYERS).forEach(id=>{
       const layer = LAYERS[id];
+      if(!layer || !layer.leaflet) return;
       if(id === "censo"){
         if(!map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
       }else if(map.hasLayer(layer.leaflet)){
@@ -113,6 +114,7 @@ function closeCensoDashboard(){
   if(overlay.classList.contains("open") && censoVisibilitySnapshot){
     Object.keys(LAYERS).forEach(id=>{
       const layer = LAYERS[id];
+      if(!layer || !layer.leaflet) return;
       const shouldBeVisible = censoVisibilitySnapshot[id] === true;
       const isVisible = map.hasLayer(layer.leaflet);
 
