@@ -169,12 +169,15 @@ function fbdsUsoOpenPanel(){
   Object.keys(LAYERS).forEach(id=>{
     const layer=LAYERS[id];
     if(!layer || !layer.leaflet) return;
-    if(id==="uso_ocupacao_fbds"){
-      if(!map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
-    }else if(map.hasLayer(layer.leaflet)){
+    if(id!=="uso_ocupacao_fbds" && map.hasLayer(layer.leaflet)){
       map.removeLayer(layer.leaflet);
     }
   });
+  ensureLayerReady("uso_ocupacao_fbds").then(layer=>{
+    if(!panel.classList.contains("open") || !layer.leaflet) return;
+    if(!map.hasLayer(layer.leaflet)) layer.leaflet.addTo(map);
+    fbdsUsoUpdateLayerControls();
+  }).catch(()=>{});
   fbdsUsoUpdateLayerControls();
   panel.classList.add("open");
   panel.classList.remove("uso-minimized");
